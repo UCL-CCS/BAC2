@@ -6,8 +6,8 @@ from .boundary_condition import PeriodicBoundaryCondition
 
 from bac.utils.decorators import *
 
+
 class Run:
-    """Dynamics"""
 
     def __init__(self, **kwargs):
         self._temperature_controller = TemperatureController(**kwargs['temperature_controller'])
