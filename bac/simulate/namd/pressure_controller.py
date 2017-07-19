@@ -1,14 +1,15 @@
-from pdb import PDBColumn
-from bac.utils.decorators import *
+from bac.utils.pdb import PDBColumn
+from bac.utils.decorators import (boolean, positive_decimal,
+                                  positive_integer, decimal, file, column)
 
 
 class PressureController:
     def __init__(self, **kwargs):
 
-        self.use_group_pressure = kwargs.get('use_group_pressure', False)
-        self.use_flexible_cell = kwargs.get('use_flexible_cell', False)
-        self.use_constant_ratio = kwargs.get('use_constant_ratio', False)
-        self.use_constant_area = kwargs.get('use_constant_area', False)
+        self.use_group_pressure = kwargs.get('use_group_pressure')
+        self.use_flexible_cell = kwargs.get('use_flexible_cell')
+        self.use_constant_ratio = kwargs.get('use_constant_ratio')
+        self.use_constant_area = kwargs.get('use_constant_area')
         self.berendsen = None
         self.langevin = None
 
@@ -55,9 +56,9 @@ class LangevinPistonPressureControl:
         self.temperature = kwargs.get('temperature')
         self.surface_tension_target = kwargs.get('surface_tension_target')
         self.strain_rate = kwargs.get('strain_rate', (0.0, 0.0, 0.0))
-        self.exclude_from_pressure = kwargs.get('exclude_from_pressure', False)
+        self.exclude_from_pressure = kwargs.get('exclude_from_pressure')
         self.exclude_from_pressure_file = kwargs.get('exclude_from_pressure_file')
-        self.exclude_from_pressure_column = kwargs.get('exclude_from_pressure_column', PDBColumn.O)
+        self.exclude_from_pressure_column = kwargs.get('exclude_from_pressure_column')
 
     @positive_decimal
     def target(self): pass

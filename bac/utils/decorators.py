@@ -1,5 +1,7 @@
 from pathlib import Path
-from pdb import PDBColumn
+from enum import Enum
+
+from bac.utils.pdb import PDBColumn
 import warnings
 
 
@@ -72,7 +74,13 @@ class advanced_property(property):
 
     @type.setter
     def type(self, value):
-        self._type = value if isinstance(value, tuple) else (value, )
+        if isinstance(value, tuple):
+            self._type = value
+        else:
+            if issubclass(value, Enum):
+                self._type = (value, str)
+            else:
+                self._type = (value, )
 
     @property
     def validator(self):
@@ -96,7 +104,7 @@ class file(advanced_property):
 
 class column(advanced_property):
     def __init__(self, *args, **kwargs):
-        super(column, self).__init__(type=(PDBColumn, str), default=PDBColumn.O, *args, **kwargs)
+        super(column, self).__init__(type=PDBColumn, default=PDBColumn.O, *args, **kwargs)
 
 
 class positive_decimal(advanced_property):
@@ -108,6 +116,9 @@ class decimal(advanced_property):
     def __init__(self, *args, **kwargs):
         super(decimal, self).__init__(type=(float, int, str), *args, **kwargs)
 
+class integer(advanced_property):
+    def __init__(self, *args, **kwargs):
+        super(integer, self).__init__(type=(int, str), *args, **kwargs)
 
 class positive_integer(advanced_property):
     def __init__(self, *args, **kwargs):
