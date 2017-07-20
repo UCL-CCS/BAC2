@@ -9,7 +9,7 @@ interchangeably in most cases. You can also convert between the two.
 All md abstractions have as their main class a `run_controller.py` module.
 Whenever you want to run a new simulation you have to instantiate a new `Run()`
 class.  
-If you are creating a workflow, you most likely will *only* need to `deepcopy` 
+If you are creating a workflow, you most likely will *__only__* need to `deepcopy` 
 the first instance, and modify some parameter and the input/output.
 
 
