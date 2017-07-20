@@ -36,18 +36,8 @@ class advanced_property(property):
             obj.__setattr__(self.private_name, None)
         elif isinstance(value, self.type):
             value = self.type[0](value)
-            if self.validator:
-                if self.warning_only:
-                    obj.__setattr__(self.private_name, value)
-                    if not self.validator(value, obj):
-                        warnings.warn("Setting {} to {} does not fulfill restrictions.".format(self.public_name, value), Warning)
-                else:
-                    if self.validator(value, obj):
-                        obj.__setattr__(self.private_name, value)
-                    else:
-                        raise ValueError("Setting {} to {} does not fulfill restrictions.".format(self.public_name, value))
-            else:
-                obj.__setattr__(self.private_name, value)
+            self.validate(obj, value)
+            obj.__setattr__(self.private_name, value)
         else:
             raise TypeError("{} must be of type {} instead of {}".format(self.public_name,
                                                                          ' or '.join(t.__name__ for t in self.type),
@@ -81,6 +71,14 @@ class advanced_property(property):
                 self._type = (value, str)
             else:
                 self._type = (value, )
+
+    def validate(self, obj, value):
+        if self.validator is not None and self.validator(value, obj) is False:
+            message = "Setting {} to {} does not fulfill restrictions.".format(self.public_name, value)
+            if self.warning_only:
+                warnings.warn(message, Warning)
+            else:
+                raise ValueError(message)
 
     @property
     def validator(self):
