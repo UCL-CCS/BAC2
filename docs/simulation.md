@@ -1,10 +1,10 @@
-#The *simulate* modules
+# The *simulate* modules
 
 BAC2.0 support Gromacs and NAMD simulation engines.
 While they have their separate class structure, you can use them 
 interchangeably in most cases. You can also convert between the two.
 
-###Setup
+### Setup
 
 All md abstractions have as their main class a `run_controller.py` module.
 Whenever you want to run a new simulation you have to instantiate a new `Run()`
