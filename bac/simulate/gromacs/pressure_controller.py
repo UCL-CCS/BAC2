@@ -35,6 +35,40 @@ class PressureController:
         self.pressure = kwargs.get('pressure')
         self.reference_coordinate_scaling = kwargs.get('reference_coordinate_scaling')
 
+    def __eq__(self, other):
+        if isinstance(other, PressureController):
+            return (self.type == other.type and
+                    self.isotropy == other.isotropy and
+                    self.frequency == other.frequency and
+                    self.time == other.time and
+                    self.compressibility == other.compressibility and
+                    self.pressure == other.pressure and
+                    self.reference_coordinate_scaling == other.reference_coordinate_scaling)
+
+        return False
+
+    def __str__(self):
+        return "{} {} pressure coupling\n" \
+               "frequency {}, every {} ps\n" \
+               "pressure: {} bar\n" \
+               "compressibility: {} bar^-1".format(self.isotropy.name.capitalize(),
+                                                   self.type.name.capitalize(),
+                                                   self.frequency,
+                                                   self.time,
+                                                   self.pressure,
+                                                   self.compressibility)
+
+    def _repr_html_(self):
+        return "<h1>{} {} pressure coupling</h1>\n" \
+               "<p>Frequency {}, every {} ps</p>" \
+               "<p>Pressure: {} bar</p>" \
+               "<p>Compressibility: {} bar^-1</p>".format(self.isotropy.name.capitalize(),
+                                                          self.type.name.capitalize(),
+                                                          self.frequency,
+                                                          self.time,
+                                                          self.pressure,
+                                                          self.compressibility)
+
     @advanced_property(type=PressureCouplingType, default=PressureCouplingType.no)
     def type(self): pass
 
