@@ -1,20 +1,23 @@
-from .temperature_controller import TemperatureController
-from .pressure_controller import PressureController
-from .non_bonded_controller import NonBondedController
-from .constraint_controller import ConstraintController
-from .boundary_condition import PeriodicBoundaryCondition
+from bac.simulate.namd.temperature_controller import TemperatureController
+from bac.simulate.namd.pressure_controller import PressureController
+from bac.simulate.namd.non_bonded_controller import NonBondedController
+from bac.simulate.namd.constraint_controller import ConstraintController
+from bac.simulate.namd.boundary_condition import PeriodicBoundaryCondition
 
-from bac.utils.decorators import *
+from bac.utils.decorators import (advanced_property, positive_decimal,
+                                  positive_integer,  file, boolean, back_referenced)
+
+from bac.simulate import gromacs
 
 
 class Run:
 
     def __init__(self, **kwargs):
-        self._temperature_controller = TemperatureController(**kwargs['temperature_controller'])
-        self._pressure_controller = PressureController()
-        self._non_bonded_controller = NonBondedController(**kwargs['non_bonded_controller'])
-        self._constraints = ConstraintController()
-        self._boundary_condition = PeriodicBoundaryCondition()
+        self.temperature_controller = TemperatureController(**kwargs['temperature_controller'])
+        self.pressure_controller = PressureController()
+        self.non_bonded_controller = NonBondedController(**kwargs['non_bonded_controller'])
+        self.constraints = ConstraintController()
+        self.boundary_condition = PeriodicBoundaryCondition()
 
         # DYNAMICS
 
@@ -74,25 +77,20 @@ class Run:
 
     # Main components:
 
-    @property
-    def temperature_controller(self):
-        return self._temperature_controller
+    @back_referenced
+    def temperature_controller(self): pass
 
-    @property
-    def pressure_controller(self):
-        return self._pressure_controller
+    @back_referenced
+    def pressure_controller(self): pass
 
-    @property
-    def non_bonded_controller(self):
-        return self._non_bonded_controller
+    @back_referenced
+    def non_bonded_controller(self): pass
 
-    @property
-    def constraints(self):
-        return self._constraints
+    @back_referenced
+    def constraints(self): pass
 
-    @property
-    def boundary_condition(self):
-        return self._boundary_condition
+    @back_referenced
+    def boundary_condition(self): pass
 
     # Dynamics
 
@@ -127,9 +125,6 @@ class Run:
 
     # Output
 
-    @file
-    def output_name(self): pass
-
     @boolean(default=True)
     def binary_output(self): pass
 
@@ -145,10 +140,10 @@ class Run:
     @file(default=lambda s: s.output_name.with_suffix('.dcd'))
     def dcd_file(self): pass
 
-    @file(default=lambda s: s.output_name.with_suffix('veldcd'))
+    @file(default=lambda s: s.output_name.with_suffix('.veldcd'))
     def dcd_velocity_file(self): pass
 
-    @file(default=lambda s: s.output_name.with_suffix('forcedcd'))
+    @file(default=lambda s: s.output_name.with_suffix('.forcedcd'))
     def dcd_force_file(self): pass
 
     # Other settings
@@ -211,13 +206,33 @@ class Run:
 
     @input.setter
     def input(self, md):
+        if isinstance(md, self.__class__) and md.output_name is not None:
+            if md.binary_output:
+                self.binary_velocities = md.output_name.with_suffix('.vel')
+                self.binary_coordinates = md.output_name.with_suffix('.coor')
+            else:
+                self.velocities = md.output_name.with_suffix('.vel')
+                self.coordinates = md.output_name.with_suffix('.coor')
 
-        if md.binary_output:
-            self.binary_velocities = md.output_name.with_suffix('.vel') if md.output_name else None
-            self.binary_coordinates = md.output_name.with_suffix('.coor') if md.output_name else None
+            self.parameters = md.parameters
+
+        elif isinstance(md, gromacs.Run):
+            self.gromacs = True
+            self.coordinates = md.output_name.with_suffix('.gro')
+            self.parameters = md.output_name.with_suffix('.top')
         else:
-            self.velocities = md.output_name.with_suffix('.vel')
-            self.coordinates = md.output_name.with_suffix('.coor')
+            raise TypeError
 
-        # FIXME: Is this the correct way to handle this???
-        self.parameters = md.parameters
+
+
+
+
+
+
+
+
+
+
+
+
+

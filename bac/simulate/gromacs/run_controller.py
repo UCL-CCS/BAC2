@@ -1,6 +1,8 @@
 from enum import Enum
 
-from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean
+from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, file, back_referenced
+from bac.simulate.gromacs import (TemperatureController, PressureController, NonBondedController, ConstraintController)
+from bac.simulate import namd
 
 
 class Integrator(Enum):
@@ -26,6 +28,12 @@ class CenterOfMassMotion(Enum):
 class Run:
 
     def __init__(self, **kwargs):
+
+        self.temperature_controller = TemperatureController(**kwargs.get('temperature_controller'))
+        self.pressure_controller = PressureController()
+        self.non_bonded_controller = NonBondedController(**kwargs.get('non_bonded_controller'))
+        self.constraints = ConstraintController()
+
         self.integrator = kwargs.get('integrator')
         self.initial_time = kwargs.get('initial_time')
         self.delta_time = kwargs.get('delta_time')
@@ -39,8 +47,28 @@ class Run:
         self.generate_temperature = kwargs.get('generate_temperature')
         self.generate_seed = kwargs.get('generate_seed')
 
+        self.coordinates = kwargs.get('coordinates')
+        self.topology = kwargs.get('topology')
+        self.velocities = kwargs.get('velocities')
+
+        self.output_name = kwargs.get('output_name')
+
         self.minimization_tolerance = None
         self.minimization_step_size = None
+
+    # Main components:
+
+    @back_referenced
+    def temperature_controller(self): pass
+
+    @back_referenced
+    def pressure_controller(self): pass
+
+    @back_referenced
+    def non_bonded_controller(self): pass
+
+    @back_referenced
+    def constraints(self): pass
 
     @advanced_property(type=Integrator, default=Integrator.md)
     def integrator(self): pass
@@ -64,13 +92,44 @@ class Run:
     def com_motion_removal(self): pass
 
     @boolean(default=False)
-    def generate_veolcities(self): pass
+    def generate_velocities(self): pass
 
     @positive_decimal(default=300)
     def generate_temperature(self): pass
 
     @integer(default=-1)
     def generate_seed(self): pass
+
+    @file
+    def coordinates(self): pass
+
+    @file
+    def topology(self): pass
+
+    @file
+    def velocities(self): pass
+
+    @property
+    def input(self):
+
+        paths = []
+        paths += self.velocities
+        paths += self.coordinates
+        paths += self.topology
+
+        return '\n'.join(paths)
+
+    @input.setter
+    def input(self, md):
+        if isinstance(md, self.__class__) and md.output_name is not None:
+            self.coordinates = md.output_name.with_suffix('.gro')
+            self.topology = md.output_name.with_suffix('.top')
+            self.velocities = md.output_name.with_suffix('.cpt')
+        elif isinstance(md, namd.Run):
+            raise NotImplementedError
+        else:
+            raise TypeError
+
 
 
 
