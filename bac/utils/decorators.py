@@ -1,5 +1,6 @@
 from pathlib import Path
 from enum import Enum
+import copy
 
 from bac.utils.pdb import PDBColumn
 import warnings
@@ -128,3 +129,45 @@ class positive_integer(advanced_property):
 class boolean(advanced_property):
     def __init__(self, *args, **kwargs):
         super(boolean, self).__init__(type=bool, *args, **kwargs)
+
+class back_referenced(property):
+    def __init__(self, f):
+        self.f = f
+        super(back_referenced, self).__init__(fget=self._fget, fset=self._fset)
+
+    def _fget(self, obj):
+        try:
+            return obj.__getattribute__(self.private_name)
+        except:
+            return None
+
+    def _fset(self, obj, new_value):
+        if obj.__getattribute__(self.public_name) is not None:
+            obj.__getattribute__(self.public_name).__setattr__(self.container_name, None)
+
+        try:
+            if new_value.__getattribute__(self.container_name) is not None:
+                warnings.warn('Controller already used by another `run`. Copied. Access from `run` object only',
+                              Warning)
+                new_value = copy.deepcopy(new_value)
+        except AttributeError:
+            pass
+
+        try:
+            new_value.__setattr__(self.container_name, obj)
+        except AttributeError:
+            pass
+
+        obj.__setattr__(self.private_name, new_value)
+
+    @property
+    def private_name(self):
+        return "_{}".format(self.f.__name__)
+
+    @property
+    def public_name(self):
+        return self.f.__name__
+
+    @property
+    def container_name(self):
+        return 'run'
