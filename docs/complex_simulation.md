@@ -26,12 +26,14 @@ md_run.constraint_controller = cc
 Non bonded interactions
 ---
 
+*Note:* you can access the default controller objects from the main `Run`
+class too (instead of creating a new one like above). 
+
 ```python
-nbc = gmx.NonBondedController()
-nbc.coulomb_type = gmx.CoulombType.pme
-nbc.coulomb_cutoff = 1.0
-md_run.non_bonded_controller = nbc
+md_run.non_bonded_controller.coulomb_type = gmx.CoulombType.pme
+md_run.non_bonded_controller.coulomb_cutoff = 1.0
 ```
+
 Temperature coupling
 ---
 
