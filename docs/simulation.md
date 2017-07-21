@@ -13,7 +13,7 @@ If you are creating a workflow, you most likely will *__only__* need to `deepcop
 the first instance, and modify some parameter and the input/output.
 
 
-**Run** _main class_   
+**Run** – the _**main** class_   
 - TemperatureController  
 - PressureController  
 - NonBondedController  
@@ -22,6 +22,8 @@ the first instance, and modify some parameter and the input/output.
 ```python
 import copy
 import bac.simulate.namd as namd
+from bac.simulate.operation_queue import OperationQueue
+from bac.simulate.operation import Operation
 
 annealing = namd.Run(temperature=300.0)
 annealing.temperature_controller.langevin = namd.LangevinDynamics(damping=0.4)
@@ -38,14 +40,17 @@ equilibrate.temperature = 310.0
 equilibrate.input = annealing
 
 
-operation_queue = OperationQueue(resource='archer')
+ties_bace1 = OperationQueue(resource='archer')
 
-equilibrate.add_dependency(annealing)
+for _ in range(5):
+    op_annealing = Operation(run=annealing)
+    
+    op_equilibrate = Operation(run=equilibrate)
+    op_equilibrate.add_dependency(op_annealing)
+    
+    ties_bace1.add_operation(op_annealing, op_equilibrate)
 
-operation_queue.add_operation(equilibrate) 
-operation_queue.add_operation(annealing)
-
-# Asynchronous execution 
-operation_queue.execute()
+# Asynchronous execution
+ties_bace1.execute()
 ```
-
+end
