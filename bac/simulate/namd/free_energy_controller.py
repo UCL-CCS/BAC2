@@ -12,8 +12,8 @@ class FreeEnergyController:
 
     def __init__(self, **kwargs):
         self.type = kwargs.get('type')
-        self.lambda_start = kwargs.get('lambda_start')
-        self.lambda_end = kwargs.get('lambda_end')
+        self.start_lambda = kwargs.get('start_lambda')
+        self.end_lambda = kwargs.get('end_lambda')
         self.equilibration_steps = kwargs.get('equilibration_steps')
         self.file = kwargs.get('file')
         self.column = kwargs.get('column')
@@ -30,10 +30,10 @@ class FreeEnergyController:
     def type(self): pass
 
     @decimal(validator=lambda x: 0 <= x <= 1)
-    def lambda_start(self): pass
+    def start_lambda(self): pass
 
     @decimal(validator=lambda x: 0 <= x <= 1)
-    def lambda_end(self): pass
+    def end_lambda(self): pass
 
     @positive_integer(default=0, validator=lambda x, s: s.run.number_of_steps >= x)
     def equilibration_steps(self): pass

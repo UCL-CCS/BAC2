@@ -4,7 +4,7 @@ from bac.utils.decorators import *
 class TemperatureController:
 
     def __init__(self, **kwargs):
-        self.langevin = LangevinDynamics(**kwargs['langevin']) if (len(kwargs['langevin']) > 0) else None
+        self.langevin = None
         self.coupling = None
         self.rescale = None
         self.reassign = None

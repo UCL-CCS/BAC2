@@ -3,6 +3,7 @@ from bac.simulate.namd.pressure_controller import PressureController
 from bac.simulate.namd.non_bonded_controller import NonBondedController
 from bac.simulate.namd.constraint_controller import ConstraintController
 from bac.simulate.namd.boundary_condition import PeriodicBoundaryCondition
+from bac.simulate.namd.free_energy_controller import FreeEnergyController
 
 from bac.utils.decorators import (advanced_property, positive_decimal,
                                   positive_integer,  file, boolean, back_referenced)
@@ -13,11 +14,12 @@ from bac.simulate import gromacs
 class Run:
 
     def __init__(self, **kwargs):
-        self.temperature_controller = TemperatureController(**kwargs['temperature_controller'])
+        self.temperature_controller = TemperatureController()
         self.pressure_controller = PressureController()
-        self.non_bonded_controller = NonBondedController(**kwargs['non_bonded_controller'])
+        self.non_bonded_controller = NonBondedController()
         self.constraints = ConstraintController()
         self.boundary_condition = PeriodicBoundaryCondition()
+        self.free_energy_controller = None
 
         # DYNAMICS
 
