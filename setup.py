@@ -13,6 +13,8 @@ setup(
 
     author='CCS',
 
+    requires=['yaml'],
+
     packages=find_packages(),
 )
 
