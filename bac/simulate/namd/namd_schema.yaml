@@ -1,0 +1,138 @@
+# Attributes of main `Run()`
+
+numsteps: number_of_steps
+timestep: null
+firsttimestep: first_timestep
+
+temperature: null
+velocities: null
+binvelocities: binary_velocities
+
+coordinates: null
+bincoordinates: binary_coordinates
+
+parameters: null
+
+outputname: output_name
+binaryoutput:
+  - binary_output
+  - yes_no
+restartfreq: restart_frequency
+dcdfreq: dcd_frequency
+dcdunitcell:
+  - dcd_unit_cell
+  - yes_no
+
+## `NonBondedController()` attributes
+non_bonded_controller:
+  cutoff:
+  switching:
+    - switching
+    - on_off
+  limitdist: limit_distance
+
+## `TemperatureController()` attributes
+temperature_controller:
+  langevin:
+    name_token:
+      - langevin
+      - on_off
+    langevinTemp: temperature
+    langevinDamping: damping
+    langevinHydrogen:
+      - applies_to_hydrogen
+      - on_off
+    langevinFile: file
+    langevinCol:
+      - column
+      - enum
+  coupling:
+    name_token:
+      - tCouple
+      - on_off
+    tCoupleTemp: temperature
+    tCoupleFile: file
+    tCoupleCol:
+      - column
+      - enum
+  rescale:
+    rescaleFreq: frequency
+    rescaleTemp: temperature
+  reassign:
+    reassignFreq: frequency
+    reassignTemp: temperature
+    reassignIncr: increment
+    reassignHold: hold_at
+  lowe_andersen:
+    name_token:
+      - loweAndersen
+      - on_off
+    loweAndersenTemp: temperature
+    loweAndersenCutoff: cutoff
+    loweAndersenRate: rate
+
+## `PressureController()` attributes
+pressure_controller:
+  useGroupPressure:
+    - use_group_pressure
+    - yes_no
+  useFlexibleCell:
+    - use_flexible_cell
+    - yes_no
+  useConstantRatio:
+    - use_constant_ratio
+    - yes_no
+  useConstantArea:
+    - use_constant_area
+    - yes_no
+  berendsen:
+    name_token:
+      - BerendsenPressure
+      - on_off
+    BerendsenPressureTarget: target
+    BerendsenPressureCompressibility: compressibility
+    BerendsenPressureRelaxationTime: relaxation_time
+    BerendsenPressureFreq: frequency
+  langevin:
+    name_token:
+      - LangevinPiston
+      - on_off
+    LangevinPistonTarget: target
+    LangevinPistonPeriod: period
+    LangevinPistonDecay: decay
+    LangevinPistonTemp: temperature
+    SurfaceTensionTarget: surface_tension_target
+    ExcludeFromPressure:
+      - exclude_from_pressure
+      - on_off
+    ExcludeFromPressureFile: exclude_from_pressure_file
+    ExcludeFromPressureCol:
+      - exclude_from_pressure_column
+      - enum
+
+free_energy_controller:
+  name_token:
+    - alch
+    - on_off
+  alchType:
+    - type
+    - enum
+  alchLambda: start_lambda
+  alchLambda2: end_lambda
+  alchEquilSteps: equilibration_steps
+  alchFile: file
+  alchCol:
+    - column
+    - enum
+  alchOutFreq: output_frequency
+  alchOutFile: output_name
+  alchVdwShiftCoeff: van_der_waals_shift_coefficient
+  alchElecLambdaStart: electronic_interaction_start_lambda
+  alchVdwLambdaEnd: van_der_waals_end_lambda
+  alchBondLambdaEnd: bonded_interaction_end_lambda
+  alchBondDecouple:
+    - bond_decoupling
+    - on_off
+  alchDecouple:
+    - decouple
+    - on_off
