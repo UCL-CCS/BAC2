@@ -1,7 +1,12 @@
 from enum import Enum
 
 from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, file, back_referenced
-from bac.simulate.gromacs import (TemperatureController, PressureController, NonBondedController, ConstraintController)
+from bac.simulate.gromacs.temperature_controller import TemperatureController
+from bac.simulate.gromacs.pressure_controller import PressureController
+from bac.simulate.gromacs.non_bonded_controller import NonBondedController
+from bac.simulate.gromacs.constraint_controller import ConstraintController
+
+
 from bac.simulate import namd
 
 
