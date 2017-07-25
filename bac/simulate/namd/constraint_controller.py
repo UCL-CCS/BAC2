@@ -24,7 +24,7 @@ class BondConstraint:
         self.die_on_error = kwargs.get('die_on_error')
         self.use_settle = kwargs.get('use_settle')
 
-    @advanced_property(type=(BondType, str))
+    @advanced_property(type=BondType)
     def bonds(self): pass
 
     @positive_decimal(default=1.0e-8)
