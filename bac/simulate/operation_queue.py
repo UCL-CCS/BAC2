@@ -1,5 +1,6 @@
 from .operation import Operation
 
+
 class OperationQueue:
 
     def __init__(self, resource):
