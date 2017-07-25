@@ -52,6 +52,7 @@ class LongRangeDispersionCorrectionType(Enum):
 class NonBondedController:
 
     def __init__(self, **kwargs):
+        self.cutoff = kwargs.get('cutoff')
         self.cutoff_scheme = kwargs.get('cutoff_scheme')
         self.neighbor_list_update_frequency = kwargs.get('neighbour_list_update_frequency')
         self.neighbor_list_type = kwargs.get('neighbor_list_type')
@@ -60,8 +61,6 @@ class NonBondedController:
         self.periodic_molecules = kwargs.get('periodic_molecules')
 
         self.verlet_buffer_tolerance = kwargs.get('verlet_buffer_tolerance')
-
-        self.cutoff = kwargs.get('cutoff')
 
         self.coulomb_type = kwargs.get('coulomb_type')
         self.coulomb_modifier = kwargs.get('coulomb_modifier')

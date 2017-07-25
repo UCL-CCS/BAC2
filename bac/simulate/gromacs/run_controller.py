@@ -34,10 +34,11 @@ class Run:
 
     def __init__(self, **kwargs):
 
-        self.temperature_controller = TemperatureController(**kwargs.get('temperature_controller'))
+        self.temperature_controller = TemperatureController()
         self.pressure_controller = PressureController()
-        self.non_bonded_controller = NonBondedController(**kwargs.get('non_bonded_controller'))
+        self.non_bonded_controller = NonBondedController()
         self.constraints = ConstraintController()
+        self.free_energy_controller = None
 
         self.integrator = kwargs.get('integrator')
         self.initial_time = kwargs.get('initial_time')
@@ -45,7 +46,7 @@ class Run:
         self.number_of_steps = kwargs.get('number_of_steps')
         self.initial_step = kwargs.get('initial_step')
         self.center_of_mass_motion = kwargs.get('center_of_mass_motion')
-        self.com_motion_removal = kwargs.get('com_motion_removal')
+        self.com_motion_removal_frequency = kwargs.get('com_motion_removal_frequency')
         self.comm_groups = kwargs.get('comm_groups')
 
         self.generate_velocities = kwargs.get('generate_velocities')
@@ -60,6 +61,8 @@ class Run:
 
         self.minimization_tolerance = None
         self.minimization_step_size = None
+        self.minimization_steepest_descent_frequency = None
+        self.minimization_correction_steps = None
 
     # Main components:
 
@@ -94,7 +97,7 @@ class Run:
     def center_of_mass_motion(self): pass
 
     @integer(default=100)
-    def com_motion_removal(self): pass
+    def com_motion_removal_frequency(self): pass
 
     @boolean(default=False)
     def generate_velocities(self): pass
