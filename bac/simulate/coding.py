@@ -1,6 +1,10 @@
+from enum import Enum
 import yaml
 
-from . import Engine
+
+class Engine(Enum):
+    namd = 'namd'
+    gromacs = 'gromacs'
 
 
 class Encoder:
@@ -38,7 +42,9 @@ class Encoder:
 
         return serialize(run, cls._schema(engine))
 
-    @classmethod
-    def _schema(cls, engine):
+    @staticmethod
+    def _schema(engine):
         if engine is Engine.namd:
-            return yaml.load(open("namd.yaml", 'r'))
+            return yaml.load(open('/Users/kristofarkas/Developer/BAC2/bac/simulate/namd/namd_schema.yaml'))
+        elif engine is Engine.gromacs:
+            return yaml.load(open('/Users/kristofarkas/Developer/BAC2/bac/simulate/gromacs/gromacs_schema.yaml'))
