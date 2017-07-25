@@ -38,11 +38,9 @@ Temperature coupling
 ---
 
 ```python
-tc = gmx.TemperatureController()
-tc.type = gmx.TemperatureCouplingType.velocity_rescale
-tc.time = 0.1
-tc.temperature = 300
-md_run.temperature_controller = tc
+md_run.temperature_controller.type = gmx.TemperatureCouplingType.velocity_rescale
+md_run.temperature_controller.time = 0.1
+md_run.temperature_controller.temperature = 300
 ```
 
 Pressure coupling
