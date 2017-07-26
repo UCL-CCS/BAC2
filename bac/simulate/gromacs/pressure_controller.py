@@ -100,10 +100,20 @@ class PressureController:
     @decimal(default=1)
     def time(self): pass
 
-    @decimal
+    def group_count_validator(x, s):
+        if s.isotropy is IsotropyType.isotropic:
+            return len(x) == 1
+        elif s.isotropy is IsotropyType.semi_isotropic:
+            return len(x) == 2
+        elif s.isotropy is IsotropyType.anisotropic:
+            return len(x) == 6
+        elif s.isotropy is IsotropyType.surface_tension:
+            return len(x) == 2
+
+    @advanced_property(type=list, default=[], validator=group_count_validator)
     def compressibility(self): pass
 
-    @decimal
+    @advanced_property(type=list, default=[], validator=group_count_validator)
     def pressure(self): pass
 
     @advanced_property(type=ReferenceCoordinateScalingType, default=ReferenceCoordinateScalingType.no)

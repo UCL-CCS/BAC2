@@ -1,6 +1,6 @@
 from enum import Enum
 
-from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, file, back_referenced
+from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, file, back_referenced, positive_integer
 from bac.simulate.gromacs.temperature_controller import TemperatureController
 from bac.simulate.gromacs.pressure_controller import PressureController
 from bac.simulate.gromacs.non_bonded_controller import NonBondedController
@@ -99,6 +99,9 @@ class Run:
     @integer(default=100)
     def com_motion_removal_frequency(self): pass
 
+    @advanced_property(type=list, default=['system'])
+    def comm_groups(self): pass
+
     @boolean(default=False)
     def generate_velocities(self): pass
 
@@ -107,6 +110,18 @@ class Run:
 
     @integer(default=-1)
     def generate_seed(self): pass
+
+    @positive_decimal(default=10.0)
+    def minimization_tolerance(self): pass
+
+    @positive_decimal(default=0.01)
+    def minimization_step_size(self): pass
+
+    @positive_integer(default=1000)
+    def minimization_steepest_descent_frequency(self): pass
+
+    @positive_integer(default=10)
+    def minimization_correction_steps(self): pass
 
     @file
     def coordinates(self): pass
