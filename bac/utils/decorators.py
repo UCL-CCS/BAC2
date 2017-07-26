@@ -108,7 +108,9 @@ class column(advanced_property):
 
 class positive_decimal(advanced_property):
     def __init__(self, *args, **kwargs):
-        super(positive_decimal, self).__init__(type=(float, int, str), validator=lambda x: x >= 0, *args, **kwargs)
+        old_validator = kwargs.get('validator', lambda *y: True)
+        kwargs['validator'] = lambda *x: old_validator(*x) and x[0] >= 0
+        super(positive_decimal, self).__init__(type=(float, int, str), *args, **kwargs)
 
 
 class decimal(advanced_property):
