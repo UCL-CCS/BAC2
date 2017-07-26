@@ -138,6 +138,10 @@ class Run:
         else:
             raise TypeError
 
+    def __str__(self):
+        from bac.simulate.coding import Encoder, Engine
+        return Encoder.encode(self, engine=Engine.gromacs)
+
 
 
 
