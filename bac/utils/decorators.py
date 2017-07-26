@@ -36,13 +36,11 @@ class advanced_property(property):
         if value is None:
             obj.__setattr__(self.private_name, None)
         elif isinstance(value, self.type):
-            value = self.type[0](value)
+            value = self.convert_to_default_type(value)
             self.validate(obj, value)
             obj.__setattr__(self.private_name, value)
         else:
-            raise TypeError("{} must be of type {} instead of {}".format(self.public_name,
-                                                                         ' or '.join(t.__name__ for t in self.type),
-                                                                         type(value).__name__))
+            raise TypeError("{} must be of type {} NOT {}".format(self.public_name, ' or '.join(t.__name__ for t in self.type), type(value).__name__))
 
     @property
     def private_name(self):
@@ -57,7 +55,7 @@ class advanced_property(property):
 
         default_to_return = self._default(obj) if callable(self._default) else self._default
 
-        return self.type[0](default_to_return)
+        return self.convert_to_default_type(default_to_return)
 
     @property
     def type(self):
@@ -70,8 +68,17 @@ class advanced_property(property):
         else:
             if issubclass(value, Enum):
                 self._type = (value, str)
+            elif value is list:
+                self._type = (value, str, int, float)
             else:
                 self._type = (value, )
+
+    def convert_to_default_type(self, value):
+        default_type = self.type[0]
+        if default_type is list and not isinstance(value, list):
+            value = [value]
+
+        return default_type(value)
 
     def validate(self, obj, value):
         if self.validator is not None and self.validator(value, obj) is False:

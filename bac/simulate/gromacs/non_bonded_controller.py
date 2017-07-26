@@ -1,6 +1,22 @@
 from enum import Enum
 
-from bac.utils.decorators import advanced_property, decimal
+from bac.utils.decorators import advanced_property, decimal, positive_integer, positive_decimal, boolean
+
+
+class CutoffSchemeType(Enum):
+    verlet = 'Verlet'
+    group = 'group'
+
+
+class NeighborListType(Enum):
+    grid = 'grid'
+    simple = 'simple'
+
+
+class PeriodicBoundaryConditionType(Enum):
+    xyz = 'xyz'
+    xy = 'xy'
+    no = 'no'
 
 
 class CoulombType(Enum):
@@ -74,6 +90,27 @@ class NonBondedController:
         self.van_der_waals_switch_cutoff = kwargs.get('van_der_waals_switch_cutoff')
         self.van_der_waals_cutoff = kwargs.get('van_der_waals_cutoff')
         self.correct_long_range_dispersion = kwargs.get('correct_long_range_dispersion')
+
+    @positive_decimal(default=1.0)
+    def cutoff(self): pass
+
+    @advanced_property(type=CutoffSchemeType, default=CutoffSchemeType.verlet)
+    def cutoff_scheme(self): pass
+
+    @positive_integer(default=10)
+    def neighbor_list_update_frequency(self): pass
+
+    @advanced_property(type=NeighborListType, default=NeighborListType.grid)
+    def neighbor_list_type(self): pass
+
+    @advanced_property(type=PeriodicBoundaryConditionType, default=PeriodicBoundaryConditionType.xyz)
+    def periodic_boundary_condition(self): pass
+
+    @boolean(default=False)
+    def periodic_molecules(self): pass
+
+    @positive_decimal(default=0.005)
+    def verlet_buffer_tolerance(self): pass
 
     @advanced_property(type=CoulombType, default=CoulombType.cutoff)
     def coulomb_type(self): pass

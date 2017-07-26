@@ -16,6 +16,7 @@ class Integrator(Enum):
     tpi = 'tpi'
     tpic = 'tpic'
 
+
 class TemperatureCouplingType(Enum):
     no = 'no'
     berendsen = 'berendsen'
@@ -31,6 +32,7 @@ class TemperatureController:
         self.type = kwargs.get('type')
         self.frequency = kwargs.get('frequency')
         self.nose_hoover_chain_length = kwargs.get('nose_hoover_chain_length')
+        self.groups = kwargs.get('groups')
         self.time = kwargs.get('time')
         self.temperature = kwargs.get('temperature')
 
@@ -59,10 +61,13 @@ class TemperatureController:
     @integer(default=10, validator=lambda v, o: (v == 1) if (o.run.integrator is Integrator.md) else True)
     def nose_hoover_chain_length(self): pass
 
-    @decimal
+    @advanced_property(type=list, default=[])
+    def groups(self): pass
+
+    @advanced_property(type=list, default=[], validator=lambda x, s: len(x) == len(s.groups))
     def time(self): pass
 
-    @decimal
+    @advanced_property(type=list, default=[], validator=lambda x, s: len(x) == len(s.groups))
     def temperature(self): pass
 
 
