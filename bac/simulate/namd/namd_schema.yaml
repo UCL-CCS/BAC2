@@ -23,6 +23,27 @@ dcdunitcell:
   - dcd_unit_cell
   - yes_no
 
+### Forcefield specific parameters
+amber:
+  - amber
+  - yes_no
+
+readexclusions:
+  - read_exclusions
+  - yes_no
+
+scnb:
+
+structure:
+paraTypeXplor:
+  - parameter_type_XPLOR
+  - on_off
+paraTypeCharmm:
+  - parameter_type_CHARMM
+  - on_off
+
+gromacs:
+
 ## `NonBondedController()` attributes
 non_bonded_controller:
   cutoff:
@@ -80,9 +101,81 @@ non_bonded_controller:
       - on_off
     mollyTolerance: tolerance
     mollyIterations: iterations
-    
 
+boundary_condition:
+  cellBasisVector1:
+    - cell_basis_vector_1
+    - tuple
+  cellBasisVector2:
+    - cell_basis_vector_2
+    - tuple
+  cellBasisVector3:
+    - cell_basis_vector_3
+    - tuple
+  cellOrigin:
+    - cell_origin
+    - tuple
+  extendedSystem: extended_system
+  XSTfile: xst_file
+  XSTfreq: xst_frequency
+  wrapWater:
+    - wrap_water
+    - on_off
+  wrapAll:
+    - wrap_all
+    - on_off
+  wrapNearest:
+    - wrap_nearest
+    - on_off
 
+constraints:
+  extraBondsFile: extra_bonds
+  bond_constraint:
+    rigidBonds:
+      - bonds
+      - enum
+    rigidTolerance: tolerance
+    rigidIterations: iterations
+    rigidDieOnError:
+      - die_on_error
+      - on_off
+    useSettle:
+      - use_settle
+      - on_off
+  harmonic_constraint:
+      name_token:
+        - constraints
+        - on_off
+      consexp: exponent
+      consref: reference_position_file
+      conskfile: force_constant_file
+      conskcol:
+        - force_constant_column
+        - enum
+      constraintScaling: scaling
+      selectConstraints:
+        - select_constraints
+        - on_off
+      selectConstrX:
+        - select_constraints_x
+        - on_off
+      selectConstrY:
+        - select_constraints_y
+        - on_off
+      selectConstrZ:
+        - select_constraints_z
+        - on_off
+  atom_constraint:
+    name_token:
+      - fixedAtoms
+      - on_off
+    fixedAtomsForces:
+      - calculated_fixed_atom_forces
+      - on_off
+    fixedAtomsFile: file
+    fixedAtomsCol:
+      - column
+      - enum
 
 ## `TemperatureController()` attributes
 temperature_controller:

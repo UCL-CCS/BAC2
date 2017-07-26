@@ -3,17 +3,21 @@ from enum import Enum
 from bac.utils.decorators import *
 
 
-class ConstraintController:
-    def __init__(self):
-        self.bond_constraint = None
-        self.harmonic_constraint = None
-        self.atom_constraint = None
-        self.extra_bonds = None
-
-
 class BondType(Enum):
     all = 'all'
     water = 'water'
+    none = 'none'
+
+
+class ConstraintController:
+    def __init__(self, **kwargs):
+        self.bond_constraint = None
+        self.harmonic_constraint = None
+        self.atom_constraint = None
+        self.extra_bonds = kwargs.get('extra_bonds')
+
+    @file
+    def extra_bonds(self): pass
 
 
 class BondConstraint:
@@ -24,7 +28,7 @@ class BondConstraint:
         self.die_on_error = kwargs.get('die_on_error')
         self.use_settle = kwargs.get('use_settle')
 
-    @advanced_property(type=BondType)
+    @advanced_property(type=BondType, default=BondType.none)
     def bonds(self): pass
 
     @positive_decimal(default=1.0e-8)
@@ -41,17 +45,56 @@ class BondConstraint:
 
 
 class HarmonicConstraint:
-    # TODO: implement
-    pass
+    def __init__(self, **kwargs):
+        self.exponent = kwargs.get('exponent')
+        self.reference_position_file = kwargs.get('reference_position_file')
+        self.force_constant_file = kwargs.get('force_constant_file')
+        self.force_constant_column = kwargs.get('force_constant_column')
+        self.scaling = kwargs.get('scaling')
+        self.select_constraints = kwargs.get('select_constraints')
+        self.select_constraints_x = kwargs.get('select_constraints_x')
+        self.select_constraints_y = kwargs.get('select_constraints_y')
+        self.select_constraints_z = kwargs.get('select_constraints_z')
+
+    @positive_integer(default=0, validator=lambda x, s: x % 2 == 0)
+    def exponent(self): pass
+
+    @file
+    def reference_position_file(self): pass
+
+    @file
+    def force_constant_file(self): pass
+
+    @column
+    def force_constant_column(self): pass
+
+    @positive_decimal(default=1.0)
+    def scaling(self): pass
+
+    @boolean(default=False)
+    def select_constraints(self): pass
+
+    @boolean(default=False)
+    def select_constraints_x(self): pass
+
+    @boolean(default=False)
+    def select_constraints_y(self): pass
+
+    @boolean(default=False)
+    def select_constraints_z(self): pass
 
 
 class AtomConstraint:
     def __init__(self, **kwargs):
-        self.calculated_fixed_atom_forces = kwargs.get('calculated_fixed_atom_forces', False)
+        self.calculated_fixed_atom_forces = kwargs.get('calculated_fixed_atom_forces')
         self.file = kwargs.get('file')
-        self.column = kwargs.get('column', 'O')
+        self.column = kwargs.get('column')
 
+    @boolean(default=False)
+    def calculated_fixed_atom_forces(self): pass
 
-class ExtraBonds:
-    def __init__(self, file=None):
-        self.file = file
+    @file(default=lambda s: s.run.coordinates)
+    def file(self): pass
+
+    @column
+    def column(self): pass
