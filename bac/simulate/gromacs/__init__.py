@@ -9,3 +9,5 @@ from bac.simulate.gromacs.non_bonded_controller import (NonBondedController, Cou
                                                         VanDerWaalsType, VanDerWaalsModifierType)
 
 from bac.simulate.gromacs.constraint_controller import (ConstraintController, ConstraintAlgorithmType, ConstraintType)
+
+from bac.simulate.gromacs.free_energy_controller import (FreeEnergyController, CouplingType)
