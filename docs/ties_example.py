@@ -51,7 +51,9 @@ fe.van_der_waals_end_lambda = 1.0
 
 md.free_energy_controller = fe
 
-print(md)
+from bac.simulate.coding import Encoder, Engine
+
+Encoder.encode(md, Engine.namd, 'sim1.conf')
 
 
 if __name__ == '__main__':
