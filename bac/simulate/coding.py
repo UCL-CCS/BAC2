@@ -1,5 +1,6 @@
 from enum import Enum
 import yaml
+from bac.simulate import gromacs, namd
 
 
 class Engine(Enum):
@@ -16,12 +17,15 @@ class Encoder:
     _encoders = {'yes_no': lambda x: ('no', 'yes')[x],
                  'on_off': lambda x: ('off', 'on')[x],
                  'enum': lambda x: x.value,
-                 'tuple': lambda x: ' '.join(str(xs) for xs in x)}
+                 'iter': lambda x: ' '.join(str(xs) for xs in x)}
 
     _column_size = 25
 
     @classmethod
-    def encode(cls, run, engine):
+    def encode(cls, run, path):
+
+        if isinstance(run, gromacs.Run): engine = Engine.gromacs
+        elif isinstance(run, namd.Run): engine = Engine.namd
 
         def serialize(obj, attributes):
             serial = ''
@@ -61,7 +65,8 @@ class Encoder:
                         serial += serialize(sub_obj, internals)
             return serial+'\n'
 
-        return serialize(run, cls._schema(engine))
+        with open(path, mode='w') as conf:
+            conf.write(serialize(run, cls._schema(engine)))
 
     # FIXME: setuptools
     @staticmethod

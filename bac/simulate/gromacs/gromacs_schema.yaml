@@ -27,6 +27,9 @@ temperature_controller:
     - enum
   nsttcouple: frequency
   nh-chain-length: nose_hoover_chain_length
+  tc-grps:
+    - groups
+    - iter
   tau-t:
     - time
     - iter

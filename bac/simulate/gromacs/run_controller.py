@@ -132,6 +132,9 @@ class Run:
     @file
     def velocities(self): pass
 
+    @file
+    def output_name(self): pass
+
     @property
     def input(self):
 
