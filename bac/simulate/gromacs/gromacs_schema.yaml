@@ -27,8 +27,12 @@ temperature_controller:
     - enum
   nsttcouple: frequency
   nh-chain-length: nose_hoover_chain_length
-  tau-t: time
-  ref-t: temperature
+  tau-t:
+    - time
+    - iter
+  ref-t:
+    - temperature
+    - iter
 
 pressure_controller:
   pcoupl:
@@ -40,7 +44,11 @@ pressure_controller:
   nstpcouple: frequency
   tau-p: time
   compressibility:
-  ref-p: pressure
+    - compressibility
+    - iter
+  ref-p:
+    - pressure
+    - iter
   refcoord-scaling:
     - reference_coordinate_scaling
     - enum
@@ -113,13 +121,27 @@ free_energy_controller:
   init-lambda: initial_lambda
   delta-lambda: delta_lambda
   init-lambda-state: initial_lambda_state
-  fep-lambdas: fep_lambdas
-  coul-lambdas: coulomb_lambdas
-  vdw-lambdas: van_der_waals_lambdas
-  bonded-lambdas: bonded_lambdas
-  restraint-lambdas: restraint_lambdas
-  mass-lambdas: mass_lambdas
-  temperature-lambdas: temperature_lambdas
+  fep-lambdas:
+    - fep_lambdas
+    - iter
+  coul-lambdas:
+    - coulomb_lambdas
+    - iter
+  vdw-lambdas:
+    - van_der_waals_lambdas
+    - iter
+  bonded-lambdas:
+    - bonded_lambdas
+    - iter
+  restraint-lambdas:
+    - restraint_lambdas
+    - iter
+  mass-lambdas:
+    - mass_lambdas
+    - iter
+  temperature-lambdas:
+    - temperature_lambdas
+    - iter
   calc-lambda-neighbors: calculate_lambda_neighbors
 
   sc-alpha: soft_core_alpha
@@ -129,6 +151,10 @@ free_energy_controller:
     - yes_no
   sc-power: soft_core_power
   sc-sigma: soft_core_sigma
+
+  couple-moltype:
+    - couple_molecule_groups
+    - iter
   couple-lambda0:
     - couple_type_initial_lambda
     - enum
