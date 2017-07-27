@@ -105,16 +105,16 @@ non_bonded_controller:
 boundary_condition:
   cellBasisVector1:
     - cell_basis_vector_1
-    - tuple
+    - iter
   cellBasisVector2:
     - cell_basis_vector_2
-    - tuple
+    - iter
   cellBasisVector3:
     - cell_basis_vector_3
-    - tuple
+    - iter
   cellOrigin:
     - cell_origin
-    - tuple
+    - iter
   extendedSystem: extended_system
   XSTfile: xst_file
   XSTfreq: xst_frequency

@@ -1,3 +1,5 @@
+import subprocess
+
 from .operation import Operation
 
 
@@ -15,7 +17,16 @@ class OperationQueue:
         self.add_operation(op)
 
     def execute(self):
+
+        while len(self.operations) > 0:
+            op = next(op for op in self.operations if op.is_ready)
+
+            subprocess.run([op.executable_path, ])
+
         print('Executing on {}'.format(self.resource))
+
+
+
 
 
 
