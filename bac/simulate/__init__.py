@@ -1,6 +1,5 @@
 from enum import Enum
 
-
-class Engine(Enum):
-    namd = 'namd'
-    gromacs = 'gromacs'
+from .coding import Encoder, Engine
+from .operation import OperationState, Operation
+from .operation_queue import OperationQueue
