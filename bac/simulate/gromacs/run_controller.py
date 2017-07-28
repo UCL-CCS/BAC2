@@ -1,3 +1,4 @@
+from copy import deepcopy
 from enum import Enum
 
 from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, file, back_referenced, positive_integer
@@ -147,19 +148,26 @@ class Run:
 
     @input.setter
     def input(self, md):
-        if isinstance(md, self.__class__) and md.output_name is not None:
+        if isinstance(md, self.__class__):
+            if md.output_name is None: raise ValueError('Output not defined')
             self.coordinates = md.output_name.with_suffix('.gro')
-            self.topology = md.output_name.with_suffix('.top')
-            self.velocities = md.output_name.with_suffix('.cpt')
+            self.topology = md.topology
+            self.velocities = md.output_name.with_suffix('.cpt') if md.constraints.continuation is True else None
         elif isinstance(md, namd.Run):
             raise NotImplementedError
         else:
             raise TypeError
 
-    def __str__(self):
-        from bac.simulate.coding import Encoder, Engine
-        return Encoder.encode(self, engine=Engine.gromacs)
+    def __iter__(self):
+        return self
 
+    def __next__(self):
+        next_run = deepcopy(self)
+        next_run.output_name = None
+        next_run.coordinates = self.output_name.with_suffix('.gro')
+        next_run.topology = self.topology
+        next_run.velocities = self.output_name.with_suffix('.cpt') if self.constraints.continuation is True else None
+        return next_run
 
 
 

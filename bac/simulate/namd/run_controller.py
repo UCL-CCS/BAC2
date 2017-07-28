@@ -127,6 +127,9 @@ class Run:
 
     # Output
 
+    @file
+    def output_name(self): pass
+
     @boolean(default=True)
     def binary_output(self): pass
 
