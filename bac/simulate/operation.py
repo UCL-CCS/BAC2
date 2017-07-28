@@ -1,6 +1,6 @@
 from copy import deepcopy
 from enum import Enum
-
+import uuid
 from bac.simulate import namd, gromacs
 
 
@@ -9,7 +9,7 @@ class OperationState(Enum):
     ready = 1
     executing = 2
     finished = 3
-    cancelled = 4
+    failed = 4
 
 
 class Operation:
@@ -39,17 +39,22 @@ class Operation:
 
     @property
     def execute_path(self):
-        path = []
+        args_list = []
+
         if isinstance(self.run, gromacs.Run):
-            path = ['gmx', 'grompp',
-                    '-f', 'input_file_name.mpd',
-                    '-c', str(self.run.coordinates),
-                    '-p', str(self.run.topology),
-                    '-o', str(self.run.output_name.with_suffix('.tpr'))]
+            args1 = ['gmx', 'grompp',
+                     '-f', '{}.mpd'.format(uuid.uuid4()),
+                     '-c', str(self.run.coordinates),
+                     '-p', str(self.run.topology),
+                     '-o', str(self.run.output_name.with_suffix('.tpr'))]
+            args1 += [ '-t', str(self.run.velocities)] if self.run.velocities is not None else []
 
-            path += ['gmx', 'mdrun', '-nt', 1, '-deffnm', str(self.run.output_name)]
+            args2 = ['gmx', 'mdrun', '-nt', 1, '-deffnm', str(self.run.output_name)]
 
-        elif isinstance(self, namd.Run):
-            pass
+            args_list = [args1, args2]
 
-        return path
+        elif isinstance(self.run, namd.Run):
+            args = ['namd2', 'input_file_name.conf', '>', self.run.output_name.with_suffix('.log')]
+            args_list = [args]
+
+        return args_list
