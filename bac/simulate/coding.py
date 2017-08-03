@@ -27,6 +27,8 @@ class Encoder:
         if isinstance(run, gromacs.Run): engine = Engine.gromacs
         elif isinstance(run, namd.Run): engine = Engine.namd
 
+        path = path if path.suffix == '.mdp' else path / run.name.with_suffix('.mdp')
+
         def serialize(obj, attributes):
             serial = ''
             for external_name, internals in attributes.items():

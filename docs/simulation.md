@@ -24,8 +24,6 @@ the first instance, and modify some parameter and the input/output. *__Note__: I
 ```python
 import copy
 import bac.simulate.namd as namd
-from bac.simulate.operation_queue import OperationQueue
-from bac.simulate.operation import Operation
 
 annealing = namd.Run(temperature=300.0)
 annealing.temperature_controller.langevin = namd.LangevinDynamics(damping=0.4)
@@ -38,7 +36,7 @@ equilibrate = copy.deepcopy(annealing)
 equilibrate.temperature = 310.0
 
 # This sets all the input file paths to the output paths of the
-# pervious md simulation.
+simulations
 equilibrate.input = annealing
 
 
