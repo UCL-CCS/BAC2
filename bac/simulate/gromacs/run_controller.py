@@ -1,5 +1,6 @@
 from copy import deepcopy
 from enum import Enum
+import uuid
 
 from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, file, back_referenced, positive_integer
 from bac.simulate.gromacs.temperature_controller import TemperatureController
@@ -7,8 +8,7 @@ from bac.simulate.gromacs.pressure_controller import PressureController
 from bac.simulate.gromacs.non_bonded_controller import NonBondedController
 from bac.simulate.gromacs.constraint_controller import ConstraintController
 
-
-from bac.simulate import namd
+from bac.simulate.simulation import Simulation
 
 
 class Integrator(Enum):
@@ -31,15 +31,22 @@ class CenterOfMassMotion(Enum):
     none = 'None'
 
 
-class Run:
+class Run(Simulation):
 
     def __init__(self, **kwargs):
+
+        # Required controllers
 
         self.temperature_controller = TemperatureController()
         self.pressure_controller = PressureController()
         self.non_bonded_controller = NonBondedController()
         self.constraints = ConstraintController()
+
+        # Optional controllers
+
         self.free_energy_controller = None
+
+        # Main attributes
 
         self.integrator = kwargs.get('integrator')
         self.initial_time = kwargs.get('initial_time')
@@ -59,11 +66,12 @@ class Run:
         self.velocities = kwargs.get('velocities')
 
         self.output_name = kwargs.get('output_name')
+        self.name = kwargs.get('name')
 
-        self.minimization_tolerance = None
-        self.minimization_step_size = None
-        self.minimization_steepest_descent_frequency = None
-        self.minimization_correction_steps = None
+        self.minimization_tolerance = kwargs.get('minimization_tolerance')
+        self.minimization_step_size = kwargs.get('minimization_step_size')
+        self.minimization_steepest_descent_frequency = kwargs.get('minimization_steepest_descent_frequency')
+        self.minimization_correction_steps = kwargs.get('minimization_correction_steps')
 
     # Main components:
 
@@ -124,50 +132,47 @@ class Run:
     @positive_integer(default=10)
     def minimization_correction_steps(self): pass
 
-    @file
+    @file(validator=lambda x, _: x.suffix == '.gro')
     def coordinates(self): pass
 
-    @file
+    @file(validator=lambda x, _: x.exists())
     def topology(self): pass
 
     @file
     def velocities(self): pass
 
-    @file
+    @file(default=lambda s: s.name)
     def output_name(self): pass
 
-    @property
-    def input(self):
+    @file(default=lambda s: s.integrator.name)
+    def name(self): pass
 
-        paths = []
-        paths += self.velocities
-        paths += self.coordinates
-        paths += self.topology
+    def add_input_dependency(self, other_simulation):
+        super(Run, self).add_input_dependency(other_simulation)
 
-        return '\n'.join(paths)
-
-    @input.setter
-    def input(self, md):
-        if isinstance(md, self.__class__):
-            if md.output_name is None: raise ValueError('Output not defined')
-            self.coordinates = md.output_name.with_suffix('.gro')
-            self.topology = md.topology
-            self.velocities = md.output_name.with_suffix('.cpt') if md.constraints.continuation is True else None
-        elif isinstance(md, namd.Run):
-            raise NotImplementedError
-        else:
-            raise TypeError
-
-    def __iter__(self):
-        return self
+        self.coordinates = other_simulation.output_name.with_suffix('.gro')
+        self.topology = other_simulation.topology
+        self.velocities = other_simulation.output_name.with_suffix('.cpt') if other_simulation.constraints.continuation is True else None
 
     def __next__(self):
         next_run = deepcopy(self)
-        next_run.output_name = None
-        next_run.coordinates = self.output_name.with_suffix('.gro')
-        next_run.topology = self.topology
-        next_run.velocities = self.output_name.with_suffix('.cpt') if self.constraints.continuation is True else None
+        next_run.name, next_run.output_name = None, None
+        next_run.add_input_dependency(self)
         return next_run
+
+    @property
+    def executable_path(self):
+        args1 = ['gmx', 'grompp',
+                 '-f', str(self.name.with_suffix('.mdp')),
+                 '-c', str(self.coordinates),
+                 '-p', str(self.topology),
+                 '-o', str(self.output_name.with_suffix('.tpr'))]
+        args1 += ['-t', str(self.velocities)] if self.velocities is not None else []
+
+        args2 = ['gmx', 'mdrun', '-nt', 1, '-deffnm', str(self.output_name)]
+
+        return [args1, args2]
+
 
 
 
