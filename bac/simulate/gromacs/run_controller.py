@@ -132,7 +132,7 @@ class Run(Simulation):
     @positive_integer(default=10)
     def minimization_correction_steps(self): pass
 
-    @file(validator=lambda x, _: x.suffix == '.gro')
+    @file(validator=lambda x, _: x.suffix == '.gro', warn=True)
     def coordinates(self): pass
 
     @file(validator=lambda x, _: x.exists())

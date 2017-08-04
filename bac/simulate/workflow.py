@@ -1,8 +1,9 @@
 import subprocess
 import uuid
+import copy
 from pathlib import Path
 from itertools import product
-import copy
+import random
 from bac.simulate.coding import Encoder
 
 
@@ -10,11 +11,11 @@ class Workflow:
 
     def __init__(self, resource, name):
         self.resource = resource
-        self.name = name or str(uuid.uuid4())
-        self.path = Path(self.name)
+        self.path = Path(name + '_' + str(random.randint(1000, 9999)))
+
         self.simulations = []
         self._simulations = []
-        self.modifiers = []
+        self.ensembles = []
 
     def add_simulation(self, simulation):
         self.simulations.append(simulation)
@@ -31,24 +32,18 @@ class Workflow:
         print('Executing on {}'.format(self.resource))
 
     def preprocess_simulations(self):
-        for mods in product(*self.modifiers):
+        for *ensembles, simulation in product(*self.ensembles, self.simulations):
 
-            full_path = self.path
-            sims = copy.deepcopy(self.simulations)
+            sim = copy.deepcopy(simulation)
+            self._simulations.append(sim)
 
-            for mod in mods:
-                full_path = full_path / mod[1]
-                for sim in sims:
-                    mod[0](sim)
+            for ensemble in ensembles:
+                ensemble.modifier(sim)
 
-            full_path.mkdir(parents=True)
-            for sim in sims:
-                Encoder.encode(sim, full_path)
+            full_path = self.path.joinpath(*(ens.name for ens in ensembles))
+            full_path.mkdir(parents=True, exist_ok=True)
 
-                for p in sim.executable_path:
-                    print(' '.join(str(a) for a in p))
-
-            self._simulations += sims
+            Encoder.encode(sim, full_path)
 
     def __len__(self):
         return sum(1 if not x.is_finished else 0 for x in self._simulations)
