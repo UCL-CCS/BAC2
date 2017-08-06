@@ -30,7 +30,7 @@ class TiesWorkflow(Workflow):
         self.simulations = [eq1, eq2]
 
 if __name__ == '__main__':
-    # Some dude somewhere can then do this:
+    # One can then do this:
     # Files to top, coord etc. needs to be set, not shown here...
     import bac.protocols.ties as ti
     wf = TiesWorkflow(resource='lrz', name='test_run')
