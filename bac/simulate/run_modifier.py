@@ -4,23 +4,20 @@ from collections import namedtuple
 ensemble_descriptor = namedtuple('ensemble_descriptor', field_names=['name', 'modifier'])
 
 
-def lambda_window(iterable):
-    for ld in iterable:
+def lambda_window(arg):
+    if isinstance(arg, int):
+        arg = range(arg)
+    for ld in arg:
         name = "{}_{}".format("lambda", ld)
         yield ensemble_descriptor(name, foo(ld))
 
 
 def replica(arg):
-
     if isinstance(arg, int):
         arg = range(arg)
-
     for i in arg:
-        def f(run):
-            pass
-
+        def f(run): pass
         name = "{}_{}".format("replica", i)
-
         yield ensemble_descriptor(name, f)
 
 
