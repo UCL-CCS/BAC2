@@ -161,17 +161,28 @@ class Run(Simulation):
         return next_run
 
     @property
-    def executable_path(self):
-        args1 = ['gmx', 'grompp',
-                 '-f', str(self.name.with_suffix('.mdp')),
-                 '-c', str(self.coordinates),
-                 '-p', str(self.topology),
-                 '-o', str(self.output_name.with_suffix('.tpr'))]
-        args1 += ['-t', str(self.velocities)] if self.velocities is not None else []
+    def preprocess_executable(self):
 
-        args2 = ['gmx', 'mdrun', '-nt', 1, '-deffnm', str(self.output_name)]
+        return 'gmx grompp -f {} -c {} -p {} -o {} {}'.format(self.name.with_suffix('.mdp'),
+                                                              self.coordinates.absolute(),
+                                                              self.topology.absolute(),
+                                                              self.output_name.with_suffix('.tpr'),
+                                                              '-t' + str(self.velocities) if self.velocities else "")
 
-        return [args1, args2]
+    @property
+    def executable(self):
+        args = 'gmx mdrun -nt 1 -deffnm {}'.format(self.output_name)
+
+        return args
+
+    def restructure_paths_with_prefix(self, prefix):
+        if not self.coordinates.is_absolute():
+            self.coordinates = prefix/self.coordinates
+        if not self.topology.is_absolute():
+            self.topology = prefix/self.topology
+
+        if self.velocities and not self.velocities.is_absolute():
+            self.velocities = prefix/self.velocities
 
 
 

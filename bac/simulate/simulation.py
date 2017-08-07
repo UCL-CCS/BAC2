@@ -5,7 +5,12 @@ class Simulation(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def executable_path(self):
+    def executable(self):
+        return NotImplemented
+
+    @property
+    @abstractmethod
+    def preprocess_executable(self):
         return NotImplemented
 
     @abstractmethod
@@ -22,3 +27,6 @@ class Simulation(metaclass=ABCMeta):
 
     def is_ready(self):
         return self.dependency.is_finished
+
+    def restructure_paths_with_prefix(self, prefix):
+        return NotImplemented
