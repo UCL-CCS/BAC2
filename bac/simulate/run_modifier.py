@@ -9,7 +9,7 @@ def lambda_window(arg):
         arg = range(arg)
     for ld in arg:
         name = "{}_{}".format("lambda", ld)
-        yield ensemble_descriptor(name, foo(ld))
+        yield ensemble_descriptor(name, _foo(ld))
 
 
 def replica(arg):
@@ -21,7 +21,7 @@ def replica(arg):
         yield ensemble_descriptor(name, f)
 
 
-def foo(index):
+def _foo(index):
     def f(run):
         run.free_energy_controller.initial_lambda_state = index
     return f
