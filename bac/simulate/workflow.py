@@ -1,5 +1,4 @@
 import subprocess
-import uuid
 import copy
 from pathlib import Path
 from itertools import product
@@ -25,9 +24,9 @@ class Workflow:
         self.preprocess_simulations()
 
         while len(self):
-            op = next(op for op in self._simulations if op.is_ready)
+            sim = next(sim for sim in self._simulations if sim.is_ready)
 
-            subprocess.run(op.execute_path)
+            subprocess.run(sim.executable)
 
         print('Executing on {}'.format(self.resource))
 
@@ -40,19 +39,19 @@ class Workflow:
             for ensemble in ensembles:
                 ensemble.modifier(sim)
 
-            full_path = self.path.joinpath(*(ens.name for ens in ensembles))
-            full_path.mkdir(parents=True, exist_ok=True)
+            prefix = Path(*(ens.name for ens in ensembles))
+            self.path.joinpath(prefix).mkdir(parents=True, exist_ok=True)
 
-            sim.restructure_paths_with_prefix(prefix=full_path)
+            sim.restructure_paths_with_prefix(prefix=prefix)
 
-            Encoder.encode(sim, full_path)
+            Encoder.encode(sim, self.path)
 
             p = subprocess.run(sim.preprocess_executable, shell=True, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
-            # print(sim.preprocess_executable)
-            # print(p.stdout)
-            # if p.stderr: print(p.stderr)
-            # print()
+                               stderr=subprocess.PIPE, cwd=self.path)
+            print(sim.preprocess_executable)
+            print(p.stdout)
+            if p.stderr: print(p.stderr)
+            print()
 
     def __len__(self):
         return sum(1 if not x.is_finished else 0 for x in self._simulations)

@@ -26,7 +26,7 @@ class Simulation(metaclass=ABCMeta):
         self._dependency = v
 
     def is_ready(self):
-        return self.dependency.is_finished
+        return self.dependency.is_finished and self.state < State.running
 
     def restructure_paths_with_prefix(self, prefix):
         return NotImplemented
