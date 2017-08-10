@@ -160,22 +160,26 @@ class Run(Simulation):
         next_run.add_input_dependency(self)
         return next_run
 
+    """ These are tasks that run relatively fast.
+    """
     @property
     def preprocess_executable(self):
 
-        return 'gmx grompp -f {} -c {} -p {} -o {} {}'.format(self.name.with_suffix('.mdp'),
-                                                              self.coordinates.absolute(),
-                                                              self.topology.absolute(),
-                                                              self.output_name.with_suffix('.tpr'),
-                                                              '-t' + str(self.velocities) if self.velocities else "")
+        return 'gmx grompp -f {} -c {} -p {} -o {} -po {} {}'.\
+            format(self.name.with_suffix('.mdp'),
+                   self.coordinates,
+                   self.topology,
+                   self.output_name.with_suffix('.tpr'),
+                   self.name.with_name(self.name.name + '_generated').with_suffix('.mdp'),
+                   '-t' + str(self.velocities) if self.velocities else "")
 
     @property
     def executable(self):
-        args = 'gmx mdrun -nt 1 -deffnm {}'.format(self.output_name)
-
-        return args
+        return 'gmx mdrun -nt 1 -deffnm {}'.format(self.output_name)
 
     def restructure_paths_with_prefix(self, prefix):
+        if not self.name.is_absolute():
+            self.name = prefix/self.name
         if not self.coordinates.is_absolute():
             self.coordinates = prefix/self.coordinates
         if not self.topology.is_absolute():
