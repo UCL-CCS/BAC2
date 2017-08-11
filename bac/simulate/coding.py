@@ -43,7 +43,7 @@ class Encoder:
                 if isinstance(internals, str):
                     value = obj.__getattribute__(internals)
                     if value is not None:
-                        serial += "{}{}{}\n".format(external_name,' '*(cls._column_size-len(external_name)), value)
+                        serial += "{}{} = {}\n".format(external_name,' '*(cls._column_size-len(external_name)), value)
 
                 # The value is a list containing the name and encoding mechanism
                 # The list has to be [name, encoding] format. Nothing else works.
@@ -51,7 +51,7 @@ class Encoder:
                     value = obj.__getattribute__(internals[0])
                     if value is not None:
                         encoder = cls._encoders[internals[1]]
-                        serial += "{}{}{}\n".format(external_name, ' '*(cls._column_size-len(external_name)), encoder(value))
+                        serial += "{}{} = {}\n".format(external_name, ' '*(cls._column_size-len(external_name)), encoder(value))
 
                 # The value is a dictionary. Meaning that we have to go one level
                 # down in the hierarchy. This function is then called recursively on
@@ -62,7 +62,7 @@ class Encoder:
                     name_token = internals.pop('name_token', None)
                     if name_token is not None:
                         encoder = cls._encoders[name_token[1]]
-                        serial += "{}{}{}\n".format(name_token[0], ' '*(cls._column_size-len(name_token[0])), encoder(sub_obj is not None))
+                        serial += "{}{} = {}\n".format(name_token[0], ' '*(cls._column_size-len(name_token[0])), encoder(sub_obj is not None))
 
                     if sub_obj is not None:
                         serial += serialize(sub_obj, internals)
