@@ -2,7 +2,8 @@ from copy import deepcopy
 from enum import Enum
 import uuid
 
-from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, file, back_referenced, positive_integer
+from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, file, \
+    back_referenced, positive_integer, decimal
 from bac.simulate.gromacs.temperature_controller import TemperatureController
 from bac.simulate.gromacs.pressure_controller import PressureController
 from bac.simulate.gromacs.non_bonded_controller import NonBondedController
@@ -68,10 +69,26 @@ class Run(Simulation):
         self.output_name = kwargs.get('output_name')
         self.name = kwargs.get('name')
 
+        # Minimization
+
         self.minimization_tolerance = kwargs.get('minimization_tolerance')
         self.minimization_step_size = kwargs.get('minimization_step_size')
         self.minimization_steepest_descent_frequency = kwargs.get('minimization_steepest_descent_frequency')
         self.minimization_correction_steps = kwargs.get('minimization_correction_steps')
+
+        # Output
+
+        self.coordinate_output_frequency = kwargs.get('coordinate_output_frequency')
+        self.velocity_output_frequency = kwargs.get('velocity_output_frequency')
+        self.force_output_frequency = kwargs.get('force_output_frequency')
+        self.energy_log_output_frequency = kwargs.get('energy_log_output_frequency')
+        self.recalculate_energies_frequency = kwargs.get('recalculate_energies_frequency')
+        self.energy_output_frequency = kwargs.get('energy_output_frequency')
+        self.compressed_coordinate_output_frequency = kwargs.get('compressed_coordinate_output_frequency')
+        self.compression_precision = kwargs.get('compression_precision')
+        self.compressed_groups = kwargs.get('compressed_groups')
+
+
 
     # Main components:
 
@@ -187,6 +204,34 @@ class Run(Simulation):
 
         if self.velocities and not self.velocities.is_absolute():
             self.velocities = prefix/self.velocities
+
+    @integer(default=0)
+    def coordinate_output_frequency(self): pass
+
+    @integer(default=0)
+    def velocity_output_frequency(self): pass
+
+    @integer(default=0)
+    def force_output_frequency(self): pass
+
+    @integer(default=1000)
+    def energy_log_output_frequency(self): pass
+
+    @integer(default=100)
+    def recalculate_energies_frequency(self): pass
+
+    @integer(default=1000, validator=lambda x, s: x % s.recalculate_energies_frequency == 0)
+    def energy_output_frequency(self): pass
+
+    @integer(default=0)
+    def compressed_coordinate_output_frequency(self): pass
+
+    @decimal(default=1000)
+    def compression_precision(self): pass
+
+    @advanced_property(type=list, default=[])
+    def compressed_groups(self): pass
+
 
 
 

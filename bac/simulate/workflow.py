@@ -9,6 +9,11 @@ from bac.simulate.coding import Encoder
 class Workflow:
 
     def __init__(self, resource, name):
+        """
+
+        :param resource: The supercomputer the workflow will be run on.
+        :param name: The name of the workflow. Also the main directory name.
+        """
         self.resource = resource
         self.path = Path(name + '_' + str(random.randint(1000, 9999)))
 
@@ -17,6 +22,11 @@ class Workflow:
         self.ensembles = []
 
     def add_simulation(self, simulation):
+        """
+
+        :param simulation: a simulation instance to be added to the queue.
+
+        """
         self.simulations.append(simulation)
 
     def execute(self):
@@ -55,8 +65,6 @@ class Workflow:
 
     def __len__(self):
         return sum(1 if not x.is_finished else 0 for x in self._simulations)
-
-
 
 
 

@@ -19,7 +19,7 @@ class OutputEnergyType(Enum):
 class FreeEnergyController:
 
     def __init__(self, **kwargs):
-        self.expanded = kwargs.get('expanded')
+        # self.expanded = kwargs.get('expanded')
         self.initial_lambda = kwargs.get('initial_lambda')
         self.delta_lambda = kwargs.get('delta_lambda')
         self.initial_lambda_state = kwargs.get('initial_lambda_state')
@@ -50,8 +50,8 @@ class FreeEnergyController:
         self.output_histogram_size = kwargs.get('output_histogram_size')
         self.output_bin_size = kwargs.get('output_bin_size')
 
-    @boolean(default=False)
-    def expanded(self): pass
+    # @boolean(default=False)
+    # def expanded(self): pass
 
     @decimal(default=-1)
     def initial_lambda(self): pass
@@ -125,7 +125,7 @@ class FreeEnergyController:
     @boolean(default=True)
     def separate_output(self): pass
 
-    @decimal(default=0)
+    @integer(default=0)
     def output_histogram_size(self): pass
 
     @decimal(default=0.1)

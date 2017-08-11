@@ -4,6 +4,19 @@ from bac.utils.decorators import advanced_property, decimal, positive_integer, p
 
 
 class CutoffSchemeType(Enum):
+    """Neighbor search cutoff scheme
+
+    :param verlet: Generate a pair list with buffering. The buffer size is automatically set based on
+    verlet-buffer-tolerance, unless this is set to -1, in which case rlist will be used. This option
+    has an explicit, exact cut-off at rvdw equal to rcoulomb, unless PME or Ewald is used, in which
+    case rcoulomb > rvdw is allowed. Currently only cut-off, reaction-field, PME or Ewald electrostatics
+    and plain LJ are supported. Some gmx mdrun functionality is not yet supported with the Verlet scheme,
+    but gmx grompp checks for this. Native GPU acceleration is only supported with Verlet. With GPU-accelerated
+    PME or with separate PME ranks, gmx mdrun will automatically tune the CPU/GPU load balance by scaling rcoulomb
+    and the grid spacing. This can be turned off with mdrun -notunepme. Verlet is faster than group when there is
+    no water, or if group would use a pair-list buffer to conserve energy.
+    :param group:
+    """
     verlet = 'Verlet'
     group = 'group'
 
@@ -65,6 +78,16 @@ class LongRangeDispersionCorrectionType(Enum):
     energy_and_pressure = 'EnerPres'
 
 
+class EwaldCombinationType(Enum):
+    geometric = 'Geometric'
+    lorentz_berthelot = 'Lorentz-Berthelot'
+
+
+class EwaldGeometryType(Enum):
+    three_dimensions = '3d'
+    three_dimensions_corrected = '3dc'
+
+
 class NonBondedController:
 
     def __init__(self, **kwargs):
@@ -91,11 +114,26 @@ class NonBondedController:
         self.van_der_waals_cutoff = kwargs.get('van_der_waals_cutoff')
         self.correct_long_range_dispersion = kwargs.get('correct_long_range_dispersion')
 
+        self.fourier_spacing = kwargs.get('fourier_spacing')
+        self.fourier_magnitude_x = kwargs.get('fourier_magnitude_x')
+        self.fourier_magnitude_y = kwargs.get('fourier_magnitude_y')
+        self.fourier_magnitude_z = kwargs.get('fourier_magnitude_z')
+        self.pme_order = kwargs.get('pme_order')
+        self.ewald_tolerance_coulomb = kwargs.get('ewald_tolerance_coulomb')
+        self.ewald_tolerance_vdw = kwargs.get('ewald_tolerance_vdw')
+        self.ewald_combination_rule = kwargs.get('ewald_combination_rule')
+        self.ewald_geometry = kwargs.get('ewald_geometry')
+        self.ewald_epsilon_surface = kwargs.get('ewald_epsilon_surface')
+
     @positive_decimal(default=1.0)
     def cutoff(self): pass
 
     @advanced_property(type=CutoffSchemeType, default=CutoffSchemeType.verlet)
-    def cutoff_scheme(self): pass
+    def cutoff_scheme(self):
+        """ Cutoff scheme
+
+        """
+        pass
 
     @positive_integer(default=10)
     def neighbor_list_update_frequency(self): pass
@@ -144,3 +182,33 @@ class NonBondedController:
 
     @advanced_property(type=LongRangeDispersionCorrectionType, default=LongRangeDispersionCorrectionType.no)
     def correct_long_range_dispersion(self): pass
+
+    @decimal(default=0.12)
+    def fourier_spacing(self): pass
+
+    @positive_integer(default=0)
+    def fourier_magnitude_x(self): pass
+
+    @positive_integer(default=0)
+    def fourier_magnitude_y(self): pass
+
+    @positive_integer(default=0)
+    def fourier_magnitude_z(self): pass
+
+    @positive_integer(default=4, validator=lambda x, _: x in [4, 6, 8, 10])
+    def pme_order(self): pass
+
+    @positive_decimal(default=1e-5)
+    def ewald_tolerance_coulomb(self): pass
+
+    @positive_decimal(default=1e-3)
+    def ewald_tolerance_vdw(self): pass
+
+    @advanced_property(type=EwaldCombinationType, default=EwaldCombinationType.geometric)
+    def ewald_combination_rule(self): pass
+
+    @advanced_property(type=EwaldGeometryType, default=EwaldGeometryType.three_dimensions)
+    def ewald_geometry(self): pass
+
+    @decimal(default=0)
+    def ewald_epsilon_surface(self): pass
