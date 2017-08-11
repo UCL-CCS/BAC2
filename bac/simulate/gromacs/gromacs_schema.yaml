@@ -21,8 +21,20 @@ gen-vel:
 gen-temp: generate_temperature
 gen-seed: generate_seed
 
+nstxout: coordinate_output_frequency
+nstvout: velocity_output_frequency
+nstfout: force_output_frequency
+nstlog: energy_log_output_frequency
+nstcalcenergy: recalculate_energies_frequency
+nstenergy: energy_output_frequency
+nstxout-compressed: compressed_coordinate_output_frequency
+compressed-x-precision: compression_precision
+compressed-x-grps:
+  - compressed_groups
+  - iter
+
 temperature_controller:
-  tcouple:
+  tcoupl:
     - type
     - enum
   nsttcouple: frequency
@@ -96,6 +108,22 @@ non_bonded_controller:
     - correct_long_range_dispersion
     - enum
 
+  fourierspacing: fourier_spacing
+  fourier-nx: fourier_magnitude_x
+  fourier-ny: fourier_magnitude_y
+  fourier-nz: fourier_magnitude_z
+  pme-order: pme_order
+  ewald-rtol: ewald_tolerance_coulomb
+  ewald-rtol-lj: ewald_tolerance_vdw
+  lj-pme-comb-rule:
+    - ewald_combination_rule
+    - enum
+  ewald-geometry:
+    - ewald_geometry
+    - enum
+  epsilon-surface: ewald_epsilon_surface
+
+
 constraints:
   constraints:
     - type
@@ -118,9 +146,9 @@ free_energy_controller:
   name_token:
     - free-energy
     - yes_no
-  expanded: # FIX-ME: Incorrect! the presence of keyword indicates yes/no
-    - expanded
-    - yes_no
+#  expanded: # FIX-ME: Incorrect! the presence of keyword indicates yes/no
+#    - expanded
+#    - yes_no
   init-lambda: initial_lambda
   delta-lambda: delta_lambda
   init-lambda-state: initial_lambda_state

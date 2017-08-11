@@ -1,4 +1,22 @@
 from abc import ABCMeta, abstractmethod
+from enum import Enum
+
+
+class SimulationState(Enum):
+    pending = 0
+    ready = 1
+    executing = 2
+    finished = 3
+    cancelled = 4
+
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __lt__(self, other):
+        return self.value < other.value
+
+    def __le__(self, other):
+        return self.value <= other.value
 
 
 class Simulation(metaclass=ABCMeta):
@@ -26,7 +44,7 @@ class Simulation(metaclass=ABCMeta):
         self._dependency = v
 
     def is_ready(self):
-        return self.dependency.is_finished and self.state < State.running
+        return self.dependency.is_finished and self.state < SimulationState.executing
 
     def restructure_paths_with_prefix(self, prefix):
         return NotImplemented
