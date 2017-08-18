@@ -54,7 +54,14 @@ class FreeEnergyController:
     # def expanded(self): pass
 
     @decimal(default=-1)
-    def initial_lambda(self): pass
+    def initial_lambda(self):
+        """
+        Initial value of lambda variable.
+        Returns
+        -------
+
+        """
+        pass
 
     @decimal(default=0)
     def delta_lambda(self): pass

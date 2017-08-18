@@ -4,6 +4,7 @@ from pathlib import Path
 from itertools import product
 import random
 from bac.simulate.coding import Encoder
+from bac.simulate.simulation import Simulation
 
 
 class Workflow:
@@ -11,9 +12,29 @@ class Workflow:
     def __init__(self, resource, name):
         """
 
-        :param resource: The supercomputer the workflow will be run on.
-        :param name: The name of the workflow. Also the main directory name.
+        Parameters
+        ----------
+        resource: str
+            The supercomputer the workflow will run on.
+        name: str
+            The name of the simulation. This will be the master folder name too.
+
+        Attributes
+        ----------
+        simulations: list
+            The list of simulations in the workflow. This is generic and not dependent
+            on the ensembles. The actual simulation list, which is for all ensembles
+            is generated at `execute` time.
+        ensembles: list
+            A list of ensemble mechanism used to duplicated the simulations.
+
+        Methods
+        -------
+
+
         """
+
+
         self.resource = resource
         self.path = Path(name + '_' + str(random.randint(1000, 9999)))
 
@@ -21,10 +42,15 @@ class Workflow:
         self._simulations = []
         self.ensembles = []
 
-    def add_simulation(self, simulation):
+    def add_simulation(self, simulation: Simulation):
         """
 
-        :param simulation: a simulation instance to be added to the queue.
+        Parameters
+        ----------
+        simulation: Simulation
+
+        Returns
+        -------
 
         """
         self.simulations.append(simulation)
@@ -41,6 +67,9 @@ class Workflow:
         print('Executing on {}'.format(self.resource))
 
     def preprocess_simulations(self):
+        """Run pre-processing tasks for the simulations.
+
+        """
         for *ensembles, simulation in product(*self.ensembles, self.simulations):
 
             sim = copy.deepcopy(simulation)
