@@ -64,7 +64,15 @@ class FreeEnergyController:
         pass
 
     @decimal(default=0)
-    def delta_lambda(self): pass
+    def delta_lambda(self):
+        """
+        Difference between two consecutive lambda windows.
+        
+        Returns
+        -------
+
+        """
+        pass
 
     @integer(default=-1)
     def initial_lambda_state(self): pass
