@@ -1,0 +1,284 @@
+# Attributes of main `Run()`
+
+numsteps: number_of_steps
+timestep: null
+firsttimestep: first_timestep
+
+temperature: null
+velocities: null
+binvelocities: binary_velocities
+
+coordinates: null
+bincoordinates: binary_coordinates
+
+parameters: null
+
+outputname: output_name
+binaryoutput:
+  - binary_output
+  - yes_no
+restartfreq: restart_frequency
+dcdfreq: dcd_frequency
+dcdunitcell:
+  - dcd_unit_cell
+  - yes_no
+
+### Forcefield specific parameters
+amber:
+  - amber
+  - yes_no
+
+readexclusions:
+  - read_exclusions
+  - yes_no
+
+scnb:
+
+structure:
+paraTypeXplor:
+  - parameter_type_XPLOR
+  - on_off
+paraTypeCharmm:
+  - parameter_type_CHARMM
+  - on_off
+
+gromacs:
+
+## `NonBondedController()` attributes
+non_bonded_controller:
+  cutoff:
+  switching:
+    - switching
+    - on_off
+  switchdist: switching_distance
+  vdwForceSwitching:
+    - vdw_force_switching
+    - on_off
+  exclude:
+    - excluded_interactions
+    - enum
+  1-4scaling: one_four_scaling
+  dielectric: dielectric_constant
+  nonbondedScaling: non_bonded_scaling
+  vdwGeometricSigma: vdw_geometric_sigma
+  limitdist: limit_distance
+  LJcorrection: LJ_correction
+
+  nonbondedFreq: non_bonded_frequency
+  fullElectFrequency: full_elect_frequency
+  MTSAlgorithm:
+    - mts_algorithm
+    - enum
+  longSplitting:
+    - long_splitting
+    - enum
+
+  pairlistdist: pairlist_distance
+  stepspercycle: steps_per_cycle
+  splitPatch:
+    - split_patch
+    - enum
+  hgroupCutoff: hgroup_cutoff
+  margin:
+  pairlistMinProcs: pairlist_min_processors
+  pairlistsPerCycle: pairlists_per_cycle
+  outputPairlists: output_pairlists
+  pairlistShrink: pairlist_shrink
+  pairlistGrow: pairlist_grow
+  pairlistTrigger: pairlist_trigger
+
+  pme:
+    name_token:
+      - PME
+      - yes_no
+    PMETolerance: tolerance
+    PMEInterpOrder: interpolation_order
+    PMEGridSpacing: grid_spacing
+
+  molly:
+    name_token:
+      - molly
+      - on_off
+    mollyTolerance: tolerance
+    mollyIterations: iterations
+
+boundary_condition:
+  cellBasisVector1:
+    - cell_basis_vector_1
+    - iter
+  cellBasisVector2:
+    - cell_basis_vector_2
+    - iter
+  cellBasisVector3:
+    - cell_basis_vector_3
+    - iter
+  cellOrigin:
+    - cell_origin
+    - iter
+  extendedSystem: extended_system
+  XSTfile: xst_file
+  XSTfreq: xst_frequency
+  wrapWater:
+    - wrap_water
+    - on_off
+  wrapAll:
+    - wrap_all
+    - on_off
+  wrapNearest:
+    - wrap_nearest
+    - on_off
+
+constraints:
+  extraBondsFile: extra_bonds
+  bond_constraint:
+    rigidBonds:
+      - bonds
+      - enum
+    rigidTolerance: tolerance
+    rigidIterations: iterations
+    rigidDieOnError:
+      - die_on_error
+      - on_off
+    useSettle:
+      - use_settle
+      - on_off
+  harmonic_constraint:
+      name_token:
+        - constraints
+        - on_off
+      consexp: exponent
+      consref: reference_position_file
+      conskfile: force_constant_file
+      conskcol:
+        - force_constant_column
+        - enum
+      constraintScaling: scaling
+      selectConstraints:
+        - select_constraints
+        - on_off
+      selectConstrX:
+        - select_constraints_x
+        - on_off
+      selectConstrY:
+        - select_constraints_y
+        - on_off
+      selectConstrZ:
+        - select_constraints_z
+        - on_off
+  atom_constraint:
+    name_token:
+      - fixedAtoms
+      - on_off
+    fixedAtomsForces:
+      - calculated_fixed_atom_forces
+      - on_off
+    fixedAtomsFile: file
+    fixedAtomsCol:
+      - column
+      - enum
+
+## `TemperatureController()` attributes
+temperature_controller:
+  langevin:
+    name_token:
+      - langevin
+      - on_off
+    langevinTemp: temperature
+    langevinDamping: damping
+    langevinHydrogen:
+      - applies_to_hydrogen
+      - on_off
+    langevinFile: file
+    langevinCol:
+      - column
+      - enum
+  coupling:
+    name_token:
+      - tCouple
+      - on_off
+    tCoupleTemp: temperature
+    tCoupleFile: file
+    tCoupleCol:
+      - column
+      - enum
+  rescale:
+    rescaleFreq: frequency
+    rescaleTemp: temperature
+  reassign:
+    reassignFreq: frequency
+    reassignTemp: temperature
+    reassignIncr: increment
+    reassignHold: hold_at
+  lowe_andersen:
+    name_token:
+      - loweAndersen
+      - on_off
+    loweAndersenTemp: temperature
+    loweAndersenCutoff: cutoff
+    loweAndersenRate: rate
+
+## `PressureController()` attributes
+pressure_controller:
+  useGroupPressure:
+    - use_group_pressure
+    - yes_no
+  useFlexibleCell:
+    - use_flexible_cell
+    - yes_no
+  useConstantRatio:
+    - use_constant_ratio
+    - yes_no
+  useConstantArea:
+    - use_constant_area
+    - yes_no
+  berendsen:
+    name_token:
+      - BerendsenPressure
+      - on_off
+    BerendsenPressureTarget: target
+    BerendsenPressureCompressibility: compressibility
+    BerendsenPressureRelaxationTime: relaxation_time
+    BerendsenPressureFreq: frequency
+  langevin:
+    name_token:
+      - LangevinPiston
+      - on_off
+    LangevinPistonTarget: target
+    LangevinPistonPeriod: period
+    LangevinPistonDecay: decay
+    LangevinPistonTemp: temperature
+    SurfaceTensionTarget: surface_tension_target
+    ExcludeFromPressure:
+      - exclude_from_pressure
+      - on_off
+    ExcludeFromPressureFile: exclude_from_pressure_file
+    ExcludeFromPressureCol:
+      - exclude_from_pressure_column
+      - enum
+
+free_energy_controller:
+  name_token:
+    - alch
+    - on_off
+  alchType:
+    - type
+    - enum
+  alchLambda: start_lambda
+  alchLambda2: end_lambda
+  alchEquilSteps: equilibration_steps
+  alchFile: file
+  alchCol:
+    - column
+    - enum
+  alchOutFreq: output_frequency
+  alchOutFile: output_name
+  alchVdwShiftCoeff: van_der_waals_shift_coefficient
+  alchElecLambdaStart: electronic_interaction_start_lambda
+  alchVdwLambdaEnd: van_der_waals_end_lambda
+  alchBondLambdaEnd: bonded_interaction_end_lambda
+  alchBondDecouple:
+    - bond_decoupling
+    - on_off
+  alchDecouple:
+    - decouple
+    - on_off
