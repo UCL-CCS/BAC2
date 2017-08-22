@@ -139,7 +139,36 @@ class boolean(advanced_property):
     def __init__(self, *args, **kwargs):
         super(boolean, self).__init__(type=bool, *args, **kwargs)
 
+
 class back_referenced(property):
+    """Decorator for attributes that reference their owner.
+
+    The decorated object has a property called `run` that references back to the
+    main `Run` object. This is important for example when validators have to access
+    properties from other parts of the object tree.
+
+    Examples
+    --------
+
+    @back_referenced
+    def pressure_controller(self): pass
+
+    # Then in the class definition access self.run:
+
+    class PressureController:
+
+        @decimal(validator:lambda x, s: x < s.run.pressure)
+        def pressure(self): pass
+
+    Notes
+    -----
+
+    If you set an @back_referenced property that already has another container
+    then the object is copied before it is set as the @back_referenced. This
+    means that you can only access it from the main class' property. If this
+    happens a warning is issued.
+
+    """
     def __init__(self, f):
         self.f = f
         super(back_referenced, self).__init__(fget=self._fget, fset=self._fset)
