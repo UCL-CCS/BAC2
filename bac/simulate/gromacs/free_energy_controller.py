@@ -50,6 +50,7 @@ class FreeEnergyController:
         self.output_histogram_size = kwargs.get('output_histogram_size')
         self.output_bin_size = kwargs.get('output_bin_size')
 
+    # Gromacs grompp says this is not a valid keyword or something...
     # @boolean(default=False)
     # def expanded(self): pass
 
