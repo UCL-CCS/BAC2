@@ -19,7 +19,7 @@ class SimulationState(Enum):
         return self.value <= other.value
 
 
-class Simulation(metaclass=ABCMeta):
+class Simulation(Versioned, metaclass=ABCMeta):
 
     @property
     @abstractmethod

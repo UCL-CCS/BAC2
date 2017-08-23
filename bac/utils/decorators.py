@@ -5,14 +5,17 @@ import copy
 from bac.utils.pdb import PDBColumn
 import warnings
 
+from .versioned import Versioned
 
-class advanced_property(property):
+
+class advanced_property(property, Versioned):
     def __init__(self, *args, **kwargs):
 
         self._default = kwargs.get('default')
         self.type = kwargs.get('type')
         self.validator = kwargs.get('validator')
         self.warning_only = kwargs.get('warn', False)
+        self.version = kwargs.get('available')
 
         self.f = args[0] if args else None
 
@@ -23,6 +26,9 @@ class advanced_property(property):
         return self
 
     def _fget(self, obj):
+
+        self.version_check(obj)
+
         try:
             v = obj.__getattribute__(self.private_name)
         except AttributeError:
@@ -33,6 +39,8 @@ class advanced_property(property):
             return None
 
     def _fset(self, obj, value):
+        self.version_check(obj)
+
         if value is None:
             obj.__setattr__(self.private_name, None)
         elif isinstance(value, self.type):
@@ -102,6 +110,10 @@ class advanced_property(property):
         argument_count = value.__code__.co_argcount if value.__code__.co_argcount > 0 else None
         self._validator = lambda *a: new_validator(*a[:argument_count])
 
+    def version_check(self, obj):
+        if isinstance(obj, Versioned) and self.version is not None and obj.version is not None:
+            if self.version > obj.version:
+                warnings.warn('This is not supported on current version!', Warning)
 
 class file(advanced_property):
     def __init__(self, *args, **kwargs):
