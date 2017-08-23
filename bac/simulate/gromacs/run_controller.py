@@ -2,15 +2,20 @@ from copy import deepcopy
 from enum import Enum
 import uuid
 
-from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, file, \
-    back_referenced, positive_integer, decimal
 from distutils.version import StrictVersion
+
+from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, file, positive_integer, decimal
 from bac.simulate.gromacs.temperature_controller import TemperatureController
 from bac.simulate.gromacs.pressure_controller import PressureController
 from bac.simulate.gromacs.non_bonded_controller import NonBondedController
 from bac.simulate.gromacs.constraint_controller import ConstraintController
 
 from bac.simulate.simulation import Simulation
+
+
+class Engine(Enum):
+    namd = 'namd'
+    gromacs = 'gromacs'
 
 
 class Integrator(Enum):
@@ -45,8 +50,6 @@ class Run(Simulation):
         self.constraints = ConstraintController()
 
         # Optional controllers
-
-        self.free_energy_controller = None
 
         # Main attributes
 
@@ -89,26 +92,12 @@ class Run(Simulation):
         self.compression_precision = kwargs.get('compression_precision')
         self.compressed_groups = kwargs.get('compressed_groups')
 
+        self.version = '5.0.1'
 
-
-    # Main components:
-
-    @back_referenced
-    def temperature_controller(self): pass
-
-    @back_referenced
-    def pressure_controller(self): pass
-
-    @back_referenced
-    def non_bonded_controller(self): pass
-
-    @back_referenced
-    def constraints(self): pass
-
-    @advanced_property(type=Integrator, default=Integrator.md)
+    @advanced_property(type=Integrator, default=Integrator.md, available='5.0')
     def integrator(self): pass
 
-    @positive_decimal(default=0)
+    @positive_decimal(default=0, available='5.0')
     def initial_time(self): pass
 
     @positive_decimal(default=0.001)
@@ -233,6 +222,13 @@ class Run(Simulation):
     @advanced_property(type=list, default=[])
     def compressed_groups(self): pass
 
+    @property
+    def configuration_file_suffix(self):
+        return ".mdp"
+
+    @property
+    def engine_type(self):
+        return Engine.gromacs
 
 
 
