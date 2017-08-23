@@ -1,6 +1,13 @@
 from abc import ABCMeta, abstractmethod
 from enum import Enum
 
+from bac.utils.decorators import back_referenced
+from bac.utils.versioned import Versioned
+
+class Engine(Enum):
+    namd = 'namd'
+    gromacs = 'gromacs'
+
 
 class SimulationState(Enum):
     pending = 0
@@ -48,3 +55,29 @@ class Simulation(Versioned, metaclass=ABCMeta):
 
     def restructure_paths_with_prefix(self, prefix):
         return NotImplemented
+
+    @property
+    @abstractmethod
+    def engine_type(self) -> Engine:
+        return NotImplemented
+
+    @property
+    @abstractmethod
+    def configuration_file_suffix(self):
+        return NotImplemented
+
+    @back_referenced
+    def temperature_controller(self): pass
+
+    @back_referenced
+    def pressure_controller(self): pass
+
+    @back_referenced
+    def non_bonded_controller(self): pass
+
+    @back_referenced
+    def constraints(self): pass
+
+    @back_referenced
+    def free_energy_controller(self): pass
+
