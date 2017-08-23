@@ -2,8 +2,6 @@ from copy import deepcopy
 from enum import Enum
 import uuid
 
-from distutils.version import StrictVersion
-
 from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, file, positive_integer, decimal
 from bac.simulate.gromacs.temperature_controller import TemperatureController
 from bac.simulate.gromacs.pressure_controller import PressureController
@@ -92,8 +90,6 @@ class Run(Simulation):
         self.compression_precision = kwargs.get('compression_precision')
         self.compressed_groups = kwargs.get('compressed_groups')
 
-        self.version = '5.0.1'
-
     @advanced_property(type=Integrator, default=Integrator.md, available='5.0')
     def integrator(self): pass
 
@@ -167,10 +163,21 @@ class Run(Simulation):
         next_run.add_input_dependency(self)
         return next_run
 
-    """ These are tasks that run relatively fast.
-    """
     @property
     def preprocess_executable(self):
+        """These are tasks that run relatively fast.
+
+        Returns
+        -------
+
+        String of the executable command that you would run in bash.
+
+        Examples
+        --------
+
+        'gmx grompp -f ...'
+
+        """
 
         return 'gmx grompp -f {} -c {} -p {} -o {} -po {} {}'.\
             format(self.name.with_suffix('.mdp'),

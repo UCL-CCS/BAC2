@@ -12,14 +12,14 @@ from bac.utils.decorators import (advanced_property, positive_decimal,
 
 from bac.simulate import gromacs
 
-import distutils.version
+from bac.simulate.simulation import Simulation
 
 class Engine(Enum):
     namd = 'namd'
     gromacs = 'gromacs'
 
 
-class Run:
+class Run(Simulation):
 
     def __init__(self, **kwargs):
         self.temperature_controller = TemperatureController()
@@ -232,6 +232,22 @@ class Run:
     @property
     def engine_type(self):
         return Engine.gromacs
+
+    @property
+    def executable(self):
+        return "namd2 {} > {}"
+
+    @property
+    def preprocess_executable(self):
+        return "null"
+
+    def add_input_dependency(self, other_simulation):
+        pass
+
+    def restructure_paths_with_prefix(self, prefix):
+        pass
+
+
 
 
 
