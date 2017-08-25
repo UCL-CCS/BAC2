@@ -4,6 +4,7 @@ from enum import Enum
 from bac.utils.decorators import back_referenced
 from bac.utils.versioned import Versioned
 
+
 class Engine(Enum):
     namd = 'namd'
     gromacs = 'gromacs'
@@ -39,7 +40,7 @@ class Simulation(Versioned, metaclass=ABCMeta):
         return NotImplemented
 
     @abstractmethod
-    def add_input_dependency(self, other_simulation):
+    def add_input_dependency(self, other_simulation: 'Simulation'):
         self.dependency = other_simulation
 
     @property
@@ -53,7 +54,7 @@ class Simulation(Versioned, metaclass=ABCMeta):
     def is_ready(self):
         return self.dependency.is_finished and self.state < SimulationState.executing
 
-    def restructure_paths_with_prefix(self, prefix):
+    def restructure_paths_with_prefix(self, prefix: str):
         return NotImplemented
 
     @property
