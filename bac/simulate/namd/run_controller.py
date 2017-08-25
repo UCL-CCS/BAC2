@@ -1,3 +1,5 @@
+from enum import Enum
+
 from bac.simulate.namd.temperature_controller import TemperatureController
 from bac.simulate.namd.pressure_controller import PressureController
 from bac.simulate.namd.non_bonded_controller import NonBondedController
@@ -10,8 +12,14 @@ from bac.utils.decorators import (advanced_property, positive_decimal,
 
 from bac.simulate import gromacs
 
+from bac.simulate.simulation import Simulation
 
-class Run:
+class Engine(Enum):
+    namd = 'namd'
+    gromacs = 'gromacs'
+
+
+class Run(Simulation):
 
     def __init__(self, **kwargs):
         self.temperature_controller = TemperatureController()
@@ -19,7 +27,6 @@ class Run:
         self.non_bonded_controller = NonBondedController()
         self.constraints = ConstraintController()
         self.boundary_condition = PeriodicBoundaryCondition()
-        self.free_energy_controller = None
 
         # DYNAMICS
 
@@ -40,6 +47,7 @@ class Run:
 
         # OUTPUT
 
+        self.name = kwargs.get('name')
         self.output_name = kwargs.get('output_name')
         self.binary_output = kwargs.get('binary_output')
         self.restart_name = kwargs.get('restart_name')
@@ -76,20 +84,6 @@ class Run:
         # GROMACS
 
         self.gromacs = kwargs.get('gromacs')
-
-    # Main components:
-
-    @back_referenced
-    def temperature_controller(self): pass
-
-    @back_referenced
-    def pressure_controller(self): pass
-
-    @back_referenced
-    def non_bonded_controller(self): pass
-
-    @back_referenced
-    def constraints(self): pass
 
     @back_referenced
     def boundary_condition(self): pass
@@ -128,6 +122,9 @@ class Run:
     # Output
 
     @file
+    def name(self): pass
+
+    @file(default=lambda self: self.name)
     def output_name(self): pass
 
     @boolean(default=True)
@@ -228,9 +225,29 @@ class Run:
         else:
             raise TypeError
 
-    def __str__(self):
-        from bac.simulate.coding import Encoder, Engine
-        return Encoder.encode(self, engine=Engine.namd)
+    @property
+    def configuration_file_suffix(self):
+        return ".conf"
+
+    @property
+    def engine_type(self):
+        return Engine.gromacs
+
+    @property
+    def executable(self):
+        return "namd2 {} > {}"
+
+    @property
+    def preprocess_executable(self):
+        return "null"
+
+    def add_input_dependency(self, other_simulation):
+        pass
+
+    def restructure_paths_with_prefix(self, prefix):
+        pass
+
+
 
 
 

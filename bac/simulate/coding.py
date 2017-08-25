@@ -1,6 +1,7 @@
 from enum import Enum
 import yaml
-from bac.simulate import gromacs, namd
+
+from .simulation import Simulation
 
 
 class Engine(Enum):
@@ -22,13 +23,8 @@ class Encoder:
     _column_size = 25
 
     @classmethod
-    def encode(cls, run, path):
-
-        if isinstance(run, gromacs.Run): engine = Engine.gromacs
-        elif isinstance(run, namd.Run): engine = Engine.namd
-        else: raise TypeError('Invalid engine type.')
-
-        path = path if path.suffix == '.mdp' else path / run.name.with_suffix('.mdp')
+    def encode(cls, run: Simulation, path):
+        path = path if path.suffix == run.configuration_file_suffix else path / run.name.with_suffix(run.configuration_file_suffix)
 
         def serialize(obj, attributes):
             serial = ''
@@ -51,7 +47,8 @@ class Encoder:
                     value = obj.__getattribute__(internals[0])
                     if value is not None:
                         encoder = cls._encoders[internals[1]]
-                        serial += "{}{} = {}\n".format(external_name, ' '*(cls._column_size-len(external_name)), encoder(value))
+                        serial += "{}{} = {}\n".format(external_name, ' '*(cls._column_size-len(external_name)),
+                                                       encoder(value))
 
                 # The value is a dictionary. Meaning that we have to go one level
                 # down in the hierarchy. This function is then called recursively on
@@ -62,18 +59,19 @@ class Encoder:
                     name_token = internals.pop('name_token', None)
                     if name_token is not None:
                         encoder = cls._encoders[name_token[1]]
-                        serial += "{}{} = {}\n".format(name_token[0], ' '*(cls._column_size-len(name_token[0])), encoder(sub_obj is not None))
+                        serial += "{}{} = {}\n".format(name_token[0], ' '*(cls._column_size-len(name_token[0])),
+                                                       encoder(sub_obj is not None))
 
                     if sub_obj is not None:
                         serial += serialize(sub_obj, internals)
             return serial+'\n'
 
         with open(path, mode='w') as conf:
-            conf.write(serialize(run, cls._schema(engine)))
+            conf.write(serialize(run, cls._schema(run.engine_type)))
 
-    # FIXME: setuptools
+    # FIXME: setuptools for resource (yaml) allocation.
     @staticmethod
-    def _schema(engine):
+    def _schema(engine: Engine):
         if engine is Engine.namd:
             return yaml.load(open('/Users/kristofarkas/Developer/BAC2/bac/simulate/namd/namd_schema.yaml'))
         elif engine is Engine.gromacs:
