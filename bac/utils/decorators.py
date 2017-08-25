@@ -16,8 +16,46 @@ class advanced_property(property, Versioned):
     validating it. If the value is set to None, then the getter *will* return the default. **In summary** you
     do not have to do any of the implementation! It **is** enough to ```def property_name(self): pass```.
 
+
+    Examples
+    --------
+
+
     """
     def __init__(self, *args, **kwargs):
+        """
+
+        Parameters
+        ----------
+        default
+            The default value for the property. Can be a lambda function too. Self is passed at the only
+            parameter of the lambda function to evaluate more complex default values.
+        type: Union[type, Tuple(type)]
+            Possible types that property can be set to. **Important**: if more than one (1) type is set,
+            then the first one will be the major, and this first one *must* be instantiatable from the
+            other types.
+        validator: lambda value, object -> bool
+            This is a function that return a Bool representing wether the value is valid. Note that the object
+            is passed to the function too, so one can make more complicated validation based on the state of the
+            object.
+        warn : bool
+            If the validation fails, should it cause a warning or raise an Exception.
+            Default: False
+        available: StrictVersion
+            The minimum version number that this property is supported on.
+
+        Examples
+        --------
+
+        @advanced_property(type=(float, int), default=0.01, validator=lambda x, _: x >= 0, warn=True, available('5.0')
+        def velocity(self): pass
+
+        The property called `velocity` can be set as an float or int. Because float is the first in the list of types
+        even is `self.velocity=2` is run `self.velocity` will return 2.0. Validator just checks non-negativeness. The
+        system will only warn the user about a negative values, but will still set the property.
+
+
+        """
 
         self._default = kwargs.get('default')
         self.type = kwargs.get('type')
