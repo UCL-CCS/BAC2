@@ -9,6 +9,14 @@ from .versioned import Versioned
 
 
 class advanced_property(property, Versioned):
+    """ A `property` subclass with bells and whistles.
+
+    This is a rather specific (yet common) implementation of the property mechanism. The getter return the
+    _<property name> or the default if that is None. The setter sets _<property name> to the value after
+    validating it. If the value is set to None, then the getter *will* return the default. **In summary** you
+    do not have to do any of the implementation! It **is** enough to ```def property_name(self): pass```.
+
+    """
     def __init__(self, *args, **kwargs):
 
         self._default = kwargs.get('default')
