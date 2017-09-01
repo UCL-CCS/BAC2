@@ -10,7 +10,6 @@ from bac.simulate.gromacs.constraint_controller import ConstraintController
 
 from bac.simulate.simulation import Simulation
 
-
 class Engine(Enum):
     namd = 'namd'
     gromacs = 'gromacs'
@@ -34,6 +33,13 @@ class CenterOfMassMotion(Enum):
     linear = 'Linear'
     angular = 'Angular'
     none = 'None'
+
+    @classmethod
+    def _missing_(cls, value):
+        if value is None:
+            return cls.none
+        else:
+            super()._missing_(value)
 
 
 class Run(Simulation):
@@ -105,7 +111,7 @@ class Run(Simulation):
     @integer(default=0)
     def initial_step(self): pass
 
-    @advanced_property(type=CenterOfMassMotion, default=CenterOfMassMotion.linear)
+    @advanced_property(type=(CenterOfMassMotion, type(None), str), default=CenterOfMassMotion.linear)
     def center_of_mass_motion(self): pass
 
     @integer(default=100)
@@ -236,10 +242,3 @@ class Run(Simulation):
     @property
     def engine_type(self):
         return Engine.gromacs
-
-
-
-
-
-
-

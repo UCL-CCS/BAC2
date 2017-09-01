@@ -25,6 +25,13 @@ class TemperatureCouplingType(Enum):
     andersen_massive = 'andersen-massive'
     velocity_rescale = 'v-rescale'
 
+    @classmethod
+    def _missing_(cls, value):
+        if value is False:
+            return cls.no
+        else:
+            super()._missing_(value)
+
 
 class TemperatureController:
     def __init__(self, **kwargs):
@@ -49,13 +56,13 @@ class TemperatureController:
     @advanced_property(type=TemperatureCouplingType, default=TemperatureCouplingType.no)
     def type(self): pass
 
-    def frequency_default(self):
+    def _frequency_default(self):
         if self.run.integrator in (Integrator.md_vv,Integrator.md_vv_avek):
             return 1
         else:
             return self.run.non_bonded_controller.nstlist if self.run.non_bonded_controller.nstlist > 0 else 10
 
-    @integer(default=frequency_default)
+    @integer(default=_frequency_default)
     def frequency(self): pass
 
     @integer(default=10, validator=lambda v, o: (v == 1) if (o.run.integrator is Integrator.md) else True)
@@ -69,5 +76,3 @@ class TemperatureController:
 
     @advanced_property(type=list, default=[], validator=lambda x, s: len(x) == len(s.groups))
     def temperature(self): pass
-
-

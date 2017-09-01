@@ -9,11 +9,25 @@ class CouplingType(Enum):
     coulomb = 'q'
     none = 'none'
 
+    @classmethod
+    def _missing_(cls, value):
+        if value is None:
+            return cls.no
+        else:
+            super()._missing_(value)
+
 
 class OutputEnergyType(Enum):
     no = 'no'
     potential = 'potential'
     total = 'total'
+
+    @classmethod
+    def _missing_(cls, value):
+        if value is False:
+            return cls.no
+        else:
+            super()._missing_(value)
 
 
 class FreeEnergyController:
@@ -23,6 +37,7 @@ class FreeEnergyController:
         self.initial_lambda = kwargs.get('initial_lambda')
         self.delta_lambda = kwargs.get('delta_lambda')
         self.initial_lambda_state = kwargs.get('initial_lambda_state')
+
         self.fep_lambdas = kwargs.get('fep_lambdas')
         self.coulomb_lambdas = kwargs.get('coulomb_lambdas')
         self.van_der_waals_lambdas = kwargs.get('van_der_waals_lambdas')
@@ -68,7 +83,7 @@ class FreeEnergyController:
     def delta_lambda(self):
         """
         Difference between two consecutive lambda windows.
-        
+
         Returns
         -------
 
@@ -81,22 +96,22 @@ class FreeEnergyController:
     @advanced_property(type=list, default=[])
     def fep_lambdas(self): pass
 
-    @advanced_property(type=list, default=[])
+    @advanced_property(type=list, default=lambda self: self.fep_lambdas)
     def coulomb_lambdas(self): pass
 
-    @advanced_property(type=list, default=[])
+    @advanced_property(type=list, default=lambda self: self.fep_lambdas)
     def van_der_waals_lambdas(self): pass
 
-    @advanced_property(type=list, default=[])
+    @advanced_property(type=list, default=lambda self: self.fep_lambdas)
     def bonded_lambdas(self): pass
 
-    @advanced_property(type=list, default=[])
+    @advanced_property(type=list, default=lambda self: self.fep_lambdas)
     def restraint_lambdas(self): pass
 
-    @advanced_property(type=list, default=[])
+    @advanced_property(type=list, default=lambda self: self.fep_lambdas)
     def mass_lambdas(self): pass
 
-    @advanced_property(type=list, default=[])
+    @advanced_property(type=list, default=lambda self: self.fep_lambdas)
     def temperature_lambdas(self): pass
 
     @integer(default=1)
