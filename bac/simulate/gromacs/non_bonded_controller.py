@@ -31,6 +31,13 @@ class PeriodicBoundaryConditionType(Enum):
     xy = 'xy'
     no = 'no'
 
+    @classmethod
+    def _missing_(cls, value):
+        if value is False:
+            return cls.no
+        else:
+            super()._missing_(value)
+
 
 class CoulombType(Enum):
     cutoff = 'Cut-off'
@@ -54,6 +61,13 @@ class CoulombModifierType(Enum):
     potential_shift = 'Potential-shift'
     none = 'None'
 
+    @classmethod
+    def _missing_(cls, value):
+        if value is None:
+            return cls.none
+        else:
+            super()._missing_(value)
+
 
 class VanDerWaalsType(Enum):
     cutoff = 'Cut-off'
@@ -71,11 +85,25 @@ class VanDerWaalsModifierType(Enum):
     force_switch = 'Force-switch'
     potential_switch = 'Potential-switch'
 
+    @classmethod
+    def _missing_(cls, value):
+        if value is None:
+            return cls.none
+        else:
+            super()._missing_(value)
+
 
 class LongRangeDispersionCorrectionType(Enum):
     no = 'no'
     energy = 'Ener'
     energy_and_pressure = 'EnerPres'
+
+    @classmethod
+    def _missing_(cls, value):
+        if value is False:
+            return cls.no
+        else:
+            super()._missing_(value)
 
 
 class EwaldCombinationType(Enum):
@@ -128,7 +156,10 @@ class NonBondedController:
     @positive_decimal(default=1.0)
     def cutoff(self): pass
 
-    @advanced_property(type=CutoffSchemeType, default=CutoffSchemeType.verlet)
+    @advanced_property(type=CutoffSchemeType, default=CutoffSchemeType.verlet,
+                       validator=lambda x, _: x is CutoffSchemeType.verlet, warn=True,
+                       warning_message='`CutoffSchemeType.group` was the only cut-off treatment scheme '
+                                       'before version 4.6, and is deprecated in 5.0.')
     def cutoff_scheme(self):
         """ Cutoff scheme
 
@@ -141,7 +172,7 @@ class NonBondedController:
     @advanced_property(type=NeighborListType, default=NeighborListType.grid)
     def neighbor_list_type(self): pass
 
-    @advanced_property(type=PeriodicBoundaryConditionType, default=PeriodicBoundaryConditionType.xyz)
+    @advanced_property(type=(PeriodicBoundaryConditionType, bool, str), default=PeriodicBoundaryConditionType.xyz)
     def periodic_boundary_condition(self): pass
 
     @boolean(default=False)
@@ -153,7 +184,7 @@ class NonBondedController:
     @advanced_property(type=CoulombType, default=CoulombType.cutoff)
     def coulomb_type(self): pass
 
-    @advanced_property(type=CoulombModifierType, default=CoulombModifierType.potential_shift_verlet)
+    @advanced_property(type=(CoulombModifierType, type(None), str), default=CoulombModifierType.potential_shift_verlet)
     def coulomb_modifier(self): pass
 
     @decimal(default=0)
@@ -171,7 +202,8 @@ class NonBondedController:
     @advanced_property(type=VanDerWaalsType, default=VanDerWaalsType.cutoff)
     def van_der_waals_type(self): pass
 
-    @advanced_property(type=VanDerWaalsModifierType, default=VanDerWaalsModifierType.potential_shift_verlet)
+    @advanced_property(type=(VanDerWaalsModifierType, type(None), str),
+                       default=VanDerWaalsModifierType.potential_shift_verlet)
     def van_der_waals_modifier(self): pass
 
     @decimal(default=0)
@@ -180,7 +212,7 @@ class NonBondedController:
     @decimal(default=1)
     def van_der_waals_cutoff(self): pass
 
-    @advanced_property(type=LongRangeDispersionCorrectionType, default=LongRangeDispersionCorrectionType.no)
+    @advanced_property(type=(LongRangeDispersionCorrectionType, bool, str), default=LongRangeDispersionCorrectionType.no)
     def correct_long_range_dispersion(self): pass
 
     @decimal(default=0.12)

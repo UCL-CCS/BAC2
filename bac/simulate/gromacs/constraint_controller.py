@@ -10,6 +10,13 @@ class ConstraintType(Enum):
     h_angles = 'h-angles'
     all_angles = 'all-angles'
 
+    @classmethod
+    def _missing_(cls, value):
+        if value is None:
+            return cls.no
+        else:
+            super()._missing_(value)
+
 
 class ConstraintAlgorithmType(Enum):
     lincs = 'LINCS'
@@ -54,9 +61,3 @@ class ConstraintController:
 
     @boolean(default=False)
     def morse(self): pass
-
-
-
-
-
-

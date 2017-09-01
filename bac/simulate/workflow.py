@@ -6,8 +6,21 @@ import random
 from bac.simulate.coding import Encoder
 from bac.simulate.simulation import Simulation
 
+from typing import List
+
 
 class Workflow:
+    """
+
+    Attributes
+    ----------
+    simulations: list
+        The list of simulations in the workflow. This is generic and not dependent
+        on the ensembles. The actual simulation list, which is for all ensembles
+        is generated at `execute` time.
+    ensembles: list
+        A list of ensemble mechanism used to duplicated the simulations.
+    """
 
     def __init__(self, resource, name):
         """
@@ -19,27 +32,17 @@ class Workflow:
         name: str
             The name of the simulation. This will be the master folder name too.
 
-        Attributes
-        ----------
-        simulations: list
-            The list of simulations in the workflow. This is generic and not dependent
-            on the ensembles. The actual simulation list, which is for all ensembles
-            is generated at `execute` time.
-        ensembles: list
-            A list of ensemble mechanism used to duplicated the simulations.
-
         Methods
         -------
 
 
         """
 
-
         self.resource = resource
         self.path = Path(name + '_' + str(random.randint(1000, 9999)))
 
-        self.simulations = []
-        self._simulations = []
+        self.simulations: List[Simulation] = []
+        self._simulations: List[Simulation] = []
         self.ensembles = []
 
     def add_simulation(self, simulation: Simulation):
@@ -66,8 +69,14 @@ class Workflow:
 
         print('Executing on {}'.format(self.resource))
 
-    def preprocess_simulations(self):
+    def preprocess_simulations(self, execute=True):
         """Run pre-processing tasks for the simulations.
+
+        Parameters
+        ----------
+        execute: bool
+            Execute the preprocessing step on the shell. If `False` then the
+            executable is printed to stdout.
 
         """
         for *ensembles, simulation in product(*self.ensembles, self.simulations):
@@ -85,12 +94,11 @@ class Workflow:
 
             Encoder.encode(sim, self.path)
 
-            p = subprocess.run(sim.preprocess_executable, shell=True, stdout=subprocess.PIPE,
+            if execute:
+                subprocess.run(sim.preprocess_executable, shell=True, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, cwd=self.path)
-            print(sim.preprocess_executable)
-            print(p.stdout)
-            if p.stderr: print(p.stderr)
-            print()
+            else:
+                print(sim.preprocess_executable)
 
     def __len__(self):
         return sum(1 if not x.is_finished else 0 for x in self._simulations)

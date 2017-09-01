@@ -10,6 +10,9 @@ class Engine(Enum):
 
 
 class Encoder:
+    """Encoding functionality. Singleton-like.
+
+    """
 
     # These are simple lambda functions that turn
     # python types into specification correct
@@ -18,12 +21,23 @@ class Encoder:
     _encoders = {'yes_no': lambda x: ('no', 'yes')[x],
                  'on_off': lambda x: ('off', 'on')[x],
                  'enum': lambda x: x.value,
-                 'iter': lambda x: ' '.join(str(xs) for xs in x)}
+                 'iter': lambda x: ' '.join(str(xs) for xs in x),
+                 'two_digit_iter': lambda xs: ' '.join(f'{x:.2f}'for x in xs)}
 
     _column_size = 25
 
     @classmethod
     def encode(cls, run: Simulation, path):
+        """
+
+        Parameters
+        ----------
+        run
+            Simulation class
+        path: Path
+            Location of configuration file
+
+        """
         path = path if path.suffix == run.configuration_file_suffix else path / run.name.with_suffix(run.configuration_file_suffix)
 
         def serialize(obj, attributes):
@@ -67,7 +81,7 @@ class Encoder:
             return serial+'\n'
 
         with open(path, mode='w') as conf:
-            conf.write(serialize(run, cls._schema(run.engine_type)))
+            conf.write(serialize(run, cls._schema(Engine(run.engine_type.value))))
 
     # FIXME: setuptools for resource (yaml) allocation.
     @staticmethod

@@ -2,7 +2,9 @@ from distutils.version import StrictVersion
 
 
 class Versioned:
+    """Abstract base class for any class that can have a version number.
 
+    """
     @property
     def version(self):
         try:

@@ -154,25 +154,25 @@ free_energy_controller:
   init-lambda-state: initial_lambda_state
   fep-lambdas:
     - fep_lambdas
-    - iter
+    - two_digit_iter
   coul-lambdas:
     - coulomb_lambdas
-    - iter
+    - two_digit_iter
   vdw-lambdas:
     - van_der_waals_lambdas
-    - iter
+    - two_digit_iter
   bonded-lambdas:
     - bonded_lambdas
-    - iter
+    - two_digit_iter
   restraint-lambdas:
     - restraint_lambdas
-    - iter
+    - two_digit_iter
   mass-lambdas:
     - mass_lambdas
-    - iter
+    - two_digit_iter
   temperature-lambdas:
     - temperature_lambdas
-    - iter
+    - two_digit_iter
   calc-lambda-neighbors: calculate_lambda_neighbors
 
   sc-alpha: soft_core_alpha
