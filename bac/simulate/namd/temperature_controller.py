@@ -28,7 +28,7 @@ class LangevinDynamics:
     @positive_decimal
     def damping(self): pass
 
-    @file(default=lambda s: s.run.coordinates)
+    @file(default=lambda self: self.run.coordinates)
     def file(self): pass
 
     @column

@@ -61,6 +61,7 @@ class advanced_property(property, Versioned):
         self.type = kwargs.get('type')
         self.validator = kwargs.get('validator')
         self.warning_only = kwargs.get('warn', False)
+        self.warning_message = kwargs.get('warning_message')
         self.version = kwargs.get('available')
 
         self.f = args[0] if args else None
@@ -87,12 +88,12 @@ class advanced_property(property, Versioned):
     def _fset(self, obj, value):
         self.version_check(obj)
 
-        if value is None:
-            obj.__setattr__(self.private_name, None)
-        elif isinstance(value, self.type):
+        if isinstance(value, self.type):
             value = self.convert_to_default_type(value)
             self.validate(obj, value)
             obj.__setattr__(self.private_name, value)
+        elif value is None:
+            obj.__setattr__(self.private_name, None)
         else:
             raise TypeError("{} must be of type {} NOT {}".format(self.public_name, ' or '.join(t.__name__ for t in self.type), type(value).__name__))
 
@@ -136,7 +137,7 @@ class advanced_property(property, Versioned):
 
     def validate(self, obj, value):
         if self.validator is not None and self.validator(value, obj) is False:
-            message = "Setting {} to {} does not fulfill restrictions.".format(self.public_name, value)
+            message = self.warning_message or "Setting {} to {} does not fulfill restrictions.".format(self.public_name, value)
             if self.warning_only:
                 warnings.warn(message, Warning)
             else:

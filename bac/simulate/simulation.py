@@ -28,6 +28,11 @@ class SimulationState(Enum):
 
 
 class Simulation(Versioned, metaclass=ABCMeta):
+    """Generic base class for simulations. Contains functionality that is both required or generalizable to
+    all classes.
+
+    All abstract method should be implemented by subclass in order to be used un workflow and other mechanism.
+    """
 
     @property
     @abstractmethod
