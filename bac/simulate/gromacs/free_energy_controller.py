@@ -50,14 +50,30 @@ class FreeEnergyController:
         self.output_histogram_size = kwargs.get('output_histogram_size')
         self.output_bin_size = kwargs.get('output_bin_size')
 
+    # Gromacs grompp says this is not a valid keyword or something...
     # @boolean(default=False)
     # def expanded(self): pass
 
     @decimal(default=-1)
-    def initial_lambda(self): pass
+    def initial_lambda(self):
+        """
+        Initial value of lambda variable.
+        Returns
+        -------
+
+        """
+        pass
 
     @decimal(default=0)
-    def delta_lambda(self): pass
+    def delta_lambda(self):
+        """
+        Difference between two consecutive lambda windows.
+        
+        Returns
+        -------
+
+        """
+        pass
 
     @integer(default=-1)
     def initial_lambda_state(self): pass
