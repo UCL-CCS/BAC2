@@ -23,6 +23,13 @@ class PressureCouplingType(Enum):
     parrinello_rahman = 'Parrinello-Rahman'
     mttk = 'MTTK'
 
+    @classmethod
+    def _missing_(cls, value):
+        if value is False:
+            return cls.no
+        else:
+            super()._missing_(value)
+
 
 class IsotropyType(Enum):
     isotropic = 'isotropic'
@@ -35,6 +42,13 @@ class ReferenceCoordinateScalingType(Enum):
     no = 'no'
     all = 'all'
     com = 'com'
+
+    @classmethod
+    def _missing_(cls, value):
+        if value is False:
+            return cls.no
+        else:
+            super()._missing_(value)
 
 
 class PressureController:
@@ -118,7 +132,3 @@ class PressureController:
 
     @advanced_property(type=ReferenceCoordinateScalingType, default=ReferenceCoordinateScalingType.no)
     def reference_coordinate_scaling(self): pass
-
-
-
-
