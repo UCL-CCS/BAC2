@@ -157,7 +157,7 @@ class NonBondedController:
     def cutoff(self): pass
 
     @advanced_property(type=CutoffSchemeType, default=CutoffSchemeType.verlet,
-                       validator=lambda x, _: x is CutoffSchemeType.verlet, warn=True,
+                       validator=lambda _, x: x is CutoffSchemeType.verlet, warn=True,
                        warning_message='`CutoffSchemeType.group` was the only cut-off treatment scheme '
                                        'before version 4.6, and is deprecated in 5.0.')
     def cutoff_scheme(self):
@@ -227,7 +227,7 @@ class NonBondedController:
     @positive_integer(default=0)
     def fourier_magnitude_z(self): pass
 
-    @positive_integer(default=4, validator=lambda x, _: x in [4, 6, 8, 10])
+    @positive_integer(default=4, validator=lambda _, x: x in [4, 6, 8, 10])
     def pme_order(self): pass
 
     @positive_decimal(default=1e-5)

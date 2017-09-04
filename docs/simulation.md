@@ -6,16 +6,16 @@ interchangeably in most cases. You can also convert between the two.
 
 ### Setup
 
-All md abstractions have as their main class a `Run` object inside the `run_controller` module.
-Whenever you want to run a new simulation you have to instantiate a new `Run`
+All md abstractions have as their main class a `Simulation` object inside the `run_controller` module.
+Whenever you want to run a new simulation you have to instantiate a new `Simulation`
 class.  
 If you are creating a workflow, you most likely will *__only__* need to `deepcopy` 
 the first instance, and modify some parameter and the input/output. *__Note__: I think an even 
- better way to handle reference semantics problem is by copying the passed Run class when adding 
+ better way to handle reference semantics problem is by copying the passed Simulation class when adding 
  it to the* `operation_queue`.
 
 
-**Run** – the _**main** class_   
+**Simulation** – the _**main** class_   
 - TemperatureController  
 - PressureController  
 - NonBondedController  
@@ -25,7 +25,7 @@ the first instance, and modify some parameter and the input/output. *__Note__: I
 import copy
 import bac.simulate.namd as namd
 
-annealing = namd.Run(temperature=300.0)
+annealing = namd.Simulation(temperature=300.0)
 annealing.temperature_controller.langevin = namd.LangevinDynamics(damping=0.4)
 
 annealing.coordinates = "../bace1.pdb"

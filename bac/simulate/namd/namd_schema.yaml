@@ -1,4 +1,4 @@
-# Attributes of main `Run()`
+# Attributes of main `Simulation()`
 
 numsteps: number_of_steps
 timestep: null

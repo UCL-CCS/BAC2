@@ -1,3 +1,3 @@
-from .coding import Encoder, Engine
+from .coding import Encoder
 from .workflow import Workflow
 from .run_modifier import lambda_window, replica

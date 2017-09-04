@@ -1,6 +1,5 @@
 from copy import deepcopy
 from enum import Enum
-import uuid
 
 from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, file, positive_integer, decimal
 from bac.simulate.gromacs.temperature_controller import TemperatureController
@@ -8,25 +7,8 @@ from bac.simulate.gromacs.pressure_controller import PressureController
 from bac.simulate.gromacs.non_bonded_controller import NonBondedController
 from bac.simulate.gromacs.constraint_controller import ConstraintController
 
-from bac.simulate.simulation import Simulation
-
-class Engine(Enum):
-    namd = 'namd'
-    gromacs = 'gromacs'
-
-
-class Integrator(Enum):
-    md = 'md'
-    md_vv = 'md-vv'
-    md_vv_avek = 'md-vv-avek'
-    sd = 'sd'
-    bd = 'bd'
-    steep = 'steep'
-    cg = 'cg'
-    l_bfgs = 'l-bfgs'
-    nm = 'nm'
-    tpi = 'tpi'
-    tpic = 'tpic'
+from bac.simulate.basesimulation import BaseSimulation, Engine
+from bac.simulate.gromacs.integrator import Integrator
 
 
 class CenterOfMassMotion(Enum):
@@ -42,7 +24,7 @@ class CenterOfMassMotion(Enum):
             super()._missing_(value)
 
 
-class Run(Simulation):
+class Simulation(BaseSimulation):
 
     def __init__(self, **kwargs):
 
@@ -141,10 +123,10 @@ class Run(Simulation):
     @positive_integer(default=10)
     def minimization_correction_steps(self): pass
 
-    @file(validator=lambda x, _: x.suffix == '.gro', warn=True)
+    @file(validator=lambda _, x: x.suffix == '.gro', warn=True)
     def coordinates(self): pass
 
-    @file(validator=lambda x, _: x.exists())
+    @file(validator=lambda _, x: x.exists())
     def topology(self): pass
 
     @file
@@ -157,7 +139,7 @@ class Run(Simulation):
     def name(self): pass
 
     def add_input_dependency(self, other_simulation):
-        super(Run, self).add_input_dependency(other_simulation)
+        super(Simulation, self).add_input_dependency(other_simulation)
 
         self.coordinates = other_simulation.output_name.with_suffix('.gro')
         self.topology = other_simulation.topology
@@ -223,7 +205,7 @@ class Run(Simulation):
     @integer(default=100)
     def recalculate_energies_frequency(self): pass
 
-    @integer(default=1000, validator=lambda x, s: x % s.recalculate_energies_frequency == 0)
+    @integer(default=1000, validator=lambda self, x: x % self.recalculate_energies_frequency == 0)
     def energy_output_frequency(self): pass
 
     @integer(default=0)

@@ -1,12 +1,8 @@
 from enum import Enum
 import yaml
 
-from .simulation import Simulation
+from .basesimulation import BaseSimulation, Engine
 
-
-class Engine(Enum):
-    namd = 'namd'
-    gromacs = 'gromacs'
 
 
 class Encoder:
@@ -27,7 +23,7 @@ class Encoder:
     _column_size = 25
 
     @classmethod
-    def encode(cls, run: Simulation, path):
+    def encode(cls, run: BaseSimulation, path):
         """
 
         Parameters

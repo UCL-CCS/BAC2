@@ -1,4 +1,4 @@
-; Run control
+; Simulation control
 integrator               = steep 
 nsteps                   = 5000
 ; EM criteria and other stuff

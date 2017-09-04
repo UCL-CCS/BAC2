@@ -1,20 +1,7 @@
 from enum import Enum
 
 from bac.utils.decorators import advanced_property, integer, decimal
-
-
-class Integrator(Enum):
-    md = 'md'
-    md_vv = 'md-vv'
-    md_vv_avek = 'md-vv-avek'
-    sd = 'sd'
-    bd = 'bd'
-    steep = 'steep'
-    cg = 'cg'
-    l_bfgs = 'l-bfgs'
-    nm = 'nm'
-    tpi = 'tpi'
-    tpic = 'tpic'
+from bac.simulate.gromacs.integrator import Integrator
 
 
 class PressureCouplingType(Enum):
@@ -102,32 +89,32 @@ class PressureController:
     @advanced_property(type=IsotropyType, default=IsotropyType.isotropic)
     def isotropy(self): pass
 
-    def frequency_default(self):
-        if self.run.integrator in (Integrator.md_vv,Integrator.md_vv_avek):
+    def _frequency_default(self):
+        if self.run.integrator in (Integrator.md_vv, Integrator.md_vv_avek):
             return 1
         else:
             return self.run.non_bonded_controller.nstlist if self.run.non_bonded_controller.nstlist > 0 else 10
 
-    @integer(default=frequency_default)
+    @integer(default=_frequency_default)
     def frequency(self): pass
 
     @decimal(default=1)
     def time(self): pass
 
-    def group_count_validator(x, s):
-        if s.isotropy is IsotropyType.isotropic:
+    def _group_count_validator(self, x):
+        if self.isotropy is IsotropyType.isotropic:
             return len(x) == 1
-        elif s.isotropy is IsotropyType.semi_isotropic:
+        elif self.isotropy is IsotropyType.semi_isotropic:
             return len(x) == 2
-        elif s.isotropy is IsotropyType.anisotropic:
+        elif self.isotropy is IsotropyType.anisotropic:
             return len(x) == 6
-        elif s.isotropy is IsotropyType.surface_tension:
+        elif self.isotropy is IsotropyType.surface_tension:
             return len(x) == 2
 
-    @advanced_property(type=list, default=[], validator=group_count_validator)
+    @advanced_property(type=list, default=[], validator=_group_count_validator)
     def compressibility(self): pass
 
-    @advanced_property(type=list, default=[], validator=group_count_validator)
+    @advanced_property(type=list, default=[], validator=_group_count_validator)
     def pressure(self): pass
 
     @advanced_property(type=ReferenceCoordinateScalingType, default=ReferenceCoordinateScalingType.no)
