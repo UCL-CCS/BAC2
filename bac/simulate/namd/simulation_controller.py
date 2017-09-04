@@ -12,14 +12,10 @@ from bac.utils.decorators import (advanced_property, positive_decimal,
 
 from bac.simulate import gromacs
 
-from bac.simulate.simulation import Simulation
-
-class Engine(Enum):
-    namd = 'namd'
-    gromacs = 'gromacs'
+from bac.simulate.basesimulation import BaseSimulation, Engine
 
 
-class Run(Simulation):
+class Simulation(BaseSimulation):
 
     def __init__(self, **kwargs):
         self.temperature_controller = TemperatureController()
@@ -169,7 +165,7 @@ class Run(Simulation):
     @boolean(default=True)
     def read_exclusions(self): pass
 
-    @advanced_property(type=(int, float), validator=lambda x: x >= 1, default=2.0)
+    @advanced_property(type=(int, float), validator=lambda _, x: x >= 1, default=2.0)
     def scnb(self): pass
 
     # Charmm
@@ -218,7 +214,7 @@ class Run(Simulation):
 
             self.parameters = md.parameters
 
-        elif isinstance(md, gromacs.Run):
+        elif isinstance(md, gromacs.Simulation):
             self.gromacs = True
             self.coordinates = md.output_name.with_suffix('.gro')
             self.parameters = md.output_name.with_suffix('.top')

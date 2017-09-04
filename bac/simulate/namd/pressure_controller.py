@@ -42,9 +42,9 @@ class BerendsenPressureCoupling:
     @positive_decimal
     def relaxation_time(self): pass
 
-    @positive_integer(default=lambda s: s.run.non_bonded_controller.full_elect_frequency,
-                      validator=lambda x, s: x % s.run.non_bonded_controller.full_elect_frequency == 0
-                                             and x % s.run.non_bonded_controller.non_bonded_frequency == 0)
+    @positive_integer(default=lambda self: self.run.non_bonded_controller.full_elect_frequency,
+                      validator=lambda self, x: x % self.run.non_bonded_controller.full_elect_frequency == 0
+                                             and x % self.run.non_bonded_controller.non_bonded_frequency == 0)
     def frequency(self): pass
 
 

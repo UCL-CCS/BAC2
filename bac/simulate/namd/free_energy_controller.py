@@ -29,16 +29,16 @@ class FreeEnergyController:
     @advanced_property(type=FreeEnergyCalculationType, default=FreeEnergyCalculationType.ti)
     def type(self): pass
 
-    @decimal(validator=lambda x: 0 <= x <= 1)
+    @decimal(validator=lambda _, x: 0 <= x <= 1)
     def start_lambda(self): pass
 
-    @decimal(validator=lambda x: 0 <= x <= 1)
+    @decimal(validator=lambda _, x: 0 <= x <= 1)
     def end_lambda(self): pass
 
-    @positive_integer(default=0, validator=lambda x, s: s.run.number_of_steps >= x)
+    @positive_integer(default=0, validator=lambda self, x: self.run.number_of_steps >= x)
     def equilibration_steps(self): pass
 
-    @file(default=lambda s: s.run.coordinates)
+    @file(default=lambda self: self.run.coordinates)
     def file(self): pass
 
     @column

@@ -68,7 +68,7 @@ class NonBondedController:
     @boolean(default=True)
     def switching(self): pass
 
-    @positive_decimal(validator=lambda x, s: x <= s.cutoff)
+    @positive_decimal(validator=lambda self, x: x <= self.cutoff)
     def switching_distance(self): pass
 
     @boolean(default=False)
@@ -77,10 +77,10 @@ class NonBondedController:
     @advanced_property(type=Interaction)
     def excluded_interactions(self): pass
 
-    @positive_decimal(default=1, validator=lambda x, s: x <= 1)
+    @positive_decimal(default=1, validator=lambda _, x: x <= 1)
     def one_four_scaling(self): pass
 
-    @decimal(default=1, validator=lambda x: x >= 1)
+    @decimal(default=1, validator=lambda _, x: x >= 1)
     def dielectric_constant(self): pass
 
     @positive_decimal(default=1)
@@ -95,12 +95,11 @@ class NonBondedController:
     @boolean(default=False)
     def LJ_correction(self): pass
 
-
-    @positive_integer(default=lambda x: x.non_bonded_frequency,
-                      validator=lambda x, s: s.steps_per_cycle % x == 0, warn=True)
+    @positive_integer(default=lambda self: self.non_bonded_frequency,
+                      validator=lambda self, x: self.steps_per_cycle % x == 0, warn=True)
     def full_elect_frequency(self): pass
 
-    @positive_integer(default=1, validator=lambda x, s: x % s.full_elect_frequency == 0)
+    @positive_integer(default=1, validator=lambda self, x: x % self.full_elect_frequency == 0)
     def non_bonded_frequency(self): pass
 
     @advanced_property(type=LongSplitting, default=LongSplitting.c1)
@@ -108,9 +107,6 @@ class NonBondedController:
 
     @advanced_property(type=MTSAlgorithm, default=MTSAlgorithm.impulse_verlet)
     def mts_algorithm(self): pass
-
-
-
 
     @positive_integer(default=20)
     def steps_per_cycle(self): pass

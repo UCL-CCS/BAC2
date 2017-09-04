@@ -1,5 +1,3 @@
-from collections import namedtuple
-
 from bac.utils.decorators import *
 
 

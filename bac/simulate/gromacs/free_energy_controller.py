@@ -120,13 +120,13 @@ class FreeEnergyController:
     @decimal(default=0)
     def soft_core_alpha(self): pass
 
-    @integer(default=6, validator=lambda x, _: x in [6, 48])
+    @integer(default=6, validator=lambda _, x: x in [6, 48])
     def soft_core_radial_power(self): pass
 
     @boolean(default=False)
     def soft_core_coulomb(self): pass
 
-    @integer(default=0, validator=lambda x, _: x in [1, 2])
+    @integer(default=0, validator=lambda _, x: x in [1, 2])
     def soft_core_power(self): pass
 
     @decimal(default=0.3)

@@ -34,8 +34,8 @@ class advanced_property(property, Versioned):
             Possible types that property can be set to. **Important**: if more than one (1) type is set,
             then the first one will be the major, and this first one *must* be instantiatable from the
             other types.
-        validator: lambda value, object -> bool
-            This is a function that return a Bool representing wether the value is valid. Note that the object
+        validator: lambda container_object, value -> bool
+            This is a function that return a Bool representing whether the value is valid. Note that the object
             is passed to the function too, so one can make more complicated validation based on the state of the
             object.
         warn : bool
@@ -136,26 +136,12 @@ class advanced_property(property, Versioned):
         return default_type(value)
 
     def validate(self, obj, value):
-        if self.validator is not None and self.validator(value, obj) is False:
+        if self.validator is not None and self.validator(obj, value) is False:
             message = self.warning_message or "Setting {} to {} does not fulfill restrictions.".format(self.public_name, value)
             if self.warning_only:
                 warnings.warn(message, Warning)
             else:
                 raise ValueError(message)
-
-    @property
-    def validator(self):
-        return self._validator
-
-    @validator.setter
-    def validator(self, value):
-        if value is None:
-            self._validator = None
-            return
-
-        new_validator = value
-        argument_count = value.__code__.co_argcount if value.__code__.co_argcount > 0 else None
-        self._validator = lambda *a: new_validator(*a[:argument_count])
 
     def version_check(self, obj):
         if isinstance(obj, Versioned) and self.version is not None and obj.version is not None:
@@ -174,8 +160,8 @@ class column(advanced_property):
 
 class positive_decimal(advanced_property):
     def __init__(self, *args, **kwargs):
-        old_validator = kwargs.get('validator', lambda *y: True)
-        kwargs['validator'] = lambda *x: old_validator(*x) and x[0] >= 0
+        old_validator = kwargs.get('validator', lambda o, v: True)
+        kwargs['validator'] = lambda o, v: old_validator(o, v) and v >= 0
         super(positive_decimal, self).__init__(type=(float, int, str), *args, **kwargs)
 
 
@@ -189,8 +175,8 @@ class integer(advanced_property):
 
 class positive_integer(advanced_property):
     def __init__(self, *args, **kwargs):
-        old_validator = kwargs.get('validator', lambda *y: True)
-        kwargs['validator'] = lambda *x: old_validator(*x) and x[0] >= 0
+        old_validator = kwargs.get('validator', lambda o, v: True)
+        kwargs['validator'] = lambda o, v: old_validator(o, v) and v >= 0
         super(positive_integer, self).__init__(type=(int, str), *args, **kwargs)
 
 

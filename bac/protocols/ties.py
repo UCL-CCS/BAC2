@@ -2,13 +2,13 @@ import bac.simulate.gromacs as gmx
 from bac.simulate import Workflow, lambda_window, replica
 
 
-class TiesGromacsEq(gmx.Run):
+class TiesGromacsEq(gmx.Simulation):
     def __init__(self):
         super(TiesGromacsEq, self).__init__()
         # Add further customizations...
 
 
-class TiesGromacsMD(gmx.Run):
+class TiesGromacsMD(gmx.Simulation):
     def __init__(self):
         super(TiesGromacsMD, self).__init__()
         # Add further customizations...

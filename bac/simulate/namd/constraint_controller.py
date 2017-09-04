@@ -56,7 +56,7 @@ class HarmonicConstraint:
         self.select_constraints_y = kwargs.get('select_constraints_y')
         self.select_constraints_z = kwargs.get('select_constraints_z')
 
-    @positive_integer(default=0, validator=lambda x, s: x % 2 == 0)
+    @positive_integer(default=0, validator=lambda _, x: x % 2 == 0)
     def exponent(self): pass
 
     @file

@@ -4,7 +4,7 @@ from pathlib import Path
 from itertools import product
 import random
 from bac.simulate.coding import Encoder
-from bac.simulate.simulation import Simulation
+from bac.simulate.basesimulation import BaseSimulation
 
 from typing import List
 
@@ -41,16 +41,16 @@ class Workflow:
         self.resource = resource
         self.path = Path(name + '_' + str(random.randint(1000, 9999)))
 
-        self.simulations: List[Simulation] = []
-        self._simulations: List[Simulation] = []
+        self.simulations: List[BaseSimulation] = []
+        self._simulations: List[BaseSimulation] = []
         self.ensembles = []
 
-    def add_simulation(self, simulation: Simulation):
+    def add_simulation(self, simulation: BaseSimulation):
         """
 
         Parameters
         ----------
-        simulation: Simulation
+        simulation: BaseSimulation
 
         Returns
         -------

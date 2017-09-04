@@ -27,7 +27,7 @@ class SimulationState(Enum):
         return self.value <= other.value
 
 
-class Simulation(Versioned, metaclass=ABCMeta):
+class BaseSimulation(Versioned, metaclass=ABCMeta):
     """Generic base class for simulations. Contains functionality that is both required or generalizable to
     all classes.
 
@@ -45,7 +45,7 @@ class Simulation(Versioned, metaclass=ABCMeta):
         return NotImplemented
 
     @abstractmethod
-    def add_input_dependency(self, other_simulation: 'Simulation'):
+    def add_input_dependency(self, other_simulation: 'BaseSimulation'):
         self.dependency = other_simulation
 
     @property

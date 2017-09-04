@@ -5,9 +5,9 @@ First import the required modules
 import bac.simulate.gromacs as gmx
 ```
 
-Instantiate the main `Run` class
+Instantiate the main `Simulation` class
 ```python
-md_run = gmx.Run(integrator=gmx.Integrator.md)
+md_run = gmx.Simulation(integrator=gmx.Integrator.md)
 md_run.delta_time = 0.002
 md_run.number_of_steps = 500000
 ```
@@ -26,7 +26,7 @@ md_run.constraint_controller = cc
 Non bonded interactions
 ---
 
-*Note:* you can access the default controller objects from the main `Run`
+*Note:* you can access the default controller objects from the main `Simulation`
 class too (instead of creating a new one like above). 
 
 ```python
