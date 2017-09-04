@@ -1,10 +1,10 @@
 from pathlib import Path
 from enum import Enum
 import copy
+import warnings
+from typing import Callable
 
 from bac.utils.pdb import PDBColumn
-import warnings
-
 from .versioned import Versioned
 
 
@@ -59,7 +59,7 @@ class advanced_property(property, Versioned):
 
         self._default = kwargs.get('default')
         self.type = kwargs.get('type')
-        self.validator = kwargs.get('validator')
+        self.validator: Callable = kwargs.get('validator')
         self.warning_only = kwargs.get('warn', False)
         self.warning_message = kwargs.get('warning_message')
         self.version = kwargs.get('available')
@@ -95,7 +95,8 @@ class advanced_property(property, Versioned):
         elif value is None:
             obj.__setattr__(self.private_name, None)
         else:
-            raise TypeError("{} must be of type {} NOT {}".format(self.public_name, ' or '.join(t.__name__ for t in self.type), type(value).__name__))
+            raise TypeError("{} must be of type {} NOT {}".
+                            format(self.public_name, ' or '.join(t.__name__ for t in self.type), type(value).__name__))
 
     @property
     def private_name(self):
@@ -106,7 +107,8 @@ class advanced_property(property, Versioned):
         return self.f.__name__
 
     def default(self, obj):
-        if self._default is None: return None
+        if self._default is None:
+            return None
 
         default_to_return = self._default(obj) if callable(self._default) else self._default
 
@@ -148,6 +150,7 @@ class advanced_property(property, Versioned):
             if self.version > obj.version:
                 warnings.warn('This is not supported on current version!', Warning)
 
+
 class file(advanced_property):
     def __init__(self, *args, **kwargs):
         super(file, self).__init__(type=(Path, str), *args, **kwargs)
@@ -169,9 +172,11 @@ class decimal(advanced_property):
     def __init__(self, *args, **kwargs):
         super(decimal, self).__init__(type=(float, int, str), *args, **kwargs)
 
+
 class integer(advanced_property):
     def __init__(self, *args, **kwargs):
         super(integer, self).__init__(type=(int, str), *args, **kwargs)
+
 
 class positive_integer(advanced_property):
     def __init__(self, *args, **kwargs):
@@ -221,7 +226,7 @@ class back_referenced(property):
     def _fget(self, obj):
         try:
             return obj.__getattribute__(self.private_name)
-        except:
+        except AttributeError:
             return None
 
     def _fset(self, obj, new_value):
