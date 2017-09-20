@@ -185,10 +185,18 @@ class NonBondedController:
     def coulomb_type(self): pass
 
     @advanced_property(type=(CoulombModifierType, type(None), str), default=CoulombModifierType.potential_shift_verlet)
-    def coulomb_modifier(self): pass
+    def coulomb_modifier(self) -> CoulombModifierType:
+        pass
 
     @decimal(default=0)
-    def coulomb_switch_cutoff(self): pass
+    def coulomb_switch_cutoff(self):
+        """Coulomb interaction switching cutoff.
+
+        Where to start switching the Coulomb potential, only relevant when force or potential switching is used.
+
+        Default = 0
+        """
+        pass
 
     @decimal(default=1)
     def coulomb_cutoff(self): pass

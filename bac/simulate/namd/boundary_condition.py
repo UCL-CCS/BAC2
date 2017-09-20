@@ -16,8 +16,7 @@ class PeriodicBoundaryCondition(BoundaryCondition):
         self.cell_basis_vector_3 = kwargs.get('cell_basis_vector_3')
         self.cell_origin = kwargs.get('cell_origin')
 
-        self.extended_system = kwargs.get('extended_system')
-
+        self.extended_system: Path = kwargs.get('extended_system')
         self.xst_file = kwargs.get('xst_file')
         self.xst_frequency = kwargs.get('xst_frequency')
 
@@ -39,6 +38,14 @@ class PeriodicBoundaryCondition(BoundaryCondition):
 
     @file
     def extended_system(self): pass
+
+    @extended_system.post_set_processing
+    def extended_system(self, value):
+        if value is not None:
+            self.cell_basis_vector_1 = None
+            self.cell_basis_vector_2 = None
+            self.cell_basis_vector_3 = None
+            self.cell_origin = None
 
     @file(default=lambda s: s.run.output_name.with_suffix('.xst'))
     def xst_file(self): pass

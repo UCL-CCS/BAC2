@@ -1,5 +1,6 @@
 from copy import deepcopy
 from enum import Enum
+from pathlib import Path
 
 from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, file, positive_integer, decimal
 from bac.simulate.gromacs.temperature_controller import TemperatureController
@@ -39,7 +40,7 @@ class Simulation(BaseSimulation):
 
         # Main attributes
 
-        self.integrator = kwargs.get('integrator')
+        self.integrator: Integrator = kwargs.get('integrator')
         self.initial_time = kwargs.get('initial_time')
         self.delta_time = kwargs.get('delta_time')
         self.number_of_steps = kwargs.get('number_of_steps')
@@ -52,12 +53,12 @@ class Simulation(BaseSimulation):
         self.generate_temperature = kwargs.get('generate_temperature')
         self.generate_seed = kwargs.get('generate_seed')
 
-        self.coordinates = kwargs.get('coordinates')
-        self.topology = kwargs.get('topology')
-        self.velocities = kwargs.get('velocities')
+        self.coordinates: Path = kwargs.get('coordinates')
+        self.topology: Path = kwargs.get('topology')
+        self.velocities: Path = kwargs.get('velocities')
 
-        self.output_name = kwargs.get('output_name')
-        self.name = kwargs.get('name')
+        self.output_name: Path = kwargs.get('output_name')
+        self.name: Path = kwargs.get('name')
 
         # Minimization
 
@@ -167,27 +168,25 @@ class Simulation(BaseSimulation):
 
         """
 
-        return 'gmx grompp -f {} -c {} -p {} -o {} -po {} {}'.\
-            format(self.name.with_suffix('.mdp'),
-                   self.coordinates,
-                   self.topology,
-                   self.output_name.with_suffix('.tpr'),
-                   self.name.with_name(self.name.name + '_generated').with_suffix('.mdp'),
-                   '-t' + str(self.velocities) if self.velocities else "")
+        return f"aprun -n 1 gmx_mpi grompp -f {self.name.with_suffix('.mdp')} -c {self.coordinates} " \
+               f"-p {self.topology} -o {self.output_name.with_suffix('.tpr')} " \
+               f"-po {self.name.with_name(self.name.name + '_generated').with_suffix('.mdp')} " \
+               f"{'-t ' + str(self.velocities) if self.velocities else ''} " \
+               f"&> {self.name.with_name(self.name.name + '_grompp').with_suffix('.out')}"
 
     @property
     def executable(self):
-        return 'gmx mdrun -nt 1 -deffnm {}'.format(self.output_name)
+        return f"aprun -n {1 if self.integrator is Integrator.steep else 32} gmx_mpi mdrun -deffnm {self.output_name} " \
+               f"&> {self.output_name.with_suffix('.out')}"
 
     def restructure_paths_with_prefix(self, prefix):
-        if not self.name.is_absolute():
+        if not self.name.exists():
             self.name = prefix/self.name
-        if not self.coordinates.is_absolute():
+        if not self.output_name.exists():
+            self.output_name = prefix/self.output_name
+        if not self.coordinates.exists():
             self.coordinates = prefix/self.coordinates
-        if not self.topology.is_absolute():
-            self.topology = prefix/self.topology
-
-        if self.velocities and not self.velocities.is_absolute():
+        if self.velocities and not self.velocities.exists():
             self.velocities = prefix/self.velocities
 
     @integer(default=0)

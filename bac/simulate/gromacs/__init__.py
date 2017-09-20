@@ -1,4 +1,4 @@
-from bac.simulate.gromacs.simulation_controller import Simulation
+from bac.simulate.gromacs.simulation_controller import Simulation, CenterOfMassMotion
 
 from bac.simulate.gromacs.pressure_controller import (PressureController, PressureCouplingType, IsotropyType,
                                                       ReferenceCoordinateScalingType)
@@ -16,3 +16,5 @@ from bac.simulate.gromacs.constraint_controller import (ConstraintController, Co
 from bac.simulate.gromacs.free_energy_controller import (FreeEnergyController, CouplingType)
 
 from bac.simulate.gromacs.integrator import Integrator
+
+

@@ -96,22 +96,22 @@ class FreeEnergyController:
     @advanced_property(type=list, default=[])
     def fep_lambdas(self): pass
 
-    @advanced_property(type=list, default=lambda self: self.fep_lambdas)
+    @advanced_property(type=list, default=lambda self: self.fep_lambdas, validator=lambda self, x: len(self.fep_lambdas) == len(x))
     def coulomb_lambdas(self): pass
 
-    @advanced_property(type=list, default=lambda self: self.fep_lambdas)
+    @advanced_property(type=list, default=lambda self: self.fep_lambdas, validator=lambda self, x: len(self.fep_lambdas) == len(x))
     def van_der_waals_lambdas(self): pass
 
-    @advanced_property(type=list, default=lambda self: self.fep_lambdas)
+    @advanced_property(type=list, default=lambda self: self.fep_lambdas, validator=lambda self, x: len(self.fep_lambdas) == len(x))
     def bonded_lambdas(self): pass
 
-    @advanced_property(type=list, default=lambda self: self.fep_lambdas)
+    @advanced_property(type=list, default=lambda self: self.fep_lambdas, validator=lambda self, x: len(self.fep_lambdas) == len(x))
     def restraint_lambdas(self): pass
 
-    @advanced_property(type=list, default=lambda self: self.fep_lambdas)
+    @advanced_property(type=list, default=lambda self: self.fep_lambdas, validator=lambda self, x: len(self.fep_lambdas) == len(x))
     def mass_lambdas(self): pass
 
-    @advanced_property(type=list, default=lambda self: self.fep_lambdas)
+    @advanced_property(type=list, default=lambda self: self.fep_lambdas, validator=lambda self, x: len(self.fep_lambdas) == len(x))
     def temperature_lambdas(self): pass
 
     @integer(default=1)

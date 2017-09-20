@@ -1,14 +1,16 @@
+from enum import Enum
+
 from bac.utils.decorators import *
 
 
 class TemperatureController:
 
     def __init__(self, **kwargs):
-        self.langevin = None
-        self.coupling = None
-        self.rescale = None
-        self.reassign = None
-        self.lowe_andersen = None
+        self.langevin: LangevinDynamics = None
+        self.coupling: TemperatureCoupling = None
+        self.rescale: VelocityRescaling = None
+        self.reassign: VelocityReassignment = None
+        self.lowe_andersen: LoweAndersenDynamics = None
 
 
 class LangevinDynamics:
@@ -73,6 +75,7 @@ class VelocityReassignment:
         self.increment = kwargs.get('increment')
         self.hold_at = kwargs.get('hold_at')
 
+    @positive_decimal(default=lambda self: self.simulation.temperature)
     def temperature(self): pass
 
     @positive_integer

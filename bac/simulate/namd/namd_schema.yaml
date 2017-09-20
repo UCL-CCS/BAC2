@@ -1,17 +1,20 @@
 # Attributes of main `Simulation()`
 
 numsteps: number_of_steps
-timestep: null
+timestep:
 firsttimestep: first_timestep
+minimization:
+  - minimization
+  - on_off
 
-temperature: null
-velocities: null
+temperature:
+velocities:
 binvelocities: binary_velocities
 
-coordinates: null
+coordinates:
 bincoordinates: binary_coordinates
 
-parameters: null
+parameters:
 
 outputname: output_name
 binaryoutput:
@@ -22,6 +25,9 @@ dcdfreq: dcd_frequency
 dcdunitcell:
   - dcd_unit_cell
   - yes_no
+
+outputEnergies: output_energies
+outputPressure: output_pressure
 
 ### Forcefield specific parameters
 amber:
