@@ -13,7 +13,7 @@ setup(
 
     author='CCS',
 
-    requires=['yaml'],
+    requires=['yaml', 'parmed'],
 
     packages=find_packages(),
 )

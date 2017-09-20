@@ -11,7 +11,7 @@ from .versioned import Versioned
 class advanced_property(property, Versioned):
     """ A `property` subclass with bells and whistles.
 
-    This is a rather specific (yet common) implementation of the property mechanism. The getter return the
+    This is a rather specific (yet common) implementation of the property mechanism. The getter returns the
     _<property name> or the default if that is None. The setter sets _<property name> to the value after
     validating it. If the value is set to None, then the getter *will* return the default. **In summary** you
     do not have to do any of the implementation! It **is** enough to ```def property_name(self): pass```.
@@ -63,6 +63,7 @@ class advanced_property(property, Versioned):
         self.warning_only = kwargs.get('warn', False)
         self.warning_message = kwargs.get('warning_message')
         self.version = kwargs.get('available')
+        self.post_set_processor = None
 
         self.f = args[0] if args else None
 
@@ -97,6 +98,9 @@ class advanced_property(property, Versioned):
         else:
             raise TypeError("{} must be of type {} NOT {}".
                             format(self.public_name, ' or '.join(t.__name__ for t in self.type), type(value).__name__))
+
+        if self.post_set_processor:
+            self.post_set_processor(obj, value)
 
     @property
     def private_name(self):
@@ -150,6 +154,19 @@ class advanced_property(property, Versioned):
             if self.version > obj.version:
                 warnings.warn('This is not supported on current version!', Warning)
 
+    @property
+    def f(self):
+        return self._f
+
+    @f.setter
+    def f(self, f):
+        self.__doc__ = f.__doc__
+        self._f = f
+
+    def post_set_processing(self, f):
+        self.post_set_processor = f
+        return self
+
 
 class file(advanced_property):
     def __init__(self, *args, **kwargs):
@@ -181,8 +198,15 @@ class integer(advanced_property):
 class positive_integer(advanced_property):
     def __init__(self, *args, **kwargs):
         old_validator = kwargs.get('validator', lambda o, v: True)
-        kwargs['validator'] = lambda o, v: old_validator(o, v) and v >= 0
+        kwargs['validator'] = lambda o, v: old_validator(o, v) and v > 0
         super(positive_integer, self).__init__(type=(int, str), *args, **kwargs)
+
+
+class non_negative_integer(advanced_property):
+    def __init__(self, *args, **kwargs):
+        old_validator = kwargs.get('validator', lambda o, v: True)
+        kwargs['validator'] = lambda o, v: old_validator(o, v) and v >= 0
+        super(non_negative_integer, self).__init__(type=(int, str), *args, **kwargs)
 
 
 class boolean(advanced_property):
@@ -193,8 +217,8 @@ class boolean(advanced_property):
 class back_referenced(property):
     """Decorator for attributes that reference their owner.
 
-    The decorated object has a property called `run` that references back to the
-    main `Run` object. This is important for example when validators have to access
+    The decorated object has a property called `simulation` that references back to the
+    main `Simulation` object. This is important for example when validators have to access
     properties from other parts of the object tree.
 
     Examples
@@ -203,11 +227,11 @@ class back_referenced(property):
     @back_referenced
     def pressure_controller(self): pass
 
-    # Then in the class definition access self.run:
+    # Then in the class definition access self.simulation:
 
     class PressureController:
 
-        @decimal(validator:lambda x, s: x < s.run.pressure)
+        @decimal(validator:lambda x, s: x < s.simulation.pressure)
         def pressure(self): pass
 
     Notes
@@ -235,7 +259,7 @@ class back_referenced(property):
 
         try:
             if new_value.__getattribute__(self.container_name) is not None:
-                warnings.warn('Controller already used by another `run`. Copied. Access from `run` object only',
+                warnings.warn('Controller already used by another `simulation`. Copied. Access from `simulation` object only',
                               Warning)
                 new_value = copy.deepcopy(new_value)
         except AttributeError:
@@ -258,4 +282,4 @@ class back_referenced(property):
 
     @property
     def container_name(self):
-        return 'run'
+        return 'simulation'

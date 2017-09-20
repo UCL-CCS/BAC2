@@ -1,4 +1,5 @@
 from enum import Enum
+from copy import deepcopy
 
 from bac.simulate.namd.temperature_controller import TemperatureController
 from bac.simulate.namd.pressure_controller import PressureController
@@ -8,7 +9,8 @@ from bac.simulate.namd.boundary_condition import PeriodicBoundaryCondition
 from bac.simulate.namd.free_energy_controller import FreeEnergyController
 
 from bac.utils.decorators import (advanced_property, positive_decimal,
-                                  positive_integer,  file, boolean, back_referenced)
+                                  positive_integer,  file, boolean, back_referenced,
+                                  non_negative_integer)
 
 from bac.simulate import gromacs
 
@@ -29,6 +31,8 @@ class Simulation(BaseSimulation):
         self.number_of_steps = kwargs.get('number_of_steps')
         self.timestep = kwargs.get('timestep')
         self.first_timestep = kwargs.get('first_timestep')
+
+        self.minimization = kwargs.get('minimization')
 
         # INPUT
 
@@ -57,6 +61,9 @@ class Simulation(BaseSimulation):
         self.dcd_velocity_frequency = kwargs.get('dcd_velocity_frequency')
         self.dcd_force_file = kwargs.get('dcd_file')
         self.dcd_force_frequency = kwargs.get('dcd_force_frequency')
+
+        self.output_energies = kwargs.get('output_energies')
+        self.output_pressure = kwargs.get('output_energies')
 
         # OTHER SETTINGS
 
@@ -94,6 +101,9 @@ class Simulation(BaseSimulation):
 
     @positive_integer(default=0)
     def first_timestep(self): pass
+
+    @boolean(default=False)
+    def minimization(self): pass
 
     # Input
 
@@ -143,6 +153,12 @@ class Simulation(BaseSimulation):
 
     @file(default=lambda s: s.output_name.with_suffix('.forcedcd'))
     def dcd_force_file(self): pass
+
+    @positive_integer
+    def output_energies(self): pass
+
+    @non_negative_integer
+    def output_pressure(self): pass
 
     # Other settings
 
@@ -227,21 +243,43 @@ class Simulation(BaseSimulation):
 
     @property
     def engine_type(self):
-        return Engine.gromacs
+        return Engine.namd
 
     @property
     def executable(self):
-        return "namd2 {} > {}"
+        return f"namd2 {self.name} > {self.output_name}"
 
     @property
     def preprocess_executable(self):
-        return "null"
+        return None
 
     def add_input_dependency(self, other_simulation):
-        pass
+        super(Simulation, self).add_input_dependency(other_simulation)
+
+        self.boundary_condition.extended_system = other_simulation.output_name.with_suffix('.xsc')
+        self.coordinates = other_simulation.output_name.with_suffix('.coor')
+        self.constraints.harmonic_constraint.reference_position_file = other_simulation.output_name.with_suffix('.coor')
 
     def restructure_paths_with_prefix(self, prefix):
-        pass
+        if not self.coordinates.exists():
+            self.coordinates = prefix/self.coordinates
+        if not self.boundary_condition.extended_system.exists():
+            self.boundary_condition.extended_system = prefix/self.boundary_condition.extended_system
+        if not self.boundary_condition.xst_file.exists():
+            self.boundary_condition.xst_file = prefix/self.boundary_condition.xst_file
+        if not self.constraints.harmonic_constraint.reference_position_file.exists():
+            self.constraints.harmonic_constraint.reference_position_file = prefix/self.constraints.harmonic_constraint.reference_position_file
+        if not self.name.exists():
+            self.name = prefix/self.name
+        if not self.output_name.exists():
+            self.output_name = prefix/self.output_name
+
+    def __next__(self):
+        next_run = deepcopy(self)
+        next_run.name, next_run.output_name = None, None
+        next_run.add_input_dependency(self)
+        return next_run
+
 
 
 

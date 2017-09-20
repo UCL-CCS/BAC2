@@ -4,7 +4,6 @@ import yaml
 from .basesimulation import BaseSimulation, Engine
 
 
-
 class Encoder:
     """Encoding functionality. Singleton-like.
 
@@ -23,61 +22,26 @@ class Encoder:
     _column_size = 25
 
     @classmethod
-    def encode(cls, run: BaseSimulation, path):
+    def encode(cls, simulation: BaseSimulation, path=None):
         """
 
         Parameters
         ----------
-        run
+        simulation
             Simulation class
         path: Path
             Location of configuration file
 
         """
-        path = path if path.suffix == run.configuration_file_suffix else path / run.name.with_suffix(run.configuration_file_suffix)
 
-        def serialize(obj, attributes):
-            serial = ''
-            for external_name, internals in attributes.items():
-                # As a simplification, if the internal and external name are the same
-                # one can omit the internal name in the YAML file. This results in
-                # `internals` to be `None`. We can set `internals` to be `external_name`.
-                if internals is None:
-                    internals = external_name
+        encoded = cls._serialize(simulation, cls._schema(Engine(simulation.engine_type.value)))
 
-                # Simple key value pair
-                if isinstance(internals, str):
-                    value = obj.__getattribute__(internals)
-                    if value is not None:
-                        serial += "{}{} = {}\n".format(external_name,' '*(cls._column_size-len(external_name)), value)
-
-                # The value is a list containing the name and encoding mechanism
-                # The list has to be [name, encoding] format. Nothing else works.
-                elif isinstance(internals, list):
-                    value = obj.__getattribute__(internals[0])
-                    if value is not None:
-                        encoder = cls._encoders[internals[1]]
-                        serial += "{}{} = {}\n".format(external_name, ' '*(cls._column_size-len(external_name)),
-                                                       encoder(value))
-
-                # The value is a dictionary. Meaning that we have to go one level
-                # down in the hierarchy. This function is then called recursively on
-                # the object.
-                elif isinstance(internals, dict):
-                    sub_obj = obj.__getattribute__(external_name)
-
-                    name_token = internals.pop('name_token', None)
-                    if name_token is not None:
-                        encoder = cls._encoders[name_token[1]]
-                        serial += "{}{} = {}\n".format(name_token[0], ' '*(cls._column_size-len(name_token[0])),
-                                                       encoder(sub_obj is not None))
-
-                    if sub_obj is not None:
-                        serial += serialize(sub_obj, internals)
-            return serial+'\n'
-
-        with open(path, mode='w') as conf:
-            conf.write(serialize(run, cls._schema(Engine(run.engine_type.value))))
+        if path is not None:
+            path = path if path.suffix == simulation.configuration_file_suffix else path / simulation.name.with_suffix(simulation.configuration_file_suffix)
+            with open(path, mode='w') as conf:
+                conf.write(encoded)
+        else:
+            print(encoded)
 
     # FIXME: setuptools for resource (yaml) allocation.
     @staticmethod
@@ -86,3 +50,45 @@ class Encoder:
             return yaml.load(open('/Users/kristofarkas/Developer/BAC2/bac/simulate/namd/namd_schema.yaml'))
         elif engine is Engine.gromacs:
             return yaml.load(open('/Users/kristofarkas/Developer/BAC2/bac/simulate/gromacs/gromacs_schema.yaml'))
+
+    @classmethod
+    def _serialize(cls, obj, attributes):
+        serial = ''
+        for external_name, internals in attributes.items():
+            # As a simplification, if the internal and external name are the same
+            # one can omit the internal name in the YAML file. This results in
+            # `internals` to be `None`. We can set `internals` to be `external_name`.
+            if internals is None:
+                internals = external_name
+
+            # Simple key value pair
+            if isinstance(internals, str):
+                value = obj.__getattribute__(internals)
+                if value is not None:
+                    serial += "{}{} = {}\n".format(external_name, ' ' * (cls._column_size - len(external_name)), value)
+
+            # The value is a list containing the name and encoding mechanism
+            # The list has to be [name, encoding] format. Nothing else works.
+            elif isinstance(internals, list):
+                value = obj.__getattribute__(internals[0])
+                if value is not None:
+                    encoder = cls._encoders[internals[1]]
+                    serial += "{}{} = {}\n".format(external_name, ' ' * (cls._column_size - len(external_name)),
+                                                   encoder(value))
+
+            # The value is a dictionary. Meaning that we have to go one level
+            # down in the hierarchy. This function is then called recursively on
+            # the object.
+            elif isinstance(internals, dict):
+                sub_obj = obj.__getattribute__(external_name)
+
+                name_token = internals.pop('name_token', None)
+                if name_token is not None:
+                    encoder = cls._encoders[name_token[1]]
+                    serial += "{}{} = {}\n".format(name_token[0], ' ' * (cls._column_size - len(name_token[0])),
+                                                   encoder(sub_obj is not None))
+
+                if sub_obj is not None:
+                    serial += cls._serialize(sub_obj, internals)
+        return serial + '\n'
+

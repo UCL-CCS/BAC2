@@ -11,9 +11,9 @@ class BondType(Enum):
 
 class ConstraintController:
     def __init__(self, **kwargs):
-        self.bond_constraint = None
-        self.harmonic_constraint = None
-        self.atom_constraint = None
+        self.bond_constraint: BondConstraint = None
+        self.harmonic_constraint: HarmonicConstraint = None
+        self.atom_constraint: AtomConstraint = None
         self.extra_bonds = kwargs.get('extra_bonds')
 
     @file
