@@ -1,25 +1,19 @@
-from enum import Enum
+from bac.utils.decorators import boolean, positive_decimal, pathlike, pdbcolumn, positive_integer, decimal
 
-from bac.utils.decorators import *
+from bac.simulate.coding import Encodable
 
 
 class TemperatureController:
-
-    def __init__(self, **kwargs):
-        self.langevin: LangevinDynamics = None
-        self.coupling: TemperatureCoupling = None
-        self.rescale: VelocityRescaling = None
-        self.reassign: VelocityReassignment = None
-        self.lowe_andersen: LoweAndersenDynamics = None
+    pass
 
 
-class LangevinDynamics:
-    def __init__(self, **kwargs):
-        self.temperature = kwargs.get('temperature')
-        self.damping = kwargs.get('damping')
-        self.applies_to_hydrogen = kwargs.get('hydrogen')
-        self.file = kwargs.get('file')
-        self.column = kwargs.get('column')
+class LangevinDynamics(TemperatureController, Encodable):
+    def __init__(self, *, temperature, damping=None, applies_to_hydrogen=None, file=None, column=None):
+        self.temperature = temperature
+        self.damping = damping
+        self.applies_to_hydrogen = applies_to_hydrogen
+        self.file = file
+        self.column = column
 
     @boolean(default=True)
     def applies_to_hydrogen(self): pass
@@ -30,33 +24,34 @@ class LangevinDynamics:
     @positive_decimal
     def damping(self): pass
 
-    @file(default=lambda self: self.run.coordinates)
+    @pathlike(default=lambda self: self.simulation.coordinates)
     def file(self): pass
 
-    @column
+    @pdbcolumn
     def column(self): pass
 
 
-class TemperatureCoupling:
-    def __init__(self, **kwargs):
-        self.temperature = kwargs.get('temperature')
-        self.file = kwargs.get('file')
-        self.column = kwargs.get('column')
+class TemperatureCoupling(TemperatureController, Encodable):
+
+    def __init__(self, *, temperature, file=None, column=None):
+        self.temperature = temperature
+        self.file = file
+        self.column = column
 
     @positive_decimal
     def temperature(self): pass
 
-    @file
+    @pathlike(default=lambda self: self.simulation.coordinates)
     def file(self): pass
 
-    @column
+    @pdbcolumn
     def column(self): pass
 
 
-class VelocityRescaling:
-    def __init__(self, **kwargs):
-        self.temperature = kwargs.get('temperature')
-        self.frequency = kwargs.get('frequency')
+class VelocityRescaling(TemperatureController, Encodable):
+    def __init__(self, *, temperature, frequency):
+        self.temperature = temperature
+        self.frequency = frequency
 
     @positive_decimal
     def temperature(self): pass
@@ -68,12 +63,12 @@ class VelocityRescaling:
         return self.frequency is not None
 
 
-class VelocityReassignment:
-    def __init__(self, **kwargs):
-        self.temperature = kwargs.get('temperature')
-        self.frequency = kwargs.get('frequency')
-        self.increment = kwargs.get('increment')
-        self.hold_at = kwargs.get('hold_at')
+class VelocityReassignment(TemperatureController, Encodable):
+    def __init__(self, *, temperature=None, frequency, increment=None, hold_at=None):
+        self.temperature = temperature
+        self.frequency = frequency
+        self.increment = increment
+        self.hold_at = hold_at
 
     @positive_decimal(default=lambda self: self.simulation.temperature)
     def temperature(self): pass
@@ -91,11 +86,11 @@ class VelocityReassignment:
         return self.frequency is not None
 
 
-class LoweAndersenDynamics:
-    def __init__(self, **kwargs):
-        self.temperature = kwargs.get('temperature')
-        self.cutoff = kwargs.get('cutoff')
-        self.rate = kwargs.get('rate')
+class LoweAndersenDynamics(TemperatureController, Encodable):
+    def __init__(self, *, temperature, cutoff=None, rate=None):
+        self.temperature = temperature
+        self.cutoff = cutoff
+        self.rate = rate
 
     @positive_decimal
     def temperature(self): pass

@@ -5,26 +5,25 @@ from bac.simulate.namd.temperature_controller import TemperatureController
 from bac.simulate.namd.pressure_controller import PressureController
 from bac.simulate.namd.non_bonded_controller import NonBondedController
 from bac.simulate.namd.constraint_controller import ConstraintController
-from bac.simulate.namd.boundary_condition import PeriodicBoundaryCondition
 from bac.simulate.namd.free_energy_controller import FreeEnergyController
 
 from bac.utils.decorators import (advanced_property, positive_decimal,
-                                  positive_integer,  file, boolean, back_referenced,
+                                  positive_integer, pathlike, boolean, back_referenced,
                                   non_negative_integer)
 
 from bac.simulate import gromacs
 
 from bac.simulate.basesimulation import BaseSimulation, Engine
+from bac.simulate.coding import Encodable
 
 
-class Simulation(BaseSimulation):
+class Simulation(BaseSimulation, Encodable):
 
     def __init__(self, **kwargs):
-        self.temperature_controller = TemperatureController()
-        self.pressure_controller = PressureController()
-        self.non_bonded_controller = NonBondedController()
+        self.temperature_controller = None
+        self.pressure_controller = None
+        self.non_bonded_controller = None
         self.constraints = ConstraintController()
-        self.boundary_condition = PeriodicBoundaryCondition()
 
         # DYNAMICS
 
@@ -56,7 +55,7 @@ class Simulation(BaseSimulation):
         self.binary_restart = kwargs.get('binary_restart', True)
         self.dcd_file = kwargs.get('dcd_file')
         self.dcd_frequency = kwargs.get('dcd_frequency')
-        self.dcd_unit_cell = kwargs.get('dcd_unit_cell', self.boundary_condition.is_periodic)
+        self.dcd_unit_cell = kwargs.get('dcd_unit_cell')
         self.dcd_velocity_file = kwargs.get('dcd_file')
         self.dcd_velocity_frequency = kwargs.get('dcd_velocity_frequency')
         self.dcd_force_file = kwargs.get('dcd_file')
@@ -88,9 +87,6 @@ class Simulation(BaseSimulation):
 
         self.gromacs = kwargs.get('gromacs')
 
-    @back_referenced
-    def boundary_condition(self): pass
-
     # Dynamics
 
     @positive_integer
@@ -110,33 +106,33 @@ class Simulation(BaseSimulation):
     @positive_decimal
     def temperature(self): pass
 
-    @file
+    @pathlike
     def velocities(self): pass
 
-    @file
+    @pathlike
     def binary_velocities(self): pass
 
-    @file
+    @pathlike
     def coordinates(self): pass
 
-    @file
+    @pathlike
     def binary_coordinates(self): pass
 
-    @file
+    @pathlike
     def parameters(self): pass
 
     # Output
 
-    @file
+    @pathlike
     def name(self): pass
 
-    @file(default=lambda self: self.name)
+    @pathlike(default=lambda self: self.name)
     def output_name(self): pass
 
     @boolean(default=True)
     def binary_output(self): pass
 
-    @file(default=lambda s: s.output_name.with_suffix('.restart'))
+    @pathlike(default=lambda s: s.output_name.with_suffix('.restart'))
     def restart_name(self): pass
 
     @positive_integer
@@ -145,13 +141,16 @@ class Simulation(BaseSimulation):
     @boolean(default=False)
     def restart_save(self): pass
 
-    @file(default=lambda s: s.output_name.with_suffix('.dcd'))
+    @pathlike(default=lambda s: s.output_name.with_suffix('.dcd'))
     def dcd_file(self): pass
 
-    @file(default=lambda s: s.output_name.with_suffix('.veldcd'))
+    @pathlike(default=lambda s: s.output_name.with_suffix('.veldcd'))
     def dcd_velocity_file(self): pass
 
-    @file(default=lambda s: s.output_name.with_suffix('.forcedcd'))
+    @boolean(default=True)
+    def dcd_unit_cell(self): pass
+
+    @pathlike(default=lambda s: s.output_name.with_suffix('.forcedcd'))
     def dcd_force_file(self): pass
 
     @positive_integer
@@ -186,7 +185,7 @@ class Simulation(BaseSimulation):
 
     # Charmm
 
-    @file
+    @pathlike
     def structure(self): pass
 
     @boolean(default=True)
@@ -200,43 +199,6 @@ class Simulation(BaseSimulation):
     @boolean(default=False)
     def gromacs(self): pass
 
-    # Workflow, BETA!
-
-    @property
-    def input(self):
-
-        paths = []
-
-        if self.binary_output:
-            paths += self.binary_velocities
-            paths += self.binary_coordinates
-        else:
-            paths += self.velocities
-            paths += self.coordinates
-
-        paths += self.parameters
-
-        return '\n'.join(paths)
-
-    @input.setter
-    def input(self, md):
-        if isinstance(md, self.__class__) and md.output_name is not None:
-            if md.binary_output:
-                self.binary_velocities = md.output_name.with_suffix('.vel')
-                self.binary_coordinates = md.output_name.with_suffix('.coor')
-            else:
-                self.velocities = md.output_name.with_suffix('.vel')
-                self.coordinates = md.output_name.with_suffix('.coor')
-
-            self.parameters = md.parameters
-
-        elif isinstance(md, gromacs.Simulation):
-            self.gromacs = True
-            self.coordinates = md.output_name.with_suffix('.gro')
-            self.parameters = md.output_name.with_suffix('.top')
-        else:
-            raise TypeError
-
     @property
     def configuration_file_suffix(self):
         return ".conf"
@@ -247,38 +209,45 @@ class Simulation(BaseSimulation):
 
     @property
     def executable(self):
-        return f"namd2 {self.name} > {self.output_name}"
+        return f"namd2 {self.name.with_suffix('.conf')} > {self.output_name.with_suffix('.out')}"
 
     @property
     def preprocess_executable(self):
-        return None
+        return ''
 
     def add_input_dependency(self, other_simulation):
         super(Simulation, self).add_input_dependency(other_simulation)
 
-        self.boundary_condition.extended_system = other_simulation.output_name.with_suffix('.xsc')
+        self.non_bonded_controller.extended_system = other_simulation.output_name.with_suffix('.xsc')
         self.coordinates = other_simulation.output_name.with_suffix('.coor')
         self.constraints.harmonic_constraint.reference_position_file = other_simulation.output_name.with_suffix('.coor')
 
     def restructure_paths_with_prefix(self, prefix):
-        if not self.coordinates.exists():
+        if self.coordinates and not self.coordinates.exists():
             self.coordinates = prefix/self.coordinates
-        if not self.boundary_condition.extended_system.exists():
-            self.boundary_condition.extended_system = prefix/self.boundary_condition.extended_system
-        if not self.boundary_condition.xst_file.exists():
-            self.boundary_condition.xst_file = prefix/self.boundary_condition.xst_file
-        if not self.constraints.harmonic_constraint.reference_position_file.exists():
+
+        if self.non_bonded_controller.extended_system and not self.non_bonded_controller.extended_system.exists():
+            self.non_bonded_controller.extended_system = prefix/self.non_bonded_controller.extended_system
+
+        if self.non_bonded_controller.xst_file and not self.non_bonded_controller.xst_file.exists():
+            self.non_bonded_controller.xst_file = prefix/self.non_bonded_controller.xst_file
+
+        if self.constraints.harmonic_constraint and self.constraints.harmonic_constraint.reference_position_file and not self.constraints.harmonic_constraint.reference_position_file.exists():
             self.constraints.harmonic_constraint.reference_position_file = prefix/self.constraints.harmonic_constraint.reference_position_file
-        if not self.name.exists():
-            self.name = prefix/self.name
-        if not self.output_name.exists():
-            self.output_name = prefix/self.output_name
 
     def __next__(self):
         next_run = deepcopy(self)
         next_run.name, next_run.output_name = None, None
         next_run.add_input_dependency(self)
         return next_run
+
+    def encode(self, path=None, suffix=None):
+        path = path if path.suffix == self.configuration_file_suffix else path / self.name.with_suffix(
+            self.configuration_file_suffix)
+        suf = (suffix or '') + f"{'minimize' if self.minimization else 'run'} {self.number_of_steps}\n"
+        return super(Simulation, self).encode(path=path, suffix=suf)
+
+
 
 
 

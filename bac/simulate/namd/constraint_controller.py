@@ -1,6 +1,8 @@
 from enum import Enum
 
-from bac.utils.decorators import *
+from bac.utils.decorators import pathlike, advanced_property, positive_integer, positive_decimal, boolean, pdbcolumn
+
+from bac.simulate.coding import Encodable
 
 
 class BondType(Enum):
@@ -9,24 +11,24 @@ class BondType(Enum):
     none = 'none'
 
 
-class ConstraintController:
+class ConstraintController(Encodable):
     def __init__(self, **kwargs):
         self.bond_constraint: BondConstraint = None
         self.harmonic_constraint: HarmonicConstraint = None
         self.atom_constraint: AtomConstraint = None
         self.extra_bonds = kwargs.get('extra_bonds')
 
-    @file
+    @pathlike
     def extra_bonds(self): pass
 
 
-class BondConstraint:
-    def __init__(self, **kwargs):
-        self.bonds = kwargs.get('bonds')
-        self.tolerance = kwargs.get('tolerance')
-        self.iterations = kwargs.get('iterations')
-        self.die_on_error = kwargs.get('die_on_error')
-        self.use_settle = kwargs.get('use_settle')
+class BondConstraint(Encodable):
+    def __init__(self, *, bonds=None, tolerance=None, iterations=None, die_on_error=None, use_settle=None):
+        self.bonds = bonds
+        self.tolerance = tolerance
+        self.iterations = iterations
+        self.die_on_error = die_on_error
+        self.use_settle = use_settle
 
     @advanced_property(type=BondType, default=BondType.none)
     def bonds(self): pass
@@ -44,13 +46,13 @@ class BondConstraint:
     def use_settle(self): pass
 
 
-class HarmonicConstraint:
-    def __init__(self, **kwargs):
-        self.exponent = kwargs.get('exponent')
+class HarmonicConstraint(Encodable):
+    def __init__(self, *, exponent=None, scaling=None, **kwargs):
+        self.exponent = exponent
         self.reference_position_file = kwargs.get('reference_position_file')
         self.force_constant_file = kwargs.get('force_constant_file')
         self.force_constant_column = kwargs.get('force_constant_column')
-        self.scaling = kwargs.get('scaling')
+        self.scaling = scaling
         self.select_constraints = kwargs.get('select_constraints')
         self.select_constraints_x = kwargs.get('select_constraints_x')
         self.select_constraints_y = kwargs.get('select_constraints_y')
@@ -59,13 +61,13 @@ class HarmonicConstraint:
     @positive_integer(default=0, validator=lambda _, x: x % 2 == 0)
     def exponent(self): pass
 
-    @file
+    @pathlike
     def reference_position_file(self): pass
 
-    @file
+    @pathlike
     def force_constant_file(self): pass
 
-    @column
+    @pdbcolumn
     def force_constant_column(self): pass
 
     @positive_decimal(default=1.0)
@@ -84,17 +86,17 @@ class HarmonicConstraint:
     def select_constraints_z(self): pass
 
 
-class AtomConstraint:
-    def __init__(self, **kwargs):
-        self.calculated_fixed_atom_forces = kwargs.get('calculated_fixed_atom_forces')
+class AtomConstraint(Encodable):
+    def __init__(self, *, calculate_fixed_atom_forces=None, **kwargs):
+        self.calculate_fixed_atom_forces = calculate_fixed_atom_forces
         self.file = kwargs.get('file')
         self.column = kwargs.get('column')
 
     @boolean(default=False)
-    def calculated_fixed_atom_forces(self): pass
+    def calculate_fixed_atom_forces(self): pass
 
-    @file(default=lambda s: s.run.coordinates)
+    @pathlike(default=lambda s: s.run.coordinates)
     def file(self): pass
 
-    @column
+    @pdbcolumn
     def column(self): pass

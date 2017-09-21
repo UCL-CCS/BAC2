@@ -81,9 +81,11 @@ class advanced_property(property, Versioned):
             v = obj.__getattribute__(self.private_name)
         except AttributeError:
             v = None
+
         try:
             return v if v is not None else self.default(obj)
-        except (AttributeError, TypeError):
+        except (AttributeError, TypeError) as e:
+            warnings.warn(f'{e}; {self.f.__name__}', Warning)
             return None
 
     def _fset(self, obj, value):
@@ -91,7 +93,10 @@ class advanced_property(property, Versioned):
 
         if isinstance(value, self.type):
             value = self.convert_to_default_type(value)
-            self.validate(obj, value)
+            try:
+                self.validate(obj, value)
+            except AttributeError as e:
+                warnings.warn(f'{e}')
             obj.__setattr__(self.private_name, value)
         elif value is None:
             obj.__setattr__(self.private_name, None)
@@ -168,14 +173,14 @@ class advanced_property(property, Versioned):
         return self
 
 
-class file(advanced_property):
+class pathlike(advanced_property):
     def __init__(self, *args, **kwargs):
-        super(file, self).__init__(type=(Path, str), *args, **kwargs)
+        super(pathlike, self).__init__(type=(Path, str), *args, **kwargs)
 
 
-class column(advanced_property):
+class pdbcolumn(advanced_property):
     def __init__(self, *args, **kwargs):
-        super(column, self).__init__(type=PDBColumn, default=PDBColumn.O, *args, **kwargs)
+        super(pdbcolumn, self).__init__(type=PDBColumn, default=PDBColumn.O, *args, **kwargs)
 
 
 class positive_decimal(advanced_property):

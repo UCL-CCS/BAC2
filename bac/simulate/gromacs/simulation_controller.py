@@ -2,7 +2,7 @@ from copy import deepcopy
 from enum import Enum
 from pathlib import Path
 
-from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, file, positive_integer, decimal
+from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, pathlike, positive_integer, decimal
 from bac.simulate.gromacs.temperature_controller import TemperatureController
 from bac.simulate.gromacs.pressure_controller import PressureController
 from bac.simulate.gromacs.non_bonded_controller import NonBondedController
@@ -124,19 +124,19 @@ class Simulation(BaseSimulation):
     @positive_integer(default=10)
     def minimization_correction_steps(self): pass
 
-    @file(validator=lambda _, x: x.suffix == '.gro', warn=True)
+    @pathlike(validator=lambda _, x: x.suffix == '.gro', warn=True)
     def coordinates(self): pass
 
-    @file(validator=lambda _, x: x.exists())
+    @pathlike(validator=lambda _, x: x.exists())
     def topology(self): pass
 
-    @file
+    @pathlike
     def velocities(self): pass
 
-    @file(default=lambda s: s.name)
+    @pathlike(default=lambda s: s.name)
     def output_name(self): pass
 
-    @file(default=lambda s: s.integrator.name)
+    @pathlike(default=lambda s: s.integrator.name)
     def name(self): pass
 
     def add_input_dependency(self, other_simulation):

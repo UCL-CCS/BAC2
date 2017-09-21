@@ -1,0 +1,22 @@
+constraints:
+  - active_indicator
+  - on_off
+consexp: exponent
+consref: reference_position_file
+conskfile: force_constant_file
+conskcol:
+  - force_constant_column
+  - enum
+constraintScaling: scaling
+selectConstraints:
+  - select_constraints
+  - on_off
+selectConstrX:
+  - select_constraints_x
+  - on_off
+selectConstrY:
+  - select_constraints_y
+  - on_off
+selectConstrZ:
+  - select_constraints_z
+  - on_off

@@ -1,0 +1,10 @@
+fixedAtoms:
+  - active_indicator
+  - on_off
+fixedAtomsForces:
+  - calculate_fixed_atom_forces
+  - on_off
+fixedAtomsFile: file
+fixedAtomsCol:
+  - column
+  - enum
