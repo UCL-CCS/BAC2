@@ -1,0 +1,12 @@
+langevin:
+  - active_indicator
+  - on_off
+langevinTemp: temperature
+langevinDamping: damping
+langevinHydrogen:
+  - applies_to_hydrogen
+  - on_off
+langevinFile: file
+langevinCol:
+  - column
+  - enum

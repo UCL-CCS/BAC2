@@ -2,8 +2,7 @@ import subprocess
 import copy
 from pathlib import Path
 from itertools import product
-import random
-from bac.simulate.coding import Encoder
+
 from bac.simulate.basesimulation import BaseSimulation
 from bac.simulate.ensemble import BaseEnsembleIterator
 
@@ -30,7 +29,7 @@ class Workflow:
         ----------
         resource: str
             The supercomputer the workflow will run on.
-        dir: path like
+        r_dir: path like
             The name of the simulation. This will be the master folder name too.
 
         Methods
@@ -79,12 +78,6 @@ class Workflow:
     def preprocess_simulations(self):
         """Run pre-processing tasks for the simulations.
 
-        Parameters
-        ----------
-        execute: bool
-            Execute the pre processing step on the shell. If `False` then the
-            executable is printed to stdout.
-
         """
         for *ensembles, simulation in product(*self.ensembles, self.simulations):
 
@@ -99,7 +92,7 @@ class Workflow:
 
             sim.restructure_paths_with_prefix(prefix=prefix)
 
-            Encoder.encode(sim, self.path)
+            sim.encode(path=self.path)
 
         self.write_generic_bash_executable(path=self.path)
 

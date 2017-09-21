@@ -237,3 +237,5 @@ ENV/
 
 
 examples/gromacs_fe/MeOH*
+examples/namd_esmacs/esmacs_bw
+examples/mobley/mobley_9055303

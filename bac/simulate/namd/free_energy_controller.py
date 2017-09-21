@@ -1,6 +1,8 @@
 from enum import Enum
 
-from bac.utils.decorators import advanced_property, decimal, positive_integer, file, column, positive_decimal, boolean
+from bac.utils.decorators import advanced_property, decimal, positive_integer, pathlike, pdbcolumn, positive_decimal, boolean
+
+from bac.simulate.coding import Encodable
 
 
 class FreeEnergyCalculationType(Enum):
@@ -8,7 +10,7 @@ class FreeEnergyCalculationType(Enum):
     ti = 'ti'
 
 
-class FreeEnergyController:
+class FreeEnergyController(Encodable):
 
     def __init__(self, **kwargs):
         self.type = kwargs.get('type')
@@ -38,10 +40,10 @@ class FreeEnergyController:
     @positive_integer(default=0, validator=lambda self, x: self.run.number_of_steps >= x)
     def equilibration_steps(self): pass
 
-    @file(default=lambda self: self.run.coordinates)
+    @pathlike(default=lambda self: self.run.coordinates)
     def file(self): pass
 
-    @column
+    @pdbcolumn
     def column(self): pass
 
     @positive_integer(default=5)

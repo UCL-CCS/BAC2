@@ -52,7 +52,7 @@ class TemperatureController:
     @integer(default=_frequency_default)
     def frequency(self): pass
 
-    @integer(default=10, validator=lambda self, v: (v == 1) if (self.run.integrator is Integrator.md) else True)
+    @integer(default=10, validator=lambda self, v: (v == 1) if (self.simulation.integrator is Integrator.md) else True)
     def nose_hoover_chain_length(self): pass
 
     @advanced_property(type=list, default=['System'])

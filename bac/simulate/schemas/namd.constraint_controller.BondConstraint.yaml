@@ -1,0 +1,11 @@
+rigidBonds:
+  - bonds
+  - enum
+rigidTolerance: tolerance
+rigidIterations: iterations
+rigidDieOnError:
+  - die_on_error
+  - on_off
+useSettle:
+  - use_settle
+  - on_off

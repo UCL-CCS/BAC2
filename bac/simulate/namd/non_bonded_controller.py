@@ -2,6 +2,8 @@ from enum import Enum
 
 from bac.utils.decorators import *
 
+from bac.simulate.coding import Encodable
+
 
 class Interaction(Enum):
     one_two = '1-2'
@@ -12,8 +14,10 @@ class Interaction(Enum):
 
 
 class MTSAlgorithm(Enum):
-    impulse_verlet = 'impulse/verletI'
-    constant_naive = 'constant/naive'
+    impulse = 'impulse'
+    verlet = 'verletI'
+    constant = 'constant'
+    naive = 'naive'
 
 
 class LongSplitting(Enum):
@@ -26,8 +30,7 @@ class SplitPatchType(Enum):
     position = 'position'
 
 
-class NonBondedController:
-
+class NonBondedController(Encodable):
     def __init__(self, **kwargs):
 
         self.cutoff = kwargs.get('cutoff')
@@ -61,6 +64,20 @@ class NonBondedController:
 
         self.pme = None
         self.molly = None
+
+        self.cell_basis_vector_1 = kwargs.get('cell_basis_vector_1')
+        self.cell_basis_vector_2 = kwargs.get('cell_basis_vector_2')
+        self.cell_basis_vector_3 = kwargs.get('cell_basis_vector_3')
+        self.cell_origin = kwargs.get('cell_origin')
+
+        self.extended_system: Path = kwargs.get('extended_system')
+        self.xst_file = kwargs.get('xst_file')
+        self.xst_frequency = kwargs.get('xst_frequency')
+
+        self.wrap_water = kwargs.get('wrap_water')
+        self.wrap_all = kwargs.get('wrap_all')
+        self.wrap_nearest = kwargs.get('wrap_nearest')
+
 
     @positive_decimal
     def cutoff(self): pass
@@ -105,7 +122,7 @@ class NonBondedController:
     @advanced_property(type=LongSplitting, default=LongSplitting.c1)
     def long_splitting(self): pass
 
-    @advanced_property(type=MTSAlgorithm, default=MTSAlgorithm.impulse_verlet)
+    @advanced_property(type=MTSAlgorithm, default=MTSAlgorithm.impulse)
     def mts_algorithm(self): pass
 
     @positive_integer(default=20)
@@ -114,8 +131,48 @@ class NonBondedController:
     @advanced_property(type=SplitPatchType, default=SplitPatchType.hydrogen)
     def split_patch(self): pass
 
+    # Boundary Condition
 
-class PME:
+    @advanced_property(type=tuple, default=(0, 0, 0))
+    def cell_basis_vector_1(self): pass
+
+    @advanced_property(type=tuple, default=(0, 0, 0))
+    def cell_basis_vector_2(self): pass
+
+    @advanced_property(type=tuple, default=(0, 0, 0))
+    def cell_basis_vector_3(self): pass
+
+    @advanced_property(type=tuple, default=(0, 0, 0))
+    def cell_origin(self): pass
+
+    @pathlike
+    def extended_system(self): pass
+
+    @extended_system.post_set_processing
+    def extended_system(self, value):
+        if value is not None:
+            self.cell_basis_vector_1 = None
+            self.cell_basis_vector_2 = None
+            self.cell_basis_vector_3 = None
+            self.cell_origin = None
+
+    @pathlike(default=lambda self: self.simulation.output_name.with_suffix('.xst') if self.xst_frequency else None)
+    def xst_file(self): pass
+
+    @positive_integer
+    def xst_frequency(self): pass
+
+    @boolean(default=False)
+    def wrap_water(self):pass
+
+    @boolean(default=False)
+    def wrap_all(self): pass
+
+    @boolean(default=False)
+    def wrap_nearest(self): pass
+
+
+class PME(Encodable):
     def __init__(self, **kwargs):
         self.tolerance = kwargs.get('tolerance', 10e-6)
         self.interpolation_order = kwargs.get('interpolation_order', 4)
@@ -123,9 +180,7 @@ class PME:
         self.grid_size = kwargs.get('grid_size')
 
 
-class Molly:
+class Molly(Encodable):
     def __init__(self, **kwargs):
         self.tolerance = kwargs.get('tolerance', 0.00001)
         self.iterations = kwargs.get('iterations', 100)
-
-

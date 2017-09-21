@@ -1,94 +1,80 @@
-from enum import Enum
 import yaml
+from functools import reduce
 
-from .basesimulation import BaseSimulation, Engine
+_encoders = {'yes_no': lambda x: ('no', 'yes')[x],
+             'on_off': lambda x: ('off', 'on')[x],
+             'enum': lambda x: x.value,
+             'iter': lambda x: ' '.join(str(xs) for xs in x),
+             'two_digit_iter': lambda xs: ' '.join(f'{x:.2f}'for x in xs)}
 
 
-class Encoder:
-    """Encoding functionality. Singleton-like.
+_column_size = 25
 
-    """
 
-    # These are simple lambda functions that turn
-    # python types into specification correct
-    # format. A notable example is the yes/no and
-    # on/off bool problem.
-    _encoders = {'yes_no': lambda x: ('no', 'yes')[x],
-                 'on_off': lambda x: ('off', 'on')[x],
-                 'enum': lambda x: x.value,
-                 'iter': lambda x: ' '.join(str(xs) for xs in x),
-                 'two_digit_iter': lambda xs: ' '.join(f'{x:.2f}'for x in xs)}
+class Encodable:
 
-    _column_size = 25
+    def encode(self, path=None, suffix=None):
 
-    @classmethod
-    def encode(cls, simulation: BaseSimulation, path=None):
-        """
+        # This is an ugly hack. So the yaml files are named as if you were to write out the
+        # class' name, with the module hierarchy. But printing that out puts a < class ' in front
+        # so we have to take that out, plus we also take out bac.simulate.
+        # Also, this has to be set as a resource in the setup.py file, obv referencing it like this
+        # is not cool.
 
-        Parameters
-        ----------
-        simulation
-            Simulation class
-        path: Path
-            Location of configuration file
+        def update(d, other): d.update(other); return d
 
-        """
+        attributes = reduce(update, (yaml.load(open(f"/Users/kristofarkas/Developer/BAC2/bac/simulate/schemas/{str(class_names)[21:-2]}.yaml"))
+                                     for class_names in (self.__class__, *self.__class__.__bases__) if (issubclass(class_names, Encodable)) and class_names is not Encodable), {})
 
-        encoded = cls._serialize(simulation, cls._schema(Engine(simulation.engine_type.value)))
+        s = self._serialize(attributes)
 
-        if path is not None:
-            path = path if path.suffix == simulation.configuration_file_suffix else path / simulation.name.with_suffix(simulation.configuration_file_suffix)
-            with open(path, mode='w') as conf:
-                conf.write(encoded)
+        if suffix:
+            s += suffix
+
+        if path is None:
+            return s
         else:
-            print(encoded)
+            with open(path, mode='w') as f:
+                f.write(s)
 
-    # FIXME: setuptools for resource (yaml) allocation.
-    @staticmethod
-    def _schema(engine: Engine):
-        if engine is Engine.namd:
-            return yaml.load(open('/Users/kristofarkas/Developer/BAC2/bac/simulate/namd/namd_schema.yaml'))
-        elif engine is Engine.gromacs:
-            return yaml.load(open('/Users/kristofarkas/Developer/BAC2/bac/simulate/gromacs/gromacs_schema.yaml'))
-
-    @classmethod
-    def _serialize(cls, obj, attributes):
+    def _serialize(self, attributes):
         serial = ''
         for external_name, internals in attributes.items():
             # As a simplification, if the internal and external name are the same
             # one can omit the internal name in the YAML file. This results in
             # `internals` to be `None`. We can set `internals` to be `external_name`.
             if internals is None:
-                internals = external_name
+                internals = [external_name]
 
-            # Simple key value pair
             if isinstance(internals, str):
-                value = obj.__getattribute__(internals)
-                if value is not None:
-                    serial += "{}{} = {}\n".format(external_name, ' ' * (cls._column_size - len(external_name)), value)
+                internals = [internals]
 
-            # The value is a list containing the name and encoding mechanism
-            # The list has to be [name, encoding] format. Nothing else works.
-            elif isinstance(internals, list):
-                value = obj.__getattribute__(internals[0])
-                if value is not None:
-                    encoder = cls._encoders[internals[1]]
-                    serial += "{}{} = {}\n".format(external_name, ' ' * (cls._column_size - len(external_name)),
-                                                   encoder(value))
+            if not isinstance(internals, list):
+                raise SyntaxError('YAML schema is invalid!')
 
-            # The value is a dictionary. Meaning that we have to go one level
-            # down in the hierarchy. This function is then called recursively on
-            # the object.
-            elif isinstance(internals, dict):
-                sub_obj = obj.__getattribute__(external_name)
+            if internals[0] == 'active_indicator':
+                value = True
+            else:
+                value = self.__getattribute__(internals[0])
 
-                name_token = internals.pop('name_token', None)
-                if name_token is not None:
-                    encoder = cls._encoders[name_token[1]]
-                    serial += "{}{} = {}\n".format(name_token[0], ' ' * (cls._column_size - len(name_token[0])),
-                                                   encoder(sub_obj is not None))
+            if isinstance(value, Encodable):
+                serial += value.encode()
+            elif value is not None:
+                serial += self._format_line(external_name, value if len(internals) == 1 else _encoders[internals[1]](value))
 
-                if sub_obj is not None:
-                    serial += cls._serialize(sub_obj, internals)
         return serial + '\n'
+
+    @staticmethod
+    def _format_line(this: str, that: str, separator=' = ', align=True, terminator='\n'):
+
+        this = str(this)
+
+        if align:
+            this += ' '*(_column_size - len(this))
+        this += separator + str(that) + terminator
+
+        return this
+
+
+
 
