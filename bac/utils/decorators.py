@@ -121,7 +121,7 @@ class advanced_property(property, Versioned):
 
         default_to_return = self._default(obj) if callable(self._default) else self._default
 
-        return self.convert_to_default_type(default_to_return)
+        return self.convert_to_default_type(default_to_return) if default_to_return is not None else None
 
     @property
     def type(self):
@@ -141,6 +141,7 @@ class advanced_property(property, Versioned):
 
     def convert_to_default_type(self, value):
         default_type = self.type[0]
+
         if default_type is list and not isinstance(value, list):
             value = [value]
 

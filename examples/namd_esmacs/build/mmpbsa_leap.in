@@ -1,0 +1,18 @@
+source oldff/leaprc.ff99SBildn
+source leaprc.gaff
+addAtomTypes { { "ZN" "Zn" "sp3" } { "S3" "S" "sp3" } { "N2" "N" "sp3" } }
+loadoff atomic_ions.lib
+loadamberparams frcmod.ions1lsm_hfe_tip3p
+loadamberparams frcmod.ionslrcm_hfe_tip3p
+loadamberprep ZAFF.prep 
+loadamberparams ZAFF.frcmod
+
+frcmod = loadamberparams /home/dave/tmp/bac-store/system_descriptions/default/drugs_par/egfr/resp/aee/aee.frcmod
+loadamberprep /home/dave/tmp/bac-store/system_descriptions/default/drugs_par/egfr/resp/aee/aee.prep
+lig = loadpdb /home/dave/tmp/bac-store/default/egfr-a698g/com/drug/aee/2j6m-a698g/build/lig.pdb
+saveamberparm lig /home/dave/tmp/bac-store/default/egfr-a698g/com/drug/aee/2j6m-a698g/build/lig.top /home/dave/tmp/bac-store/default/egfr-a698g/com/drug/aee/2j6m-a698g/build/lig.crd
+rec = loadpdb /home/dave/tmp/bac-store/default/egfr-a698g/com/drug/aee/2j6m-a698g/build/rec.pdb 
+saveamberparm rec /home/dave/tmp/bac-store/default/egfr-a698g/com/drug/aee/2j6m-a698g/build/rec.top /home/dave/tmp/bac-store/default/egfr-a698g/com/drug/aee/2j6m-a698g/build/rec.crd
+com = loadpdb /home/dave/tmp/bac-store/default/egfr-a698g/com/drug/aee/2j6m-a698g/build/com.pdb
+saveamberparm com /home/dave/tmp/bac-store/default/egfr-a698g/com/drug/aee/2j6m-a698g/build/com.top /home/dave/tmp/bac-store/default/egfr-a698g/com/drug/aee/2j6m-a698g/build/com.crd
+quit

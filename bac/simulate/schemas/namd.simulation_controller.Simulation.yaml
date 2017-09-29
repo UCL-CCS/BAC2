@@ -48,6 +48,8 @@ paraTypeCharmm:
   - on_off
 
 gromacs:
+  - gromacs
+  - on_off
 
 ## NonBondedController
 non_bonded_controller:

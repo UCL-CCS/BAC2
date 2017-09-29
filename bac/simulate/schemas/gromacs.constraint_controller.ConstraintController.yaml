@@ -1,0 +1,16 @@
+constraints:
+  - type
+  - enum
+constraint-algorithm:
+  - algorithm
+  - enum
+continuation:
+  - continuation
+  - yes_no
+shake-tol: shake_tolerance
+lincs-order: lincs_order
+lincs-iter: lincs_iterations
+lincs-warnangle: lincs_warn_after_angle
+morse:
+  - morse
+  - yes_no

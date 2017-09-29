@@ -1,6 +1,7 @@
 from enum import Enum
 
 from bac.utils.decorators import advanced_property, decimal, positive_integer, positive_decimal, boolean
+from bac.simulate.coding import Encodable
 
 
 class CutoffSchemeType(Enum):
@@ -116,7 +117,7 @@ class EwaldGeometryType(Enum):
     three_dimensions_corrected = '3dc'
 
 
-class NonBondedController:
+class NonBondedController(Encodable):
 
     def __init__(self, **kwargs):
         self.cutoff = kwargs.get('cutoff')

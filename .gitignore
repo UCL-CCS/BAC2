@@ -145,7 +145,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
-build/
+#build/
 develop-eggs/
 dist/
 downloads/
@@ -235,7 +235,7 @@ ENV/
 
 # End of https://www.gitignore.io/api/python,pycharm,pycharm+all,pycharm+iml
 
-
-examples/gromacs_fe/MeOH*
+examples/gromacs_solv/mobley_*/mobley_*/
 examples/namd_esmacs/esmacs_bw
-examples/mobley/mobley_9055303
+examples/namd_ties/bace1_b01/bace1_b01
+examples/namd_solv/mobley_*/mobley_*/

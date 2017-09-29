@@ -1,3 +1,5 @@
+import numpy as np
+
 from enum import Enum
 
 from bac.utils.decorators import advanced_property, decimal, positive_integer, pathlike, pdbcolumn, positive_decimal, boolean
@@ -31,16 +33,20 @@ class FreeEnergyController(Encodable):
     @advanced_property(type=FreeEnergyCalculationType, default=FreeEnergyCalculationType.ti)
     def type(self): pass
 
-    @decimal(validator=lambda _, x: 0 <= x <= 1)
+    @advanced_property(type=(np.float_, float, int, str), validator=lambda _, x: 0 <= x <= 1)
     def start_lambda(self): pass
 
-    @decimal(validator=lambda _, x: 0 <= x <= 1)
+    @advanced_property(type=(np.float_, float, int, str), validator=lambda _, x: 0 <= x <= 1)
     def end_lambda(self): pass
+
+    @property
+    def supports_lambda_state(self):
+        return False
 
     @positive_integer(default=0, validator=lambda self, x: self.run.number_of_steps >= x)
     def equilibration_steps(self): pass
 
-    @pathlike(default=lambda self: self.run.coordinates)
+    @pathlike(default=lambda self: self.simulation.coordinates)
     def file(self): pass
 
     @pdbcolumn
@@ -49,7 +55,7 @@ class FreeEnergyController(Encodable):
     @positive_integer(default=5)
     def output_frequency(self): pass
 
-    @advanced_property(type=str, default='outfilename')
+    @pathlike(default=lambda self:self.simulation.output_name.with_suffix('.alch'))
     def output_name(self): pass
 
     @positive_decimal(default=5)

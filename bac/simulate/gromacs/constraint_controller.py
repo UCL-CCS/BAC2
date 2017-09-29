@@ -1,6 +1,7 @@
 from enum import Enum
 
 from bac.utils.decorators import advanced_property, decimal, boolean, positive_integer
+from bac.simulate.coding import Encodable
 
 
 class ConstraintType(Enum):
@@ -23,7 +24,7 @@ class ConstraintAlgorithmType(Enum):
     shake = 'SHAKE'
 
 
-class ConstraintController:
+class ConstraintController(Encodable):
 
     def __init__(self, **kwargs):
         self.type = kwargs.get('type')

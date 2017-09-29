@@ -1,6 +1,7 @@
 from enum import Enum
 
 from bac.utils.decorators import decimal, advanced_property, boolean, integer
+from bac.simulate.coding import Encodable
 
 
 class CouplingType(Enum):
@@ -30,7 +31,7 @@ class OutputEnergyType(Enum):
             super()._missing_(value)
 
 
-class FreeEnergyController:
+class FreeEnergyController(Encodable):
 
     def __init__(self, **kwargs):
         # self.expanded = kwargs.get('expanded')
@@ -92,6 +93,10 @@ class FreeEnergyController:
 
     @integer(default=-1)
     def initial_lambda_state(self): pass
+
+    @property
+    def supports_lambda_state(self):
+        return True
 
     @advanced_property(type=list, default=[])
     def fep_lambdas(self): pass

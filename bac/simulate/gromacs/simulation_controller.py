@@ -10,6 +10,7 @@ from bac.simulate.gromacs.constraint_controller import ConstraintController
 
 from bac.simulate.basesimulation import BaseSimulation, Engine
 from bac.simulate.gromacs.integrator import Integrator
+from bac.simulate.coding import Encodable
 
 
 class CenterOfMassMotion(Enum):
@@ -25,7 +26,7 @@ class CenterOfMassMotion(Enum):
             super()._missing_(value)
 
 
-class Simulation(BaseSimulation):
+class Simulation(BaseSimulation, Encodable):
 
     def __init__(self, **kwargs):
 
@@ -182,8 +183,6 @@ class Simulation(BaseSimulation):
     def restructure_paths_with_prefix(self, prefix):
         if not self.name.exists():
             self.name = prefix/self.name
-        if not self.output_name.exists():
-            self.output_name = prefix/self.output_name
         if not self.coordinates.exists():
             self.coordinates = prefix/self.coordinates
         if self.velocities and not self.velocities.exists():
@@ -223,3 +222,9 @@ class Simulation(BaseSimulation):
     @property
     def engine_type(self):
         return Engine.gromacs
+
+    def encode(self, path=None, suffix=None):
+        path = path if path.suffix == self.configuration_file_suffix else path / self.name.with_suffix(
+            self.configuration_file_suffix)
+        return super(Simulation, self).encode(path=path)
+
