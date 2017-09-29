@@ -1,5 +1,6 @@
 import yaml
 from functools import reduce
+from pathlib import Path
 
 _encoders = {'yes_no': lambda x: ('no', 'yes')[x],
              'on_off': lambda x: ('off', 'on')[x],
@@ -10,8 +11,11 @@ _encoders = {'yes_no': lambda x: ('no', 'yes')[x],
 
 _column_size = 25
 
-
 class Encodable:
+
+    @staticmethod
+    def _get_schema(class_name):
+        return Path(__file__).parent.joinpath('schemas',f'{class_name[21:-2]}.yaml')
 
     def encode(self, path=None, suffix=None):
 
@@ -23,7 +27,7 @@ class Encodable:
 
         def update(d, other): d.update(other); return d
 
-        attributes = reduce(update, (yaml.load(open(f"/Users/kristofarkas/Developer/BAC2/bac/simulate/schemas/{str(class_names)[21:-2]}.yaml"))
+        attributes = reduce(update, (yaml.load(open(self._get_schema(str(class_names))))
                                      for class_names in (self.__class__, *self.__class__.__bases__) if (issubclass(class_names, Encodable)) and class_names is not Encodable), {})
 
         s = self._serialize(attributes)
