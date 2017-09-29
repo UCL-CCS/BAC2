@@ -1,5 +1,6 @@
 from enum import Enum
 from copy import deepcopy
+from pathlib import Path
 
 from bac.simulate.namd.temperature_controller import TemperatureController
 from bac.simulate.namd.pressure_controller import PressureController
@@ -109,6 +110,11 @@ class Simulation(BaseSimulation, Encodable):
     @pathlike
     def velocities(self): pass
 
+    @velocities.post_set_processing
+    def velocities(self, value):
+        if value is not None:
+            self.temperature = None
+
     @pathlike
     def binary_velocities(self): pass
 
@@ -126,7 +132,7 @@ class Simulation(BaseSimulation, Encodable):
     @pathlike
     def name(self): pass
 
-    @pathlike(default=lambda self: self.name)
+    @pathlike
     def output_name(self): pass
 
     @boolean(default=True)
@@ -209,7 +215,8 @@ class Simulation(BaseSimulation, Encodable):
 
     @property
     def executable(self):
-        return f"namd2 {self.name.with_suffix('.conf')} > {self.output_name.with_suffix('.out')}"
+        return f"aprun -n 1 -N 1 -d 31 /u/sciteam/jphillip/NAMD_LATEST_CRAY-XE-ugni-smp-BlueWaters/namd2" \
+               f" +ppn 30 +pemap 0-29 +commap 30 {self.name.with_suffix('.conf')} >& {self.name.with_suffix('.log')}"
 
     @property
     def preprocess_executable(self):
@@ -220,20 +227,41 @@ class Simulation(BaseSimulation, Encodable):
 
         self.non_bonded_controller.extended_system = other_simulation.output_name.with_suffix('.xsc')
         self.coordinates = other_simulation.output_name.with_suffix('.coor')
-        self.constraints.harmonic_constraint.reference_position_file = other_simulation.output_name.with_suffix('.coor')
+
+        if self.constraints.harmonic_constraint is not None:
+            self.constraints.harmonic_constraint.reference_position_file = other_simulation.output_name.with_suffix('.coor')
+
+        if not other_simulation.minimization:
+            self.velocities = other_simulation.output_name.with_suffix('.vel')
 
     def restructure_paths_with_prefix(self, prefix):
-        if self.coordinates and not self.coordinates.exists():
+
+        if not self.name.exists():
+            self.name = prefix/self.name
+
+        prefix = Path('/'.join(['..']*len(prefix.parts)))
+
+        if self.coordinates and self.coordinates.exists():
             self.coordinates = prefix/self.coordinates
 
-        if self.non_bonded_controller.extended_system and not self.non_bonded_controller.extended_system.exists():
+        if self.parameters and self.parameters.exists():
+            self.parameters = prefix/self.parameters
+
+        if self.non_bonded_controller.extended_system and self.non_bonded_controller.extended_system.exists():
             self.non_bonded_controller.extended_system = prefix/self.non_bonded_controller.extended_system
 
-        if self.non_bonded_controller.xst_file and not self.non_bonded_controller.xst_file.exists():
+        if self.non_bonded_controller.xst_file and self.non_bonded_controller.xst_file.exists():
             self.non_bonded_controller.xst_file = prefix/self.non_bonded_controller.xst_file
 
-        if self.constraints.harmonic_constraint and self.constraints.harmonic_constraint.reference_position_file and not self.constraints.harmonic_constraint.reference_position_file.exists():
+        if self.constraints.harmonic_constraint and self.constraints.harmonic_constraint.reference_position_file and self.constraints.harmonic_constraint.reference_position_file.exists():
             self.constraints.harmonic_constraint.reference_position_file = prefix/self.constraints.harmonic_constraint.reference_position_file
+
+        if self.constraints.harmonic_constraint and self.constraints.harmonic_constraint.force_constant_file and self.constraints.harmonic_constraint.force_constant_file.exists():
+            self.constraints.harmonic_constraint.force_constant_file = prefix/self.constraints.harmonic_constraint.force_constant_file
+
+        if self.free_energy_controller and self.free_energy_controller.file:
+            self.free_energy_controller.file = prefix/self.free_energy_controller.file
+
 
     def __next__(self):
         next_run = deepcopy(self)
@@ -242,7 +270,7 @@ class Simulation(BaseSimulation, Encodable):
         return next_run
 
     def encode(self, path=None, suffix=None):
-        path = path if path.suffix == self.configuration_file_suffix else path / self.name.with_suffix(
+        path = path if (path is None or path.suffix == self.configuration_file_suffix) else path / self.name.with_suffix(
             self.configuration_file_suffix)
         suf = (suffix or '') + f"{'minimize' if self.minimization else 'run'} {self.number_of_steps}\n"
         return super(Simulation, self).encode(path=path, suffix=suf)

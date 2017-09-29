@@ -104,12 +104,7 @@ class Workflow:
         with open(path / 'workflow.sh', mode='w') as wf, open(path / 'run.sh', mode='w') as rn:
 
             wf.write('#!/usr/bin/env bash\n\n')
-            rn.write('#!/usr/bin/env bash\n\n'
-                     '#PBS -l nodes=%%%:ppn=32:xe\n'
-                     '#PBS -l walltime=%%:%%:00\n'
-                     'module swap PrgEnv-cray PrgEnv-gnu\n'
-                     'export OMP_NUM_THREADS=1\n'
-                     'cd $PBS_O_WORKDIR\n')
+            rn.write(self.bash_preprocessor())
 
             for index, ens in enumerate(self.ensembles, start=1):
                 wf.write(f"{ens.name.upper()}=${index}\n")
@@ -134,5 +129,23 @@ class Workflow:
     def __len__(self):
         return sum(1 if not x.is_finished else 0 for x in self._simulations)
 
+    def bash_preprocessor(self):
+        prep = "#!/usr/bin/env bash\n\n" \
+               "#PBS -l walltime=00:15:00\n" \
+               "#PBS -l nodes=1:ppn=32:xe\n" \
+               "cd $PBS_O_WORKDIR\n" \
+               "module swap PrgEnv-cray PrgEnv-gnu\n" \
 
+        if True:
+            prep += "export OMP_NUM_THREADS=1\n"
+        else:
+            prep += "module load rca\n" \
+                    "module load craype-hugepages8M\n" \
+                    "module list\n" \
+                    "export HUGETLB_DEFAULT_PAGE_SIZE=8M\n" \
+                    "export HUGETLB_MORECORE=no\n" \
+                    "export ATP_ENABLED=1\n" \
+                    "ulimit -c unlimited\n"
+
+        return prep
 

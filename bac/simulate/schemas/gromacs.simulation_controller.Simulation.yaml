@@ -1,0 +1,44 @@
+integrator:
+  - integrator
+  - enum
+tinit: initial_time
+dt: delta_time
+nsteps: number_of_steps
+init-step: initial_step
+comm-mode:
+  - center_of_mass_motion
+  - enum
+nstcomm: com_motion_removal_frequency
+
+emtol: minimization_tolerance
+emstep: minimization_step_size
+nstcgsteep: minimization_steepest_descent_frequency
+nbfgscorr: minimization_correction_steps
+
+gen-vel:
+  - generate_velocities
+  - yes_no
+gen-temp: generate_temperature
+gen-seed: generate_seed
+
+nstxout: coordinate_output_frequency
+nstvout: velocity_output_frequency
+nstfout: force_output_frequency
+nstlog: energy_log_output_frequency
+nstcalcenergy: recalculate_energies_frequency
+nstenergy: energy_output_frequency
+nstxout-compressed: compressed_coordinate_output_frequency
+compressed-x-precision: compression_precision
+compressed-x-grps:
+  - compressed_groups
+  - iter
+
+temperature_controller:
+
+pressure_controller:
+
+non_bonded_controller:
+
+constraints:
+
+free_energy_controller:

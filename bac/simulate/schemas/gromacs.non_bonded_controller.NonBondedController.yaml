@@ -1,0 +1,53 @@
+cutoff-scheme:
+  - cutoff_scheme
+  - enum
+nstlist: neighbor_list_update_frequency
+ns-type:
+  - neighbor_list_type
+  - enum
+pbc:
+  - periodic_boundary_condition
+  - enum
+periodic-molecules:
+  - periodic_molecules
+  - yes_no
+verlet-buffer-tolerance: verlet_buffer_tolerance
+rlist: cutoff
+
+coulombtype:
+  - coulomb_type
+  - enum
+coulomb-modifier:
+  - coulomb_modifier
+  - enum
+rcoulomb-switch: coulomb_switch_cutoff
+rcoulomb: coulomb_cutoff
+epsilon-r: dielectric
+epsilon-rf: relative_dielectric
+
+vdwtype:
+  - van_der_waals_type
+  - enum
+vdw-modifier:
+  - van_der_waals_modifier
+  - enum
+rvdw-switch: van_der_waals_switch_cutoff
+rvdw: van_der_waals_cutoff
+DispCorr:
+  - correct_long_range_dispersion
+  - enum
+
+fourierspacing: fourier_spacing
+fourier-nx: fourier_magnitude_x
+fourier-ny: fourier_magnitude_y
+fourier-nz: fourier_magnitude_z
+pme-order: pme_order
+ewald-rtol: ewald_tolerance_coulomb
+ewald-rtol-lj: ewald_tolerance_vdw
+lj-pme-comb-rule:
+  - ewald_combination_rule
+  - enum
+ewald-geometry:
+  - ewald_geometry
+  - enum
+epsilon-surface: ewald_epsilon_surface

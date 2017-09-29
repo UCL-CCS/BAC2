@@ -87,3 +87,10 @@ class BaseSimulation(Versioned, metaclass=ABCMeta):
     @back_referenced
     def free_energy_controller(self): pass
 
+
+class BaseFreeEnergyController(metaclass=ABCMeta):
+
+
+
+    pass
+

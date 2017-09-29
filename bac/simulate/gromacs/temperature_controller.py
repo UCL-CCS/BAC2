@@ -2,6 +2,7 @@ from enum import Enum
 
 from bac.utils.decorators import advanced_property, integer
 from bac.simulate.gromacs.integrator import Integrator
+from bac.simulate.coding import Encodable
 
 
 class TemperatureCouplingType(Enum):
@@ -20,7 +21,7 @@ class TemperatureCouplingType(Enum):
             super()._missing_(value)
 
 
-class TemperatureController:
+class TemperatureController(Encodable):
     def __init__(self, **kwargs):
 
         self.type = kwargs.get('type')
@@ -47,7 +48,7 @@ class TemperatureController:
         if self.simulation.integrator in (Integrator.md_vv, Integrator.md_vv_avek):
             return 1
         else:
-            return self.simulation.non_bonded_controller.nstlist if self.simulation.non_bonded_controller.nstlist > 0 else 10
+            return self.simulation.non_bonded_controller.neighbor_list_update_frequency if self.simulation.non_bonded_controller.neighbor_list_update_frequency > 0 else 10
 
     @integer(default=_frequency_default)
     def frequency(self): pass
