@@ -1,0 +1,12 @@
+useGroupPressure:
+  - use_group_pressure
+  - yes_no
+useFlexibleCell:
+  - use_flexible_cell
+  - yes_no
+useConstantRatio:
+  - use_constant_ratio
+  - yes_no
+useConstantArea:
+  - use_constant_area
+  - yes_no

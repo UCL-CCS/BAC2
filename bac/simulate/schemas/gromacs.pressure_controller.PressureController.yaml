@@ -1,0 +1,17 @@
+pcoupl:
+  - type
+  - enum
+pcoupltype:
+  - isotropy
+  - enum
+nstpcouple: frequency
+tau-p: time
+compressibility:
+  - compressibility
+  - iter
+ref-p:
+  - pressure
+  - iter
+refcoord-scaling:
+  - reference_coordinate_scaling
+  - enum

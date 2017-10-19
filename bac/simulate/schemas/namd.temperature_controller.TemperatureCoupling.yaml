@@ -1,0 +1,8 @@
+tCouple:
+  - active_indicator
+  - on_off
+tCoupleTemp: temperature
+tCoupleFile: file
+tCoupleCol:
+  - column
+  - enum

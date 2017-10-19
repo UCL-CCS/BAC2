@@ -1,0 +1,25 @@
+alch:
+  - active_indicator
+  - on_off
+alchType:
+  - type
+  - enum
+alchLambda: start_lambda
+alchLambda2: end_lambda
+alchEquilSteps: equilibration_steps
+alchFile: file
+alchCol:
+  - column
+  - enum
+alchOutFreq: output_frequency
+alchOutFile: output_name
+alchVdwShiftCoeff: van_der_waals_shift_coefficient
+alchElecLambdaStart: electronic_interaction_start_lambda
+alchVdwLambdaEnd: van_der_waals_end_lambda
+alchBondLambdaEnd: bonded_interaction_end_lambda
+alchBondDecouple:
+  - bond_decoupling
+  - on_off
+alchDecouple:
+  - decouple
+  - on_off

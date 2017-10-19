@@ -1,0 +1,6 @@
+loweAndersen:
+  - active_indicator
+  - on_off
+loweAndersenTemp: temperature
+loweAndersenCutoff: cutoff
+loweAndersenRate: rate

@@ -1,0 +1,71 @@
+# Attributes of main `Simulation()`
+
+timestep:
+firsttimestep: first_timestep
+minimization:
+  - minimization
+  - on_off
+
+temperature:
+velocities:
+binvelocities: binary_velocities
+
+coordinates:
+bincoordinates: binary_coordinates
+
+parmfile: parameters
+
+outputname: output_name
+binaryoutput:
+  - binary_output
+  - yes_no
+restartfreq: restart_frequency
+dcdfreq: dcd_frequency
+dcdunitcell:
+  - dcd_unit_cell
+  - yes_no
+
+outputEnergies: output_energies
+outputPressure: output_pressure
+
+### Forcefield specific parameters
+amber:
+  - amber
+  - yes_no
+
+readexclusions:
+  - read_exclusions
+  - yes_no
+
+scnb:
+
+structure:
+paraTypeXplor:
+  - parameter_type_XPLOR
+  - on_off
+paraTypeCharmm:
+  - parameter_type_CHARMM
+  - on_off
+
+gromacs:
+  - gromacs
+  - on_off
+
+## NonBondedController
+non_bonded_controller:
+
+
+## ConstraintController
+constraints:
+
+
+## TemperatureController
+temperature_controller:
+
+
+## PressureController
+pressure_controller:
+
+
+## FreeEnergyController
+free_energy_controller:
