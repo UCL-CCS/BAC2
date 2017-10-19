@@ -1,0 +1,4 @@
+extraBondsFile: extra_bonds
+bond_constraint:
+harmonic_constraint:
+atom_constraint:

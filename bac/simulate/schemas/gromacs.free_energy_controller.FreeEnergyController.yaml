@@ -1,0 +1,64 @@
+free-energy:
+  - active_indicator
+  - yes_no
+#  expanded: # FIX-ME: Incorrect! the presence of keyword indicates yes/no
+#    - expanded
+#    - yes_no
+init-lambda: initial_lambda
+delta-lambda: delta_lambda
+init-lambda-state: initial_lambda_state
+fep-lambdas:
+  - fep_lambdas
+  - two_digit_iter
+coul-lambdas:
+  - coulomb_lambdas
+  - two_digit_iter
+vdw-lambdas:
+  - van_der_waals_lambdas
+  - two_digit_iter
+bonded-lambdas:
+  - bonded_lambdas
+  - two_digit_iter
+restraint-lambdas:
+  - restraint_lambdas
+  - two_digit_iter
+mass-lambdas:
+  - mass_lambdas
+  - two_digit_iter
+temperature-lambdas:
+  - temperature_lambdas
+  - two_digit_iter
+calc-lambda-neighbors: calculate_lambda_neighbors
+
+sc-alpha: soft_core_alpha
+sc-r-power: soft_core_radial_power
+sc-coul:
+  - soft_core_coulomb
+  - yes_no
+sc-power: soft_core_power
+sc-sigma: soft_core_sigma
+
+couple-moltype:
+  - couple_molecule_groups
+  - iter
+couple-lambda0:
+  - couple_type_initial_lambda
+  - enum
+couple-lambda1:
+  - couple_type_final_lambda
+  - enum
+couple-intramol:
+  - couple_intramolecular
+  - yes_no
+nstdhdl: output_frequency
+dhdl-derivatives:
+  - output_derivatives
+  - yes_no
+dhdl-print-energy:
+  - output_energy
+  - enum
+separate-dhdl-file:
+  - separate_output
+  - yes_no
+dh-hist-size: output_histogram_size
+dh-hist-spacing: output_bin_size
