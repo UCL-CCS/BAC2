@@ -1,4 +1,7 @@
 from enum import Enum
+from functools import partial
+
+import numpy as np
 
 from bac.utils.decorators import decimal, advanced_property, boolean, integer
 from bac.simulate.coding import Encodable
@@ -98,25 +101,31 @@ class FreeEnergyController(Encodable):
     def supports_lambda_state(self):
         return True
 
-    @advanced_property(type=list, default=[])
+    @advanced_property(type=partial(np.array, dtype=np.float), default=[])
     def fep_lambdas(self): pass
 
-    @advanced_property(type=list, default=lambda self: self.fep_lambdas, validator=lambda self, x: len(self.fep_lambdas) == len(x))
+    @advanced_property(type=partial(np.array, dtype=np.float), default=lambda self: self.fep_lambdas,
+                       validator=lambda self, x: self.fep_lambdas.size == x.size)
     def coulomb_lambdas(self): pass
 
-    @advanced_property(type=list, default=lambda self: self.fep_lambdas, validator=lambda self, x: len(self.fep_lambdas) == len(x))
+    @advanced_property(type=partial(np.array, dtype=np.float), default=lambda self: self.fep_lambdas,
+                       validator=lambda self, x: self.fep_lambdas.size == x.size)
     def van_der_waals_lambdas(self): pass
 
-    @advanced_property(type=list, default=lambda self: self.fep_lambdas, validator=lambda self, x: len(self.fep_lambdas) == len(x))
+    @advanced_property(type=partial(np.array, dtype=np.float), default=lambda self: self.fep_lambdas,
+                       validator=lambda self, x: self.fep_lambdas.size == x.size)
     def bonded_lambdas(self): pass
 
-    @advanced_property(type=list, default=lambda self: self.fep_lambdas, validator=lambda self, x: len(self.fep_lambdas) == len(x))
+    @advanced_property(type=partial(np.array, dtype=np.float), default=lambda self: self.fep_lambdas,
+                       validator=lambda self, x: self.fep_lambdas.size == x.size)
     def restraint_lambdas(self): pass
 
-    @advanced_property(type=list, default=lambda self: self.fep_lambdas, validator=lambda self, x: len(self.fep_lambdas) == len(x))
+    @advanced_property(type=partial(np.array, dtype=np.float), default=lambda self: self.fep_lambdas,
+                       validator=lambda self, x: self.fep_lambdas.size == x.size)
     def mass_lambdas(self): pass
 
-    @advanced_property(type=list, default=lambda self: self.fep_lambdas, validator=lambda self, x: len(self.fep_lambdas) == len(x))
+    @advanced_property(type=partial(np.array, dtype=np.float), default=lambda self: self.fep_lambdas,
+                       validator=lambda self, x: self.fep_lambdas.size == x.size)
     def temperature_lambdas(self): pass
 
     @integer(default=1)
