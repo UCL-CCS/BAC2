@@ -4,6 +4,7 @@ from bac.utils.decorators import (boolean, positive_decimal, pathlike, pdbcolumn
 from bac.simulate.coding import Encodable
 from bac.utils.pdb import PDBColumn
 
+
 class TemperatureController:
     pass
 

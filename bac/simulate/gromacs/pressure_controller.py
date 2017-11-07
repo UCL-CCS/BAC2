@@ -1,4 +1,7 @@
 from enum import Enum
+from functools import partial
+
+import numpy as np
 
 from bac.utils.decorators import advanced_property, integer, decimal
 from bac.simulate.gromacs.integrator import Integrator
@@ -104,18 +107,18 @@ class PressureController(Encodable):
 
     def _group_count_validator(self, x):
         if self.isotropy is IsotropyType.isotropic:
-            return len(x) == 1
+            return x.size == 1
         elif self.isotropy is IsotropyType.semi_isotropic:
-            return len(x) == 2
+            return x.size == 2
         elif self.isotropy is IsotropyType.anisotropic:
-            return len(x) == 6
+            return x.size == 6
         elif self.isotropy is IsotropyType.surface_tension:
-            return len(x) == 2
+            return x.size == 2
 
-    @advanced_property(type=list, default=[], validator=_group_count_validator)
+    @advanced_property(type=partial(np.array, dtype=np.float), default=[], validator=_group_count_validator)
     def compressibility(self): pass
 
-    @advanced_property(type=list, default=[], validator=_group_count_validator)
+    @advanced_property(type=partial(np.array, dtype=np.float), default=[], validator=_group_count_validator)
     def pressure(self): pass
 
     @advanced_property(type=ReferenceCoordinateScalingType, default=ReferenceCoordinateScalingType.no)
