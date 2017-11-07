@@ -4,6 +4,8 @@ import copy
 import warnings
 from typing import Callable
 
+import numpy as np
+
 from bac.utils.pdb import PDBColumn
 from .versioned import Versioned
 
@@ -188,31 +190,31 @@ class positive_decimal(advanced_property):
     def __init__(self, *args, **kwargs):
         old_validator = kwargs.get('validator', lambda o, v: True)
         kwargs['validator'] = lambda o, v: old_validator(o, v) and v >= 0
-        super(positive_decimal, self).__init__(type=(float, int, str), *args, **kwargs)
+        super(positive_decimal, self).__init__(type=(np.float_, float, int, str), *args, **kwargs)
 
 
 class decimal(advanced_property):
     def __init__(self, *args, **kwargs):
-        super(decimal, self).__init__(type=(float, int, str), *args, **kwargs)
+        super(decimal, self).__init__(type=(np.float_, float, int, str), *args, **kwargs)
 
 
 class integer(advanced_property):
     def __init__(self, *args, **kwargs):
-        super(integer, self).__init__(type=(int, str), *args, **kwargs)
+        super(integer, self).__init__(type=(np.int_, int, str), *args, **kwargs)
 
 
 class positive_integer(advanced_property):
     def __init__(self, *args, **kwargs):
         old_validator = kwargs.get('validator', lambda o, v: True)
         kwargs['validator'] = lambda o, v: old_validator(o, v) and v > 0
-        super(positive_integer, self).__init__(type=(int, str), *args, **kwargs)
+        super(positive_integer, self).__init__(type=(np.int_, int, str), *args, **kwargs)
 
 
 class non_negative_integer(advanced_property):
     def __init__(self, *args, **kwargs):
         old_validator = kwargs.get('validator', lambda o, v: True)
         kwargs['validator'] = lambda o, v: old_validator(o, v) and v >= 0
-        super(non_negative_integer, self).__init__(type=(int, str), *args, **kwargs)
+        super(non_negative_integer, self).__init__(type=(np.int_, int, str), *args, **kwargs)
 
 
 class boolean(advanced_property):

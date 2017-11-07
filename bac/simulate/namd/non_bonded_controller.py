@@ -1,5 +1,7 @@
 from enum import Enum
 
+import numpy as np
+
 from bac.utils.decorators import *
 
 from bac.simulate.coding import Encodable
@@ -133,16 +135,16 @@ class NonBondedController(Encodable):
 
     # Boundary Condition
 
-    @advanced_property(type=tuple, default=(0, 0, 0))
+    @advanced_property(type=(np.ndarray, tuple), default=np.zeros(3))
     def cell_basis_vector_1(self): pass
 
-    @advanced_property(type=tuple, default=(0, 0, 0))
+    @advanced_property(type=(np.ndarray, tuple), default=np.zeros(3))
     def cell_basis_vector_2(self): pass
 
-    @advanced_property(type=tuple, default=(0, 0, 0))
+    @advanced_property(type=(np.ndarray, tuple), default=np.zeros(3))
     def cell_basis_vector_3(self): pass
 
-    @advanced_property(type=tuple, default=(0, 0, 0))
+    @advanced_property(type=(np.ndarray, tuple), default=np.zeros(3))
     def cell_origin(self): pass
 
     @pathlike
