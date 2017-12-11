@@ -1,0 +1,527 @@
+{
+    "intercept": 34.7177,
+    "k": 0.461,
+    "rprobe": 0.8,
+    "params": {
+        "C": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0881
+        },
+        "C*": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0308
+        },
+        "C3": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0881
+        },
+        "C4": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0352
+        },
+        "C5": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0352
+        },
+        "C6": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0352
+        },
+        "CA": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0352
+        },
+        "CB": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0352
+        },
+        "CC": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": -0.0419
+        },
+        "CN": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0352
+        },
+        "CR": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0308
+        },
+        "CT": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": -0.0419
+        },
+        "CV": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0308
+        },
+        "CW": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0308
+        },
+        "H": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1605
+        },
+        "H0": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1676
+        },
+        "H1": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1676
+        },
+        "H4": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1708
+        },
+        "H5": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1551
+        },
+        "HA": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1525
+        },
+        "HC": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.167
+        },
+        "HO": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.0984
+        },
+        "HP": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1656
+        },
+        "HS": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1225
+        },
+        "N": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.0194
+        },
+        "N2": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.1647
+        },
+        "N3": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": -0.0421
+        },
+        "NA": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.0585
+        },
+        "NB": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.1426
+        },
+        "O": {
+            "polarity": "polar",
+            "radius": 1.4,
+            "weight": 0.2022
+        },
+        "O2": {
+            "polarity": "polar",
+            "radius": 1.4,
+            "weight": 0.2022
+        },
+        "OH": {
+            "polarity": "polar",
+            "radius": 1.4,
+            "weight": 0.2105
+        },
+        "S": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.1592
+        },
+        "SH": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.1674
+        },
+        "br": {
+            "polarity": "polar",
+            "radius": 2.04,
+            "weight": 0.2025
+        },
+        "c": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0881
+        },
+        "c1": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0974
+        },
+        "c2": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0374
+        },
+        "c3": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": -0.0419
+        },
+        "ca": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0352
+        },
+        "cc": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0308
+        },
+        "cd": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0308
+        },
+        "ce": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0321
+        },
+        "cf": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0321
+        },
+        "cg": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.108
+        },
+        "ch": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.108
+        },
+        "cl": {
+            "polarity": "apolar",
+            "radius": 1.79,
+            "weight": 0.2101
+        },
+        "cp": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.026
+        },
+        "cq": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.026
+        },
+        "cu": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0374
+        },
+        "cv": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0374
+        },
+        "cx": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": -0.0419
+        },
+        "cy": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": -0.0419
+        },
+        "cz": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0374
+        },
+        "f": {
+            "polarity": "polar",
+            "radius": 1.6,
+            "weight": 0.1992
+        },
+        "fe": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.0
+        },
+        "h1": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1676
+        },
+        "h2": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1539
+        },
+        "h3": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1656
+        },
+        "h4": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1708
+        },
+        "h5": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1551
+        },
+        "ha": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1525
+        },
+        "hc": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.167
+        },
+        "hn": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1605
+        },
+        "ho": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.0984
+        },
+        "hp": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1274
+        },
+        "hs": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1225
+        },
+        "hw": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.0984
+        },
+        "hx": {
+            "polarity": "apolar",
+            "radius": 1.2,
+            "weight": 0.1656
+        },
+        "i": {
+            "polarity": "apolar",
+            "radius": 2.15,
+            "weight": 0.2012
+        },
+        "n": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.0194
+        },
+        "n1": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.1824
+        },
+        "n2": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.1647
+        },
+        "n3": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.0393
+        },
+        "n4": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": -0.0421
+        },
+        "na": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.0585
+        },
+        "nb": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.1271
+        },
+        "nc": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.1426
+        },
+        "nd": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.1426
+        },
+        "ne": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.1398
+        },
+        "nf": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.1398
+        },
+        "nh": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.0317
+        },
+        "no": {
+            "polarity": "polar",
+            "radius": 1.54,
+            "weight": 0.1343
+        },
+        "o": {
+            "polarity": "polar",
+            "radius": 1.4,
+            "weight": 0.2022
+        },
+        "oh": {
+            "polarity": "polar",
+            "radius": 1.4,
+            "weight": 0.2105
+        },
+        "os": {
+            "polarity": "polar",
+            "radius": 1.4,
+            "weight": 0.1804
+        },
+        "p2": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.1821
+        },
+        "p3": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.1435
+        },
+        "p4": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.0846
+        },
+        "p5": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.0846
+        },
+        "pc": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.1821
+        },
+        "pd": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.1821
+        },
+        "pe": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.1821
+        },
+        "pf": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.1821
+        },
+        "px": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.0846
+        },
+        "py": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.0846
+        },
+        "s": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.1592
+        },
+        "s4": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.159
+        },
+        "s6": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.09
+        },
+        "sh": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.1674
+        },
+        "si": {
+            "polarity": "polar",
+            "radius": 2.1,
+            "weight": 0.0594
+        },
+        "ss": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.1717
+        },
+        "sx": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.159
+        },
+        "sy": {
+            "polarity": "polar",
+            "radius": 2.0,
+            "weight": 0.159
+        }
+    }
+}
