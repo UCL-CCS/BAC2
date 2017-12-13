@@ -6,7 +6,8 @@ _encoders = {'yes_no': lambda x: ('no', 'yes')[x],
              'on_off': lambda x: ('off', 'on')[x],
              'enum': lambda x: x.value,
              'iter': lambda x: ' '.join(str(xs) for xs in x),
-             'two_digit_iter': lambda xs: ' '.join(f'{x:.2f}'for x in xs)}
+             'two_digit_iter': lambda xs: ' '.join(f'{x:.2f}'for x in xs)
+             }
 
 
 _column_size = 25
@@ -16,7 +17,7 @@ class Encodable:
 
     @staticmethod
     def _get_schema(class_name):
-        return Path(__file__).parent.joinpath('schemas',f'{class_name[21:-2]}.yaml')
+        return Path(__file__).parent.joinpath('schemas', f'{class_name[21:-2]}.yaml')
 
     def encode(self, path=None, suffix=None):
 
