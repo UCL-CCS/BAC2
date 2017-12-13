@@ -2,6 +2,7 @@ from pathlib import Path
 import copy
 import warnings
 from typing import Callable, Union
+from functools import partial
 
 import numpy as np
 
@@ -154,7 +155,10 @@ class pathlike(advanced_property):
 
 class pdbcolumn(advanced_property):
     def __init__(self, *args, **kwargs):
-        super(pdbcolumn, self).__init__(type=PDBColumn, default=PDBColumn.O, *args, **kwargs)
+        kwargs['type'] = PDBColumn
+        if kwargs.get('default') is None:
+            kwargs['default'] = 'O'
+        super(pdbcolumn, self).__init__(*args, **kwargs)
 
 
 class decimal(advanced_property):
@@ -191,6 +195,11 @@ class non_negative_integer(integer):
 class boolean(advanced_property):
     def __init__(self, *args, **kwargs):
         super(boolean, self).__init__(type=bool, *args, **kwargs)
+
+
+class float_vector(advanced_property):
+    def __init__(self, *args, **kwargs):
+        super(float_vector, self).__init__(type=partial(np.array, dtype=np.float, ndmin=1), *args, **kwargs)
 
 
 class back_referenced(property):

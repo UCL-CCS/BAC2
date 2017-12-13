@@ -1,0 +1,24 @@
+timestep:
+firsttimestep: first_step
+
+nonbondedFreq: non_bonded_frequency
+fullElectFrequency: electrostatic_frequency
+MTSAlgorithm:
+  - algorithm
+  - enum
+longSplitting:
+  - long_splitting
+  - enum
+
+langevin:
+  - active_indicator
+  - on_off
+langevinTemp: temperature
+langevinDamping: damping
+langevinHydrogen:
+  - applies_to_hydrogen
+  - on_off
+langevinFile: file
+langevinCol:
+  - column
+  - enum

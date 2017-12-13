@@ -1,5 +1,4 @@
 from enum import Enum
-from functools import partial
 
 from bac.utils.decorators import *
 
@@ -12,18 +11,6 @@ class Interaction(Enum):
     one_four = '1-4'
     scaled_one_four = 'scaled1-4'
     none = 'none'
-
-
-class MTSAlgorithm(Enum):
-    impulse = 'impulse'
-    verlet = 'verletI'
-    constant = 'constant'
-    naive = 'naive'
-
-
-class LongSplitting(Enum):
-    c1 = 'c1'
-    c2 = 'c2'
 
 
 class SplitPatchType(Enum):
@@ -45,11 +32,6 @@ class NonBondedController(Encodable):
         self.vdw_geometric_sigma = kwargs.get('vdw_geometric_sigma')
         self.limit_distance = kwargs.get('limit_distance')
         self.LJ_correction = kwargs.get('LJ_correction')
-
-        self.non_bonded_frequency = kwargs.get('non_bonded_frequency')
-        self.full_elect_frequency = kwargs.get('full_elect_frequency')
-        self.mts_algorithm = kwargs.get('mts_algorithm')
-        self.long_splitting = kwargs.get('long_splitting')
 
         self.pairlist_distance = kwargs.get('pairlist_distance', self.cutoff)
         self.steps_per_cycle = kwargs.get('steps_per_cycle')
@@ -113,19 +95,6 @@ class NonBondedController(Encodable):
     @boolean(default=False)
     def LJ_correction(self): pass
 
-    @positive_integer(default=lambda self: self.non_bonded_frequency,
-                      validator=lambda self, x: self.steps_per_cycle % x == 0, warn=True)
-    def full_elect_frequency(self): pass
-
-    @positive_integer(default=1, validator=lambda self, x: x % self.full_elect_frequency == 0)
-    def non_bonded_frequency(self): pass
-
-    @advanced_property(type=LongSplitting, default=LongSplitting.c1)
-    def long_splitting(self): pass
-
-    @advanced_property(type=MTSAlgorithm, default=MTSAlgorithm.impulse)
-    def mts_algorithm(self): pass
-
     @positive_integer(default=20)
     def steps_per_cycle(self): pass
 
@@ -134,16 +103,16 @@ class NonBondedController(Encodable):
 
     # Boundary Condition
 
-    @advanced_property(type=partial(np.array, dtype=np.float), default=(0, 0, 0), validator=lambda _, x: x.size == 3)
+    @float_vector(default=(0, 0, 0), validator=lambda _, x: x.size == 3)
     def cell_basis_vector_1(self): pass
 
-    @advanced_property(type=partial(np.array, dtype=np.float), default=(0, 0, 0), validator=lambda _, x: x.size == 3)
+    @float_vector(default=(0, 0, 0), validator=lambda _, x: x.size == 3)
     def cell_basis_vector_2(self): pass
 
-    @advanced_property(type=partial(np.array, dtype=np.float), default=(0, 0, 0), validator=lambda _, x: x.size == 3)
+    @float_vector(default=(0, 0, 0), validator=lambda _, x: x.size == 3)
     def cell_basis_vector_3(self): pass
 
-    @advanced_property(type=partial(np.array, dtype=np.float), default=(0, 0, 0), validator=lambda _, x: x.size == 3)
+    @float_vector(default=(0, 0, 0), validator=lambda _, x: x.size == 3)
     def cell_origin(self): pass
 
     @pathlike

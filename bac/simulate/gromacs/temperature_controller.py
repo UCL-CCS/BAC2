@@ -1,11 +1,10 @@
 from enum import Enum
-from functools import partial
 
-import numpy as np
-
-from bac.utils.decorators import advanced_property, integer
+from bac.utils.decorators import advanced_property, integer, float_vector
 from bac.simulate.gromacs.integrator import Integrator
 from bac.simulate.coding import Encodable
+
+from .group import Group
 
 
 class TemperatureCouplingType(Enum):
@@ -60,13 +59,11 @@ class TemperatureController(Encodable):
     @integer(default=10, validator=lambda self, v: (v == 1) if (self.simulation.integrator is Integrator.md) else True)
     def nose_hoover_chain_length(self): pass
 
-    @advanced_property(type=list, default=[])
+    @advanced_property(type=list, default=[Group.system])
     def groups(self): pass
 
-    @advanced_property(type=partial(np.array, dtype=np.float), default=[],
-                       validator=lambda self, x: self.groups.size == x.size)
+    @float_vector(default=[], validator=lambda self, x: len(self.groups) == x.size)
     def time(self): pass
 
-    @advanced_property(type=partial(np.array, dtype=np.float), default=[],
-                       validator=lambda self, x: self.groups.size == x.size)
+    @float_vector(default=[], validator=lambda self, x: len(self.groups) == x.size)
     def temperature(self): pass

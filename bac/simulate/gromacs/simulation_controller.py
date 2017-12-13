@@ -9,8 +9,10 @@ from bac.simulate.gromacs.non_bonded_controller import NonBondedController
 from bac.simulate.gromacs.constraint_controller import ConstraintController
 
 from bac.simulate.basesimulation import BaseSimulation, Engine
-from bac.simulate.gromacs.integrator import Integrator
+from bac.simulate.gromacs.integrator import Integrator, VerletIntegrator
 from bac.simulate.coding import Encodable
+
+from .group import Group
 
 
 class CenterOfMassMotion(Enum):
@@ -42,10 +44,8 @@ class Simulation(BaseSimulation, Encodable):
         # Main attributes
 
         self.integrator: Integrator = kwargs.get('integrator')
-        self.initial_time = kwargs.get('initial_time')
-        self.delta_time = kwargs.get('delta_time')
         self.number_of_steps = kwargs.get('number_of_steps')
-        self.initial_step = kwargs.get('initial_step')
+
         self.center_of_mass_motion = kwargs.get('center_of_mass_motion')
         self.com_motion_removal_frequency = kwargs.get('com_motion_removal_frequency')
         self.comm_groups = kwargs.get('comm_groups')
@@ -80,20 +80,11 @@ class Simulation(BaseSimulation, Encodable):
         self.compression_precision = kwargs.get('compression_precision')
         self.compressed_groups = kwargs.get('compressed_groups')
 
-    @advanced_property(type=Integrator, default=Integrator.md, available='5.0')
+    @advanced_property(type=Integrator, default=VerletIntegrator(), available='5.0')
     def integrator(self): pass
-
-    @positive_decimal(default=0, available='5.0')
-    def initial_time(self): pass
-
-    @positive_decimal(default=0.001)
-    def delta_time(self): pass
 
     @integer(default=0)
     def number_of_steps(self): pass
-
-    @integer(default=0)
-    def initial_step(self): pass
 
     @advanced_property(type=CenterOfMassMotion, default=CenterOfMassMotion.linear)
     def center_of_mass_motion(self): pass
@@ -101,7 +92,7 @@ class Simulation(BaseSimulation, Encodable):
     @integer(default=100)
     def com_motion_removal_frequency(self): pass
 
-    @advanced_property(type=list, default=['system'])
+    @advanced_property(type=list, default=[Group.system])
     def comm_groups(self): pass
 
     @boolean(default=False)
@@ -134,10 +125,10 @@ class Simulation(BaseSimulation, Encodable):
     @pathlike
     def velocities(self): pass
 
-    @pathlike(default=lambda s: s.name)
+    @pathlike(default=lambda self: self.name)
     def output_name(self): pass
 
-    @pathlike(default=lambda s: s.integrator.name)
+    @pathlike(default=lambda self: self.integrator.name)
     def name(self): pass
 
     def add_input_dependency(self, other_simulation):
@@ -212,7 +203,7 @@ class Simulation(BaseSimulation, Encodable):
     @decimal(default=1000)
     def compression_precision(self): pass
 
-    @advanced_property(type=list, default=[])
+    @advanced_property(type=list, default=[Group.system])
     def compressed_groups(self): pass
 
     @property
