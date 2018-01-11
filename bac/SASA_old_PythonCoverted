@@ -1,4 +1,4 @@
-#This is essentially the same code derived from the jupyter notebook work from dww for calculating entropic contributions from
+#This is essentially the same code derived from the jupyter notebook for calculating entropic contributions from
 #the W-SASA method
 
 import os
