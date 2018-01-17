@@ -1,32 +1,43 @@
 from pathlib import Path
+from typing import List
+from enum import Enum
+import tempfile
 
 import parmed as pmd
 import mdtraj as md
 import pandas as pd
 
-from bac.utils.decorators import advanced_property
+from bac.utils.decorators import advanced_property, pathlike
+from .extract_residues import extract_residue
+from .sasa_analysis import atom_contribution_nm
+from .freesasa_utils import FreesasaRunner, add_residues_freesasa_config_file, default_config_filename
+
+
+class Component(Enum):
+    complex = 'complex'
+    ligand = 'ligand'
+    receptor = 'receptor'
 
 
 class Wsas:
     def __init__(self, **kwargs):
         self.temperature = kwargs.get('temperature')
-        self.first_frame = kwargs.get('first_frame')
-        self.last_frame = kwargs.get('last_frame')
-        self.stride = kwargs.get('stride')
+        self.slice = slice(kwargs.get('first_frame', 0), kwargs.get('last_frame', -1), kwargs.get('stride', 1))
         self.ligand_filter = kwargs.get('ligand_filter')
         self.nonstandard_residue_files = kwargs.get('nonstandard_residue_files')
         self.solvent_residues = kwargs.get('solvent_residues')
 
         self.topology = kwargs.get('topology')
         self.ligand_topology = kwargs.get('ligand_topology')
-        self.trajectories = kwargs.get('trajectories')
-        self.components = kwargs.get('components')
+        self.trajectories: List[md.Trajectory] = kwargs.get('trajectories')
+        self.component = kwargs.get('component')
         self.output = kwargs.get('output')
+        self.tmp_dir = tempfile.mkdtemp()
 
     @advanced_property(type=pmd.amber.AmberParm)
     def topology(self): pass
 
-    @advanced_property(type=md.Topology)
+    @advanced_property(type=pmd.amber.AmberParm)
     def ligand_topology(self): pass
 
     @ligand_topology.post_set_processing
@@ -35,67 +46,50 @@ class Wsas:
         # Then set the ligand filter to be this. lol.
         pass
 
+    @advanced_property(type=Component, default=Component.complex)
+    def component(self): pass
+
     @advanced_property(type=str)
     def ligand_filter(self):
         # Read default from the configuration file pass somehow.
         pass
 
-    def calculate_wsas(self):
+    @pathlike(default='.')
+    def output(self): pass
+
+    def calculate_wsas(self, sasa_nm_params):
         self.output.mkdir(exist_ok=True, parents=True)
 
-        sasa_config = update_sasa_config(setup)
-        sasa_calculator = freesasa_utils.FreesasaRunner(config=sasa_config)
+        any_trajectory = self.trajectories[0]
+
+        sasa_config = self.update_sasa_config()
+        sasa_calculator = FreesasaRunner(config=sasa_config)
+        atom_selections = self.create_component_selections(any_trajectory)
 
         results = {}
 
-        for idx, traj in enumerate(self.trajectories):
+        for component, atom_list in atom_selections.items():
+            results[component] = pd.DataFrame()
+            results[component]['residue'] = [any_trajectory.top.atom(x).residue.name for x in atom_list]
+            results[component]['atom_name'] = [self.topology.parm_data['ATOM_NAME'][x] for x in atom_list]
+            results[component]['atom_type'] = [self.topology.parm_data['AMBER_ATOM_TYPE'][x] for x in atom_list]
 
-            # Use stride here then hack to select first/last frames as
-            # not supported simply by mdtraj (and want to minimize memory usage)
-            # traj = mdtraj.load(str(trajectory_filename), top=str(system_topology), stride=stride)
-
-            n_frames = traj.n_frames
-            n_orig_frames = n_frames * self.stride
-
-            first_frame_input = self.first_frame
-
-            if self.last_frame == -1:
-                last_frame_input = n_orig_frames
-            else:
-                last_frame_input = self.last_frame
-
-            # Map frame numbers in original file to those read in (i.e. account for stride)
-            frames_to_use = [x for x, y in enumerate(range(0, n_orig_frames, self.stride))
-                             if y in range(first_frame_input, last_frame_input)]
-
-            first_frame_strided = frames_to_use[0]
-            last_frame_strided = frames_to_use[-1]
-
-            if idx == 0:
-
-                atom_selections = create_component_selections(traj, setup)
-
-                for component, atom_list in atom_selections.items():
-                    results[component] = pd.DataFrame()
-                    results[component]['residue'] = [traj.top.atom(x).residue.name for x in atom_list]
-                    results[component]['atom_name'] = [system_amber_top.parm_data['ATOM_NAME'][x] for x in atom_list]
-                    results[component]['atom_type'] = [system_amber_top.parm_data['AMBER_ATOM_TYPE'][x] for x in
-                                                       atom_list]
+        for trajectory in self.trajectories:
 
             for component, atom_list in atom_selections.items():
-                traj_pdb_filename = os.path.join(tmp_dir, component + '-traj.pdb')
-                comp_traj = traj[first_frame_strided:last_frame_strided].atom_slice(atom_list)
-                comp_traj.save(traj_pdb_filename)
 
-                atom_areas = pd.DataFrame(sasa_calculator.run(traj_pdb_filename))
+                trajectory_pdb = '{}/{}-traj.pdb'.format(self.tmp_dir, component)
+                trajectory[self.slice].save_pdb(trajectory_pdb)
+
+                atom_areas = pd.DataFrame(sasa_calculator.run(trajectory_pdb))
 
                 avg_areas = atom_areas.mean()
 
                 nm_contrib = [
-                    sasa_analysis.atom_contribution_nm(results[component]['atom_type'][ndx], sasa, sasa_nm_params) for
+                    atom_contribution_nm(results[component]['atom_type'][ndx], sasa, sasa_nm_params) for
                     ndx, sasa in enumerate(avg_areas)]
 
-                results[component][trajectory_filename] = nm_contrib
+                results[component][repr(trajectory)] = nm_contrib
 
         return results
 
@@ -118,15 +112,14 @@ class Wsas:
 
         filters = {}
 
-        if self.components in ['complex', 'ligand']:
-
-            filters['ligand'] = setup.ligand_filter
+        if self.component in ['complex', 'ligand']:
+            filters['ligand'] = self.ligand_filter
 
         else:
-            filters['receptor'] = parse_filter_residues(self.solvent_residues)
+            filters['receptor'] = self.parse_filter_residues(self.solvent_residues)
 
-        if setup.component == 'complex':
-            filters['complex'] = parse_filter_residues(self.solvent_residues)
+        if self.component == 'complex':
+            filters['complex'] = self.parse_filter_residues(self.solvent_residues)
             filters['receptor'] = '{} and (not {})'.format(filters['complex'],
                                                            filters['ligand'])
 
@@ -136,4 +129,60 @@ class Wsas:
             selections[component] = trajectory.top.select(filter)
 
         return selections
+
+    def update_sasa_config(self):
+
+        if self.ligand_topology:
+
+            files_to_add = [self.ligand_topology] + self.nonstandard_residue_files
+
+        else:
+
+            files_to_add = self.nonstandard_residue_files
+
+        residues_to_add = {}
+
+        for filename in files_to_add:
+            residues_to_add.update(extract_residue(filename))
+
+        if residues_to_add:
+
+            sasa_config = self.tmp_dir.joinpath('system_sasa.config')
+
+            add_residues_freesasa_config_file(residues_to_add, sasa_config)
+
+        else:
+
+            sasa_config = default_config_filename
+
+        return sasa_config
+
+    @staticmethod
+    def parse_filter_residues(filter_residues):
+        """
+        Convert input list of residue names into an mdtraj filter which will
+        select all residues not matching an entry in the input list.
+
+        Parameters
+        ----------
+        filter_residues : list
+            Residue codes to be combined into a exclusion filter.
+
+        Returns
+        -------
+        str
+            Selection text in mdtraj format selecting everything that does not
+            match input residue names.
+
+        """
+
+        # TODO: Check the escape character for + ions
+
+        selection_text = '! ('
+        selection_text += ' or '.join(['(resname =~ {:s})'.format(x) for x in filter_residues])
+        selection_text += ')'
+
+        return selection_text
+
+
 
