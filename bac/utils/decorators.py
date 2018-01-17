@@ -95,7 +95,7 @@ class advanced_property(property, Versioned):
         if value is None:
             obj.__setattr__(self.private_name, None)
         else:
-            value = self.type(value)
+            value = value if isinstance(self.type, type) and isinstance(value, self.type) else self.type(value)
             try:
                 self.validate(obj, value)
             except AttributeError as e:
@@ -119,7 +119,12 @@ class advanced_property(property, Versioned):
 
         default_to_return = self._default(obj) if callable(self._default) else self._default
 
-        return self.type(default_to_return) if default_to_return is not None else None
+        if default_to_return is None:
+            return None
+        elif isinstance(self.type, type) and isinstance(default_to_return, self.type):
+            return default_to_return
+        else:
+            return self.type(default_to_return)
 
     def validate(self, obj, value):
         if self.validator is not None and self.validator(obj, value) is False:
