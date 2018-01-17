@@ -31,7 +31,7 @@ class BaseSimulation(Versioned, metaclass=ABCMeta):
     """Generic base class for simulations. Contains functionality that is both required or generalizable to
     all classes.
 
-    All abstract method should be implemented by subclass in order to be used un workflow and other mechanism.
+    All abstract method should be implemented by subclass in order to be used in workflow and other mechanism.
     """
 
     @property
@@ -89,8 +89,5 @@ class BaseSimulation(Versioned, metaclass=ABCMeta):
 
 
 class BaseFreeEnergyController(metaclass=ABCMeta):
-
-
-
     pass
 

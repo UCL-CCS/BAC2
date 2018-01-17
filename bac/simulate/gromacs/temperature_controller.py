@@ -1,8 +1,10 @@
 from enum import Enum
 
-from bac.utils.decorators import advanced_property, integer
+from bac.utils.decorators import advanced_property, integer, float_vector
 from bac.simulate.gromacs.integrator import Integrator
 from bac.simulate.coding import Encodable
+
+from .group import Group
 
 
 class TemperatureCouplingType(Enum):
@@ -48,7 +50,8 @@ class TemperatureController(Encodable):
         if self.simulation.integrator in (Integrator.md_vv, Integrator.md_vv_avek):
             return 1
         else:
-            return self.simulation.non_bonded_controller.neighbor_list_update_frequency if self.simulation.non_bonded_controller.neighbor_list_update_frequency > 0 else 10
+            return self.simulation.non_bonded_controller.neighbor_list_update_frequency \
+                if self.simulation.non_bonded_controller.neighbor_list_update_frequency > 0 else 10
 
     @integer(default=_frequency_default)
     def frequency(self): pass
@@ -56,11 +59,11 @@ class TemperatureController(Encodable):
     @integer(default=10, validator=lambda self, v: (v == 1) if (self.simulation.integrator is Integrator.md) else True)
     def nose_hoover_chain_length(self): pass
 
-    @advanced_property(type=list, default=['System'])
+    @advanced_property(type=list, default=[Group.system])
     def groups(self): pass
 
-    @advanced_property(type=list, default=[], validator=lambda self, x: len(x) == len(self.groups))
+    @float_vector(default=[], validator=lambda self, x: len(self.groups) == x.size)
     def time(self): pass
 
-    @advanced_property(type=list, default=[], validator=lambda self, x: len(x) == len(self.groups))
+    @float_vector(default=[], validator=lambda self, x: len(self.groups) == x.size)
     def temperature(self): pass

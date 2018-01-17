@@ -1,6 +1,7 @@
-from enum import Enum
 from copy import deepcopy
 from pathlib import Path
+
+import numpy as np
 
 from bac.simulate.namd.temperature_controller import TemperatureController
 from bac.simulate.namd.pressure_controller import PressureController
@@ -9,13 +10,12 @@ from bac.simulate.namd.constraint_controller import ConstraintController
 from bac.simulate.namd.free_energy_controller import FreeEnergyController
 
 from bac.utils.decorators import (advanced_property, positive_decimal,
-                                  positive_integer, pathlike, boolean, back_referenced,
+                                  positive_integer, pathlike, boolean,
                                   non_negative_integer)
-
-from bac.simulate import gromacs
 
 from bac.simulate.basesimulation import BaseSimulation, Engine
 from bac.simulate.coding import Encodable
+from bac.simulate.namd.integrator import Integrator, VerletIntegrator
 
 
 class Simulation(BaseSimulation, Encodable):
@@ -28,9 +28,8 @@ class Simulation(BaseSimulation, Encodable):
 
         # DYNAMICS
 
+        self.integrator: Integrator = kwargs.get('integrator')
         self.number_of_steps = kwargs.get('number_of_steps')
-        self.timestep = kwargs.get('timestep')
-        self.first_timestep = kwargs.get('first_timestep')
 
         self.minimization = kwargs.get('minimization')
 
@@ -90,14 +89,11 @@ class Simulation(BaseSimulation, Encodable):
 
     # Dynamics
 
+    @advanced_property(type=Integrator, default=VerletIntegrator())
+    def integrator(self): pass
+
     @positive_integer
     def number_of_steps(self): pass
-
-    @positive_decimal(default=1.0)
-    def timestep(self): pass
-
-    @positive_integer(default=0)
-    def first_timestep(self): pass
 
     @boolean(default=False)
     def minimization(self): pass
@@ -187,7 +183,7 @@ class Simulation(BaseSimulation, Encodable):
     @boolean(default=True)
     def read_exclusions(self): pass
 
-    @advanced_property(type=(int, float), validator=lambda _, x: x >= 1, default=2.0)
+    @advanced_property(type=np.float, validator=lambda _, x: x >= 1, default=2.0)
     def scnb(self): pass
 
     # Charmm

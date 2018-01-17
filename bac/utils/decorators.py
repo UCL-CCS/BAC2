@@ -1,8 +1,10 @@
 from pathlib import Path
-from enum import Enum
 import copy
 import warnings
-from typing import Callable
+from typing import Callable, Union
+from functools import partial
+
+import numpy as np
 
 from bac.utils.pdb import PDBColumn
 from .versioned import Versioned
@@ -31,9 +33,8 @@ class advanced_property(property, Versioned):
             The default value for the property. Can be a lambda function too. Self is passed at the only
             parameter of the lambda function to evaluate more complex default values.
         type: Union[type, Tuple(type)]
-            Possible types that property can be set to. **Important**: if more than one (1) type is set,
-            then the first one will be the major, and this first one *must* be instantiatable from the
-            other types.
+            This is a type or any function that takes anything supported and converts in into the desired
+            correct type, or fails if the type or the value is not supported or correct.
         validator: lambda container_object, value -> bool
             This is a function that return a Bool representing whether the value is valid. Note that the object
             is passed to the function too, so one can make more complicated validation based on the state of the
@@ -58,7 +59,7 @@ class advanced_property(property, Versioned):
         """
 
         self._default = kwargs.get('default')
-        self.type = kwargs.get('type')
+        self.type: Union[Callable, type] = kwargs.get('type')
         self.validator: Callable = kwargs.get('validator')
         self.warning_only = kwargs.get('warn', False)
         self.warning_message = kwargs.get('warning_message')
@@ -91,18 +92,15 @@ class advanced_property(property, Versioned):
     def _fset(self, obj, value):
         self.version_check(obj)
 
-        if isinstance(value, self.type):
-            value = self.convert_to_default_type(value)
+        if value is None:
+            obj.__setattr__(self.private_name, None)
+        else:
+            value = value if isinstance(self.type, type) and isinstance(value, self.type) else self.type(value)
             try:
                 self.validate(obj, value)
             except AttributeError as e:
                 warnings.warn(f'{e}')
             obj.__setattr__(self.private_name, value)
-        elif value is None:
-            obj.__setattr__(self.private_name, None)
-        else:
-            raise TypeError("{} must be of type {} NOT {}".
-                            format(self.public_name, ' or '.join(t.__name__ for t in self.type), type(value).__name__))
 
         if self.post_set_processor:
             self.post_set_processor(obj, value)
@@ -121,31 +119,12 @@ class advanced_property(property, Versioned):
 
         default_to_return = self._default(obj) if callable(self._default) else self._default
 
-        return self.convert_to_default_type(default_to_return) if default_to_return is not None else None
-
-    @property
-    def type(self):
-        return self._type
-
-    @type.setter
-    def type(self, value):
-        if isinstance(value, tuple):
-            self._type = value
+        if default_to_return is None:
+            return None
+        elif isinstance(self.type, type) and isinstance(default_to_return, self.type):
+            return default_to_return
         else:
-            if issubclass(value, Enum):
-                self._type = (value, str)
-            elif value is list:
-                self._type = (value, str, int, float)
-            else:
-                self._type = (value, )
-
-    def convert_to_default_type(self, value):
-        default_type = self.type[0]
-
-        if default_type is list and not isinstance(value, list):
-            value = [value]
-
-        return default_type(value)
+            return self.type(default_to_return)
 
     def validate(self, obj, value):
         if self.validator is not None and self.validator(obj, value) is False:
@@ -176,48 +155,56 @@ class advanced_property(property, Versioned):
 
 class pathlike(advanced_property):
     def __init__(self, *args, **kwargs):
-        super(pathlike, self).__init__(type=(Path, str), *args, **kwargs)
+        super(pathlike, self).__init__(type=Path, *args, **kwargs)
 
 
 class pdbcolumn(advanced_property):
     def __init__(self, *args, **kwargs):
-        super(pdbcolumn, self).__init__(type=PDBColumn, default=PDBColumn.O, *args, **kwargs)
-
-
-class positive_decimal(advanced_property):
-    def __init__(self, *args, **kwargs):
-        old_validator = kwargs.get('validator', lambda o, v: True)
-        kwargs['validator'] = lambda o, v: old_validator(o, v) and v >= 0
-        super(positive_decimal, self).__init__(type=(float, int, str), *args, **kwargs)
+        kwargs['type'] = PDBColumn
+        if kwargs.get('default') is None:
+            kwargs['default'] = 'O'
+        super(pdbcolumn, self).__init__(*args, **kwargs)
 
 
 class decimal(advanced_property):
     def __init__(self, *args, **kwargs):
-        super(decimal, self).__init__(type=(float, int, str), *args, **kwargs)
+        super(decimal, self).__init__(type=np.float, *args, **kwargs)
+
+
+class positive_decimal(decimal):
+    def __init__(self, *args, **kwargs):
+        old_validator = kwargs.get('validator', lambda o, v: True)
+        kwargs['validator'] = lambda o, v: old_validator(o, v) and v >= 0
+        super(positive_decimal, self).__init__(*args, **kwargs)
 
 
 class integer(advanced_property):
     def __init__(self, *args, **kwargs):
-        super(integer, self).__init__(type=(int, str), *args, **kwargs)
+        super(integer, self).__init__(type=np.int, *args, **kwargs)
 
 
-class positive_integer(advanced_property):
+class positive_integer(integer):
     def __init__(self, *args, **kwargs):
         old_validator = kwargs.get('validator', lambda o, v: True)
         kwargs['validator'] = lambda o, v: old_validator(o, v) and v > 0
-        super(positive_integer, self).__init__(type=(int, str), *args, **kwargs)
+        super(positive_integer, self).__init__(*args, **kwargs)
 
 
-class non_negative_integer(advanced_property):
+class non_negative_integer(integer):
     def __init__(self, *args, **kwargs):
         old_validator = kwargs.get('validator', lambda o, v: True)
         kwargs['validator'] = lambda o, v: old_validator(o, v) and v >= 0
-        super(non_negative_integer, self).__init__(type=(int, str), *args, **kwargs)
+        super(non_negative_integer, self).__init__(*args, **kwargs)
 
 
 class boolean(advanced_property):
     def __init__(self, *args, **kwargs):
         super(boolean, self).__init__(type=bool, *args, **kwargs)
+
+
+class float_vector(advanced_property):
+    def __init__(self, *args, **kwargs):
+        super(float_vector, self).__init__(type=partial(np.array, dtype=np.float, ndmin=1), *args, **kwargs)
 
 
 class back_referenced(property):
