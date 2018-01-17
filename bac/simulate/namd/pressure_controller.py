@@ -1,5 +1,5 @@
-from bac.utils.pdb import PDBColumn
-from bac.utils.decorators import (boolean, positive_decimal, advanced_property,
+
+from bac.utils.decorators import (boolean, positive_decimal, float_vector,
                                   positive_integer, decimal, pathlike, pdbcolumn)
 from bac.simulate.coding import Encodable
 
@@ -78,7 +78,7 @@ class LangevinPistonPressureControl(PressureController):
     @decimal(default=0.0)
     def surface_tension_target(self): pass
 
-    @advanced_property(default=(0, 0, 0), type=tuple)
+    @float_vector(default=(0, 0, 0), validator=lambda _, x: x.size == 3)
     def strain_rate(self): pass
 
     @boolean(default=False)

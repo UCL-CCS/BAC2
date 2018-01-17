@@ -3,6 +3,8 @@ from bac.utils.decorators import (boolean, positive_decimal, pathlike, pdbcolumn
 
 from bac.simulate.coding import Encodable
 from bac.utils.pdb import PDBColumn
+import bac.simulate.base_thermostat as base
+
 
 class TemperatureController:
     pass
@@ -47,6 +49,14 @@ class TemperatureCoupling(TemperatureController, Encodable):
 
     @pdbcolumn
     def column(self): pass
+
+
+class VelocityRescale(base.VelocityRescale):
+    def __init__(self, *, temperature, frequency):
+        super(VelocityRescale, self).__init__(temperature=temperature, frequency=frequency)
+
+    @positive_decimal
+    def temperature(self): pass
 
 
 class VelocityRescaling(TemperatureController, Encodable):
