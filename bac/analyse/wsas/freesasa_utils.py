@@ -8,8 +8,8 @@ import freesasa
 
 defaults_dirname = os.path.dirname(os.path.realpath(__file__))
 default_config_filename = os.path.join(defaults_dirname, 'amber_config.txt')
-default_atom_params_filename = os.path.join(defaults_dirname,
-                                            'wsas-params-wang2012.json')
+default_atom_params_filename = os.path.join(defaults_dirname, 'wsas-params-wang2012.json')
+
 
 class FreesasaRunner:
     """Wrapper to help run freesasa on a single PDB file
@@ -17,7 +17,7 @@ class FreesasaRunner:
     Freesasa has a nice Python interface but somethings don't work quite as
     needed for how we wanted for BAC, at least in Python 3. This wrapper is
     intended to handle these issues:
-    1. filenames need conversion to bytes when passed to freesasa
+    1. file names need conversion to bytes when passed to freesasa
     2. By default should include HETATMS and hydrogens in analysis
 
     Parameters
@@ -71,8 +71,8 @@ class FreesasaRunner:
 
         logfilename = kwargs.get('logfile', '/dev/null')
 
-        #Hide warnings (as the load of multiple structures is two step and
-        #extended config is not read in first step).
+        # Hide warnings (as the load of multiple structures is two step and
+        # extended config is not read in first step).
         freesasa.setVerbosity(1)
 
         self.classifier = freesasa.Classifier(config_filename)
@@ -80,7 +80,6 @@ class FreesasaRunner:
         self.options = kwargs.get('options', default_options)
 
         self.parameters = kwargs.get('parameters', default_parameters)
-
 
     def run(self, pdb):
         """Run freesasa on provided PDB file

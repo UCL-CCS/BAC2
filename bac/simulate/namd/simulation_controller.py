@@ -113,6 +113,7 @@ class Simulation(BaseSimulation, Encodable):
     @velocities.post_set_processing
     def velocities(self, value):
         if value is not None:
+            # Either velocity or temperature can be set.
             self.temperature = None
 
     @pathlike
