@@ -45,9 +45,10 @@ def atom_contribution_nm(atom_type, sas, params):
 
     return atom_type_info['weight'] * (sas + k * bsa)
 
+
 def nm_component_calc(atom_values, temperature, intercept):
 
-    #Factor of 1000 converts cal/mol to kcal/mol
+    # Factor of 1000 converts cal/mol to kcal/mol
     component_nm = temperature/1000 * (atom_values.sum() + intercept)
 
     return component_nm

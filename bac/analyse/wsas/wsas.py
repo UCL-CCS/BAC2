@@ -1,19 +1,17 @@
-import shutil
 import os
+import json
+import shutil
 import argparse
 import tempfile
-import json
-
 from pathlib import Path
 
-import pandas as pd
 import mdtraj
+import pandas as pd
 import parmed as pmd
 
-import sasa_analysis
-import freesasa_utils
-
-import extract_residues
+from bac.analyse.wsas import sasa_analysis
+from bac.analyse.wsas import freesasa_utils
+from bac.analyse.wsas import extract_residues
 
 
 def parse_filter_residues(filter_residues):
@@ -124,13 +122,12 @@ def check_prmtop(top_filename):
 
 def commandline_parser():
 
-    #TODO: Allow selection of output directory
+    # TODO: Allow selection of output directory
 
     defaults_dirname = os.path.dirname(os.path.realpath(__file__))
     default_config = os.path.join(defaults_dirname, 'template-input.json')
     default_wsas_filename = os.path.join(defaults_dirname, 'amber_config.txt')
-    default_params_filename = os.path.join(defaults_dirname,
-                                           'wsas-params-wang2012.json')
+    default_params_filename = os.path.join(defaults_dirname, 'wsas-params-wang2012.json')
 
     parser = argparse.ArgumentParser(description='WSAS Calculator: Computes surface area '
                                                  'related free energy components')
@@ -147,7 +144,7 @@ def commandline_parser():
                         help='Topology for the ligand (in vaccuo).',
                         metavar='FILE', type=check_prmtop)
 
-    parser.add_argument('-t', dest='trajectories', required=False, nargs = '+',
+    parser.add_argument('-t', dest='trajectories', required=False, nargs='+',
                         help='Trajectories of coordinates to use in analysis.',
                         metavar='FILE', type=extant_file)
 
@@ -187,7 +184,7 @@ def validate_prmtop_filename(original_filename, target_dir=Path('.')):
     Returns
     -------
     Path
-        Location of verfified prmtop (with potentially edited filename)
+        Location of verified prmtop (with potentially edited filename)
 
     """
 
@@ -206,33 +203,6 @@ def validate_prmtop_filename(original_filename, target_dir=Path('.')):
         top_filename = Path(original_filename)
 
     return top_filename
-
-
-def parse_filter_residues(filter_residues):
-    """
-    Convert input list of residue names into an mdtraj filter which will
-    select all residues not matching an entry in the input list.
-
-    Parameters
-    ----------
-    filter_residues : list
-        Residue codes to be combined into a exclusion filter.
-
-    Returns
-    -------
-    str
-        Selection text in mdtraj format selecting everything that does not
-        match input residue names.
-
-    """
-
-    # TODO: Check the escape character for + ions
-
-    selection_text = '! ('
-    selection_text += ' or '.join(['(resname =~ {:s})'.format(x) for x in filter_residues])
-    selection_text += ')'
-
-    return selection_text
 
 
 def create_component_selections(traj, setup):
@@ -299,8 +269,7 @@ def update_sasa_config(setup):
 
         sasa_config = setup.tmp_dir.joinpath('system_sasa.config')
 
-        freesasa_utils.add_residues_freesasa_config_file(residues_to_add,
-                                                         sasa_config)
+        freesasa_utils.add_residues_freesasa_config_file(residues_to_add, sasa_config)
 
     else:
 
@@ -338,7 +307,7 @@ def wsas_calc(setup, sasa_nm_params):
             last_frame_input = setup.last_frame
 
         # Map frame numbers in original file to those read in (i.e. account for stride)
-        frames_to_use = [x for x,y in enumerate(range(0, n_orig_frames, stride))
+        frames_to_use = [x for x, y in enumerate(range(0, n_orig_frames, stride))
                          if y in range(first_frame_input, last_frame_input)]
 
         first_frame_strided = frames_to_use[0]
@@ -374,7 +343,6 @@ def wsas_calc(setup, sasa_nm_params):
                           ndx, sasa in enumerate(avg_areas)]
 
             results[component][trajectory_filename] = nm_contrib
-
 
     return results
 
@@ -415,8 +383,7 @@ def setup_workspace(setup):
 
     read_config_file(setup)
 
-    #TODO: Validate contents of setup
-
+    # TODO: Validate contents of setup
 
     return
 
@@ -483,6 +450,5 @@ if __name__ == "__main__":
 
     output_file = setup.output_dir.joinpath('{}-wsas-summary.dat'.format(component))
     wsas_component.to_csv(output_file, sep='\t')
-
 
     teardown_workspace(setup)
