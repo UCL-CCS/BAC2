@@ -136,7 +136,7 @@ def _create_freesasa_section_text(new_residues, sasa_atom_params):
 
     atom_types = []
 
-    # Create lines for residue section of format:https://www.eventbrite.co.uk/e/microbiology-medicine-and-meditation-tickets-39512044589
+    # Create lines for residue section of format:
     # residue_name atom_name atom_type
     residue_section = ''
 
