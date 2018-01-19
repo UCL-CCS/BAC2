@@ -95,7 +95,7 @@ class Simulation(BaseSimulation, Encodable):
     @integer(default=0)
     def initial_step(self): pass
 
-    @advanced_property(type=(CenterOfMassMotion, type(None), str), default=CenterOfMassMotion.linear)
+    @advanced_property(type=CenterOfMassMotion, default=CenterOfMassMotion.linear)
     def center_of_mass_motion(self): pass
 
     @integer(default=100)

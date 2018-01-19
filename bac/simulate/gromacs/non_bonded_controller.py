@@ -173,7 +173,7 @@ class NonBondedController(Encodable):
     @advanced_property(type=NeighborListType, default=NeighborListType.grid)
     def neighbor_list_type(self): pass
 
-    @advanced_property(type=(PeriodicBoundaryConditionType, bool, str), default=PeriodicBoundaryConditionType.xyz)
+    @advanced_property(type=PeriodicBoundaryConditionType, default=PeriodicBoundaryConditionType.xyz)
     def periodic_boundary_condition(self): pass
 
     @boolean(default=False)
@@ -185,7 +185,7 @@ class NonBondedController(Encodable):
     @advanced_property(type=CoulombType, default=CoulombType.cutoff)
     def coulomb_type(self): pass
 
-    @advanced_property(type=(CoulombModifierType, type(None), str), default=CoulombModifierType.potential_shift_verlet)
+    @advanced_property(type=CoulombModifierType, default=CoulombModifierType.potential_shift_verlet)
     def coulomb_modifier(self) -> CoulombModifierType:
         pass
 
@@ -211,8 +211,7 @@ class NonBondedController(Encodable):
     @advanced_property(type=VanDerWaalsType, default=VanDerWaalsType.cutoff)
     def van_der_waals_type(self): pass
 
-    @advanced_property(type=(VanDerWaalsModifierType, type(None), str),
-                       default=VanDerWaalsModifierType.potential_shift_verlet)
+    @advanced_property(type=VanDerWaalsModifierType, default=VanDerWaalsModifierType.potential_shift_verlet)
     def van_der_waals_modifier(self): pass
 
     @decimal(default=0)
@@ -221,7 +220,7 @@ class NonBondedController(Encodable):
     @decimal(default=1)
     def van_der_waals_cutoff(self): pass
 
-    @advanced_property(type=(LongRangeDispersionCorrectionType, bool, str), default=LongRangeDispersionCorrectionType.no)
+    @advanced_property(type=LongRangeDispersionCorrectionType, default=LongRangeDispersionCorrectionType.no)
     def correct_long_range_dispersion(self): pass
 
     @decimal(default=0.12)

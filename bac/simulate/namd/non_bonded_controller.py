@@ -1,4 +1,7 @@
 from enum import Enum
+from functools import partial
+
+import numpy as np
 
 from bac.utils.decorators import *
 
@@ -133,16 +136,16 @@ class NonBondedController(Encodable):
 
     # Boundary Condition
 
-    @advanced_property(type=tuple, default=(0, 0, 0))
+    @advanced_property(type=partial(np.array, dtype=np.float), default=(0, 0, 0), validator=lambda _, x: x.size == 3)
     def cell_basis_vector_1(self): pass
 
-    @advanced_property(type=tuple, default=(0, 0, 0))
+    @advanced_property(type=partial(np.array, dtype=np.float), default=(0, 0, 0), validator=lambda _, x: x.size == 3)
     def cell_basis_vector_2(self): pass
 
-    @advanced_property(type=tuple, default=(0, 0, 0))
+    @advanced_property(type=partial(np.array, dtype=np.float), default=(0, 0, 0), validator=lambda _, x: x.size == 3)
     def cell_basis_vector_3(self): pass
 
-    @advanced_property(type=tuple, default=(0, 0, 0))
+    @advanced_property(type=partial(np.array, dtype=np.float), default=(0, 0, 0), validator=lambda _, x: x.size == 3)
     def cell_origin(self): pass
 
     @pathlike

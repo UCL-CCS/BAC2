@@ -13,10 +13,9 @@ setup(
 
     author='CCS',
 
-    requires=['yaml', 'parmed'],
+    requires=['yaml', 'parmed', 'numpy'],
 
     packages=find_packages(),
 
     include_package_data=True,
 )
-
