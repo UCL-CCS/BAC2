@@ -18,6 +18,12 @@ class SplitPatchType(Enum):
     position = 'position'
 
 
+class WaterModel(Enum):
+    tip3p = 'tip3'
+    tip4p = 'tip4'
+    swm4_ndp = 'swm4'
+
+
 class NonBondedController(Encodable):
     def __init__(self, **kwargs):
 
@@ -61,6 +67,7 @@ class NonBondedController(Encodable):
         self.wrap_all = kwargs.get('wrap_all')
         self.wrap_nearest = kwargs.get('wrap_nearest')
 
+        self.water_model = kwargs.get('water_model')
 
     @positive_decimal
     def cutoff(self): pass
@@ -133,13 +140,16 @@ class NonBondedController(Encodable):
     def xst_frequency(self): pass
 
     @boolean(default=False)
-    def wrap_water(self):pass
+    def wrap_water(self): pass
 
     @boolean(default=False)
     def wrap_all(self): pass
 
     @boolean(default=False)
     def wrap_nearest(self): pass
+
+    @advanced_property(type=WaterModel, default=WaterModel.tip3p)
+    def water_model(self): pass
 
 
 class PME(Encodable):
