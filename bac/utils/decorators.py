@@ -103,7 +103,7 @@ class advanced_property(property, Versioned):
             obj.__setattr__(self.private_name, value)
 
         if self.post_set_processor:
-            self.post_set_processor(obj, value)
+            self.post_set_processor(obj)
 
     @property
     def private_name(self):
