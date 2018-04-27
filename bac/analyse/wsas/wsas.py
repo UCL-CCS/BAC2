@@ -70,7 +70,8 @@ def extant_file(x):
 
 def str2bool(x):
     """
-    'Type' for argparse - checks that file exists but does not open.
+    'Type' for argparse - converts variants of (t)rue/(false), (y)es/(n)o and
+    1/0 to True/False.
 
     Parameters
     ----------
