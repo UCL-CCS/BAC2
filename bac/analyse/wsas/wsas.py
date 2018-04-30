@@ -123,8 +123,6 @@ def check_prmtop(top_filename):
 
 def commandline_parser():
 
-    # TODO: Allow selection of output directory
-
     defaults_dirname = os.path.dirname(os.path.realpath(__file__))
     default_config = os.path.join(defaults_dirname, 'template-input.json')
     default_wsas_filename = os.path.join(defaults_dirname, 'amber_config.txt')
