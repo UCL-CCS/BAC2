@@ -284,6 +284,8 @@ def wsas_calc(setup, sasa_nm_params):
     tmp_dir = setup.tmp_dir
     trajectories = setup.trajectories
     system_topology = setup.system_topology
+    first_frame = setup.first_frame
+    last_frame = setup.last_frame
     stride = setup.stride
     output_dir = setup.output_dir
 
@@ -293,38 +295,30 @@ def wsas_calc(setup, sasa_nm_params):
 
     for idx, trajectory_filename in enumerate(trajectories):
 
-        # Use stride here then hack to select first/last frames as
-        # not supported simply by mdtraj (and want to minimize memory usage)
-        traj = mdtraj.load(str(trajectory_filename), top=str(system_topology), stride=stride)
+        # Load trajectory but only analyse selected frames
+        traj = mdtraj.load(str(trajectory_filename), top=str(system_topology))
+        traj = traj[first_frame:last_frame:stride]
 
-        n_frames = traj.n_frames
-        n_orig_frames = n_frames * stride
-
-        first_frame_input = setup.first_frame
-
-        if setup.last_frame == -1:
-            last_frame_input = n_orig_frames
-        else:
-            last_frame_input = setup.last_frame
-
-        # Map frame numbers in original file to those read in (i.e. account for stride)
-        frames_to_use = [x for x, y in enumerate(range(0, n_orig_frames, stride))
-                         if y in range(first_frame_input, last_frame_input)]
-
-        first_frame_strided = frames_to_use[0]
-        last_frame_strided = frames_to_use[-1]
-
+        # Setup the surface area calculation machinery only for first trajectory
+        # then reuse for the others
         if idx == 0:
 
+            # Add any system specific non-standard residues (including ligands)
+            # to the freesasa config file
             sasa_config = update_sasa_config(setup)
 
             sasa_calculator = freesasa_utils.FreesasaRunner(config=sasa_config)
 
+            # Get atom indices for relevant components [complex/receptor/ligand]
             atom_selections = create_component_selections(traj, setup)
 
+            # Setup dictionary to hold values for all component calculations
             results = {}
 
             for component, atom_list in atom_selections.items():
+
+                # Create columns with residue bame, atom name and atom type for
+                # each atom in each component for which areas will be calculated
                 results[component] = pd.DataFrame()
                 results[component]['residue'] = [traj.top.atom(x).residue.name for x in atom_list]
                 results[component]['atom_name'] = [system_amber_top.parm_data['ATOM_NAME'][x] for x in atom_list]
@@ -332,14 +326,19 @@ def wsas_calc(setup, sasa_nm_params):
 
         for component, atom_list in atom_selections.items():
 
+            # Create temporary (multiframe) PDB for analysis by freesasa
+            # Filtered to contain only component atoms
             traj_pdb_filename = os.path.join(tmp_dir, component + '-traj.pdb')
-            comp_traj = traj[first_frame_strided:last_frame_strided].atom_slice(atom_list)
+            comp_traj = traj.atom_slice(atom_list)
             comp_traj.save(traj_pdb_filename)
 
+            # Get atomic surface areas for each frame
             atom_areas = pd.DataFrame(sasa_calculator.run(traj_pdb_filename))
 
+            # Average surface areas across trajectory
             avg_areas = atom_areas.mean()
 
+            # Compute 'normal mode entropy' from surface areas
             nm_contrib = [sasa_analysis.atom_contribution_nm(results[component]['atom_type'][ndx], sasa, sasa_nm_params) for
                           ndx, sasa in enumerate(avg_areas)]
 
