@@ -14,10 +14,10 @@ default_atom_params_filename = os.path.join(defaults_dirname, 'wsas-params-wang2
 class FreesasaRunner:
     """Wrapper to help run freesasa on a single PDB file
 
-    Freesasa has a nice Python interface but somethings don't work quite as
-    needed for how we wanted for BAC, at least in Python 3. This wrapper is
-    intended to handle these issues:
-    1. file names need conversion to bytes when passed to freesasa
+    Freesasa has a nice Python interface but some things don't work quite as
+    needed for BAC, at least in Python 3. This wrapper is intended to handle
+    these issues:
+    1. File names need conversion to bytes when passed to freesasa
     2. By default should include HETATMS and hydrogens in analysis
 
     Parameters
