@@ -95,7 +95,7 @@ def str2bool(x):
 
 def check_prmtop(top_filename):
     """
-    'Type' for argparse - checks that file exists and is a valif Amber prmtop
+    'Type' for argparse - checks that file exists and is a valid Amber prmtop
 
     Parameters
     ----------
@@ -177,9 +177,9 @@ def validate_prmtop_filename(original_filename, target_dir=Path('.')):
 
     Parameters
     ----------
-    original_filename : str
+    original_filename : Path
         Path to supposed prmtop file
-    target_dir
+    target_dir : Path
         Directory in which to create symlink if required
 
     Returns
@@ -244,9 +244,9 @@ def create_component_selections(traj, setup):
 
     selections = {}
 
-    for component, filter in filters.items():
+    for component, atom_filter in filters.items():
 
-        selections[component] = traj.top.select(filter)
+        selections[component] = traj.top.select(atom_filter)
 
     return selections
 
@@ -279,6 +279,7 @@ def update_sasa_config(setup):
     return sasa_config
 
 
+# noinspection PyUnboundLocalVariable
 def wsas_calc(setup, sasa_nm_params):
 
     tmp_dir = setup.tmp_dir
@@ -339,8 +340,8 @@ def wsas_calc(setup, sasa_nm_params):
             avg_areas = atom_areas.mean()
 
             # Compute 'normal mode entropy' from surface areas
-            nm_contrib = [sasa_analysis.atom_contribution_nm(results[component]['atom_type'][ndx], sasa, sasa_nm_params) for
-                          ndx, sasa in enumerate(avg_areas)]
+            nm_contrib = [sasa_analysis.atom_contribution_nm(results[component]['atom_type'][ndx], sasa, sasa_nm_params)
+                          for ndx, sasa in enumerate(avg_areas)]
 
             results[component][trajectory_filename] = nm_contrib
 
