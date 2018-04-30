@@ -81,6 +81,7 @@ class FreesasaRunner:
 
         self.parameters = kwargs.get('parameters', default_parameters)
 
+
     def run(self, pdb):
         """Run freesasa on provided PDB file
 
