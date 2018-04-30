@@ -198,7 +198,6 @@ def update_sasa_config(setup):
     return sasa_config
 
 
-# noinspection PyUnboundLocalVariable
 def wsas_calc(setup, sasa_nm_params):
 
     tmp_dir = setup.tmp_dir
