@@ -9,7 +9,7 @@ def extract_parmtop_residue(filename):
 
     Parameters
     ----------
-    filename: str
+    filename: Path
         Filename of the input parmtop.
 
     Returns
@@ -41,7 +41,7 @@ def extract_prep_residue(filename):
 
     Parameters
     ----------
-    filename: str
+    filename: Path
         Filename of the input prep file.
 
     Returns
@@ -83,7 +83,7 @@ def extract_offlib_residue(filename):
 
     Parameters
     ----------
-    filename: str
+    filename: Path
         Filename of the input prep file.
 
     Returns
@@ -110,7 +110,7 @@ def extract_mol2_residue(filename):
 
     Parameters
     ----------
-    filename: str
+    filename: Path
         Filename of the input mol2 file.
 
     Returns
@@ -135,7 +135,7 @@ def extract_residue(filename):
 
     Parameters
     ----------
-    filename: str
+    filename: Path
         Filename of the input residue template file.
 
     Returns
