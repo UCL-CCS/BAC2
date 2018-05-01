@@ -239,7 +239,8 @@ def wsas_calc(setup, sasa_nm_params):
                 # Create columns with residue bame, atom name and atom type for
                 # each atom in each component for which areas will be calculated
                 results[component] = pd.DataFrame()
-                results[component]['residue'] = [traj.top.atom(x).residue.name for x in atom_list]
+                results[component]['resid'] = [traj.top.atom(x).residue.resSeq for x in atom_list]
+                results[component]['residue_name'] = [traj.top.atom(x).residue.name for x in atom_list]
                 results[component]['atom_name'] = [system_amber_top.parm_data['ATOM_NAME'][x] for x in atom_list]
                 results[component]['atom_type'] = [system_amber_top.parm_data['AMBER_ATOM_TYPE'][x] for x in atom_list]
 
