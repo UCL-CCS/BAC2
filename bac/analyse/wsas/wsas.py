@@ -315,8 +315,6 @@ class Wsas:
             energies['difference'] = energies['complex'] - energies['receptor'] - energies['ligand']
 
 
-
-
 def validate_prmtop_filename(original_prmtop, target_dir='', force_new=False):
     """
     Check that file exists and create a symlink if it doesn't have a
@@ -338,7 +336,6 @@ def validate_prmtop_filename(original_prmtop, target_dir='', force_new=False):
     """
 
     original_filename = Path(original_prmtop)
-
 
     if not os.path.isfile(original_filename):
         raise IOError()
