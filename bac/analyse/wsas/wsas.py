@@ -357,24 +357,4 @@ def validate_prmtop_filename(original_prmtop, target_dir='', force_new=False):
 
     return str(top_filename)
 
-if __name__ == "__main__":
-    # execute only if run as a script
-
-    top = '/net/dirac/mnt/store7/dave/janssen/return/brd4-jj-prot-gsk-lig-99sb/g1/gsk1/build/complex.top'
-    lig_top = '/net/dirac/mnt/store7/dave/janssen/return/brd4-jj-prot-gsk-lig-99sb/g1/gsk1/build/lig.top'
-    dcds = ['/net/dirac/mnt/store7/dave/janssen/return/brd4-jj-prot-gsk-lig-99sb/g1/gsk1/replicas/rep1/simulation/sim1.dcd']
-
-    top = validate_prmtop_filename(top, '.', force_new=True)
-    lig_top = validate_prmtop_filename(lig_top, '.', force_new=True)
-
-    wsas_calculator = Wsas(topology=top,
-                           ligand_topology=lig_top,
-                           trajectories=dcds,
-                           first_frame=0,
-                           last_frame=-1,
-                           stride=10)
-
-
-    wsas_calculator.calc_surface_areas()
-    wsas_calculator.compute_nm_energy()
 
