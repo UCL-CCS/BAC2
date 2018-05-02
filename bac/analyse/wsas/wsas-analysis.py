@@ -72,6 +72,10 @@ def commandline_parser():
                         help='Trajectories of coordinates to use in analysis.',
                         metavar='FILE', type=extant_file)
 
+    parser.add_argument('-n', dest='non_standard_residues', required=False, nargs='+',
+                        help='Topology file for non-standard residues',
+                        metavar='FILE', type=extant_file)
+
     parser.add_argument('-w', dest='wsas_params', default=default_wsas_filename,
                         help='JSON file containing atom/residue parameters for WSAS analysis.',
                         metavar='FILE', type=extant_file)
