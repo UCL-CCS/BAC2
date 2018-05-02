@@ -60,9 +60,13 @@ def commandline_parser():
                         help='Topology for the full (usually solvated) system',
                         metavar='FILE', type=check_prmtop)
 
-    parser.add_argument("-lt", dest='ligand_topology', required=False,
+    parser.add_argument('-lt', dest='ligand_topology', required=False,
                         help='Topology for the ligand (in vaccuo).',
                         metavar='FILE', type=check_prmtop)
+
+    parser.add_argument('-lf', dest='ligand_filter', required=False,
+                        help='Filter text (mdtraj DSL) to identify ligand',
+                        type=str)
 
     parser.add_argument('-t', dest='trajectories', required=False, nargs='+',
                         help='Trajectories of coordinates to use in analysis.',
