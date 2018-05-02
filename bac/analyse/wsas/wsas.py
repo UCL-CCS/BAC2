@@ -11,10 +11,8 @@ import mdtraj as md
 import pandas as pd
 
 from bac.utils.decorators import advanced_property, pathlike
-#from .extract_residues import extract_residue
-from bac.analyse.wsas.extract_residues import extract_residue
-from bac.analyse.wsas.sasa_analysis import atom_contribution_nm
-from bac.analyse.wsas.freesasa_utils import FreesasaRunner, add_residues_freesasa_config_file, default_config_filename
+from .extract_residues import extract_residue
+from .freesasa_utils import FreesasaRunner, add_residues_freesasa_config_file, default_config_filename
 
 defaults_dirname = os.path.dirname(os.path.realpath(__file__))
 default_params_filename = os.path.join(defaults_dirname, 'wsas-params-wang2012.json')
