@@ -8,8 +8,6 @@ import freesasa
 
 defaults_dirname = os.path.dirname(os.path.realpath(__file__))
 default_config_filename = os.path.join(defaults_dirname, 'amber_config.txt')
-default_atom_params_filename = os.path.join(defaults_dirname, 'wsas-params-wang2012.json')
-
 
 class FreesasaRunner:
     """Wrapper to help run freesasa on a single PDB file
