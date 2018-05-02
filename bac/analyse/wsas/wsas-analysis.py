@@ -1,60 +1,22 @@
-import os
+import os, sys
 import json
 import shutil
 import argparse
 import tempfile
 from pathlib import Path
 
-import mdtraj
-import pandas as pd
-import parmed as pmd
-
-from bac.analyse.wsas import sasa_analysis
-from bac.analyse.wsas import freesasa_utils
-from bac.analyse.wsas import extract_residues
-from bac.analyse.wsas.input_checks import extant_file, str2bool, check_prmtop
-
-
-def parse_filter_residues(filter_residues):
-    """
-    Convert input list of residue names into an mdtraj filter which will
-    select all residues not matching an entry in the input list.
-
-    Parameters
-    ----------
-    filter_residues : list
-        Residue codes to be combined into a exclusion filter.
-
-    Returns
-    -------
-    str
-        Selection text in mdtraj format selecting everything that does not
-        match input residue names.
-
-    """
-
-    # TODO: Check the escape character for + ions
-
-    selection_text = '! ('
-    selection_text += ' or '.join(['(resname =~ {:s})'.format(x) for x in filter_residues])
-    selection_text += ')'
-
-    return selection_text
+from bac.analyse.wsas.input_checks import extant_file, check_prmtop
+from bac.analyse.wsas.freesasa_utils import default_config_filename
+from bac.analyse.wsas.wsas import Wsas, validate_prmtop_filename, default_params_filename
 
 
 def commandline_parser():
 
-    defaults_dirname = os.path.dirname(os.path.realpath(__file__))
-    default_config = os.path.join(defaults_dirname, 'template-input.json')
-    default_wsas_filename = os.path.join(defaults_dirname, 'amber_config.txt')
-    default_params_filename = os.path.join(defaults_dirname, 'wsas-params-wang2012.json')
+    #TODO: Allow user to set solvent filter
+    #TODO: Create option to use a parameters yaml file rather than commandline
 
     parser = argparse.ArgumentParser(description='WSAS Calculator: Computes surface area '
                                                  'related free energy components')
-
-    parser.add_argument('-i', dest='config_filename', default=default_config,
-                        help='Input JSON configuration file', metavar='FILE',
-                        type=extant_file)
 
     parser.add_argument('-st', dest='system_topology', required=True,
                         help='Topology for the full (usually solvated) system',
@@ -72,15 +34,19 @@ def commandline_parser():
                         help='Trajectories of coordinates to use in analysis.',
                         metavar='FILE', type=extant_file)
 
-    parser.add_argument('-n', dest='non_standard_residues', required=False, nargs='+',
+    parser.add_argument('-te', dest='temp', default=300.0,
+                        help='Temperature for energy computations',
+                        type=float)
+
+    parser.add_argument('-n', dest='non_standard_residues', default=[], nargs='+',
                         help='Topology file for non-standard residues',
                         metavar='FILE', type=extant_file)
 
-    parser.add_argument('-w', dest='wsas_params', default=default_wsas_filename,
+    parser.add_argument('-w', dest='wsas_params', default=default_params_filename,
                         help='JSON file containing atom/residue parameters for WSAS analysis.',
                         metavar='FILE', type=extant_file)
 
-    parser.add_argument('-f', dest='freesasa_params', default=default_params_filename,
+    parser.add_argument('-f', dest='freesasa_config', default=default_config_filename,
                         help='Freesasa atom and residue parameters file.',
                         metavar='FILE', type=extant_file)
 
@@ -95,299 +61,81 @@ def commandline_parser():
 
     return args
 
+def save_outputs(wsas, output_dir):
 
-def validate_prmtop_filename(original_filename, target_dir=Path('.')):
-    """
-    Check that file exists and create a symlink if it doesn't have a
-    prmtop extension (often *.top is used but mdtraj cant't detect type
-    with ambiguous extensions).
+    for component, wsas_data in wsas.wsas.items():
 
-    Parameters
-    ----------
-    original_filename : Path
-        Path to supposed prmtop file
-    target_dir : Path
-        Directory in which to create symlink if required
+        output_file = os.path.join(output_dir, '{}-wsas-atom-breakdown.dat'.format(component))
+        wsas_data.to_csv(output_file, sep='\t', index=False)
 
-    Returns
-    -------
-    Path
-        Location of verified prmtop (with potentially edited filename)
+    for component, energy_data in wsas.energies.items():
+        output_file = os.path.join(output_dir, '{}-wsas-summary.dat'.format(component))
+        energy_data.to_csv(output_file, sep='\t', index=False)
 
-    """
+    if 'complex' in wsas.energies:
 
-    if not os.path.isfile(original_filename):
-        raise IOError()
+        nm_approx = 0.0
 
-    basename, ext = os.path.splitext(os.path.basename(original_filename))
+        for component in ['complex', 'receptor', 'ligand']:
 
-    if ext != 'prmtop':
+            energies = wsas.energies[component]
 
-        top_filename = Path(os.path.join(target_dir, basename + '.prmtop'))
-        os.symlink(original_filename.absolute(), top_filename.absolute())
+            if component == 'complex':
+                nm_approx = energies
+            else:
+                nm_approx -= energies
 
-    else:
+        output_file = os.path.join(output_dir, 'nm-approx-summary.dat')
+        nm_approx.to_csv(output_file, sep='\t', index=False)
 
-        top_filename = Path(original_filename)
-
-    return top_filename
-
-
-def create_component_selections(traj, setup):
-    """
-    Obtain atom level selections for components used in calculation:
-    complex, receptor and ligand. For component only calculations only
-    one selection is returned, for complex all three.
-
-    Parameters
-    ----------
-    traj : mdtraj.Trajectory
-        An input MD trajectory - contains topology information
-    setup : argparse.Namespace
-        Contains user selections
-
-    Returns
-    -------
-    dict
-        Keys are component names and values are numpy arrays of selected atom indexes
-    """
-
-    solvent_residues = setup.solvent_residues
-
-    filters = {}
-
-    if setup.component in ['complex', 'ligand']:
-
-        filters['ligand'] = setup.ligand_filter
-
-    else:
-        filters['receptor'] = parse_filter_residues(solvent_residues)
-
-    if setup.component == 'complex':
-
-        filters['complex'] = parse_filter_residues(solvent_residues)
-        filters['receptor'] = '{} and (not {})'.format(filters['complex'],
-                                                       filters['ligand'])
-
-    selections = {}
-
-    for component, atom_filter in filters.items():
-
-        selections[component] = traj.top.select(atom_filter)
-
-    return selections
-
-
-def update_sasa_config(setup):
-
-    if setup.ligand_topology:
-
-        files_to_add = [setup.ligand_topology] + setup.nonstandard_residue_files
-
-    else:
-
-        files_to_add = setup.nonstandard_residue_files
-
-    residues_to_add = {}
-
-    for filename in files_to_add:
-        residues_to_add.update(extract_residues.extract_residue(filename))
-
-    if residues_to_add:
-
-        sasa_config = setup.tmp_dir.joinpath('system_sasa.config')
-
-        defaults_dirname = os.path.dirname(os.path.realpath(__file__))
-        default_atom_params_filename = os.path.join(defaults_dirname, 'wsas-params-wang2012.json')
-
-        with open(default_atom_params_filename, 'r') as f:
-            params = json.load(f)
-
-        freesasa_utils.add_residues_freesasa_config_file(residues_to_add,
-                                                         sasa_config,
-                                                         params['params'])
-
-    else:
-
-        sasa_config = freesasa_utils.default_config_filename
-
-    return sasa_config
-
-
-def wsas_calc(setup, sasa_nm_params):
-
-    tmp_dir = setup.tmp_dir
-    trajectories = setup.trajectories
-    system_topology = setup.system_topology
-    first_frame = setup.first_frame
-    last_frame = setup.last_frame
-    stride = setup.stride
-    output_dir = setup.output_dir
-
-    output_dir.mkdir(exist_ok=True, parents=True)
-
-    system_amber_top = pmd.load_file(str(system_topology))
-
-    for idx, trajectory_filename in enumerate(trajectories):
-
-        # Load trajectory but only analyse selected frames
-        traj = mdtraj.load(str(trajectory_filename), top=str(system_topology))
-        traj = traj[first_frame:last_frame:stride]
-
-        # Setup the surface area calculation machinery only for first trajectory
-        # then reuse for the others
-        if idx == 0:
-
-            # Add any system specific non-standard residues (including ligands)
-            # to the freesasa config file
-            sasa_config = update_sasa_config(setup)
-
-            sasa_calculator = freesasa_utils.FreesasaRunner(config=sasa_config)
-
-            # Get atom indices for relevant components [complex/receptor/ligand]
-            atom_selections = create_component_selections(traj, setup)
-
-            # Setup dictionary to hold values for all component calculations
-            results = {}
-
-            for component, atom_list in atom_selections.items():
-
-                # Create columns with residue bame, atom name and atom type for
-                # each atom in each component for which areas will be calculated
-                results[component] = pd.DataFrame()
-                results[component]['resid'] = [traj.top.atom(x).residue.resSeq for x in atom_list]
-                results[component]['residue_name'] = [traj.top.atom(x).residue.name for x in atom_list]
-                results[component]['atom_name'] = [system_amber_top.parm_data['ATOM_NAME'][x] for x in atom_list]
-                results[component]['atom_type'] = [system_amber_top.parm_data['AMBER_ATOM_TYPE'][x] for x in atom_list]
-
-        for component, atom_list in atom_selections.items():
-
-            # Create temporary (multiframe) PDB for analysis by freesasa
-            # Filtered to contain only component atoms
-            traj_pdb_filename = os.path.join(tmp_dir, component + '-traj.pdb')
-            comp_traj = traj.atom_slice(atom_list)
-            comp_traj.save(traj_pdb_filename)
-
-            # Get atomic surface areas for each frame
-            atom_areas = pd.DataFrame(sasa_calculator.run(traj_pdb_filename))
-
-            # Average surface areas across trajectory
-            avg_areas = atom_areas.mean()
-
-            # Compute 'normal mode entropy' from surface areas
-            nm_contrib = [sasa_analysis.atom_contribution_nm(results[component]['atom_type'][ndx], sasa, sasa_nm_params)
-                          for ndx, sasa in enumerate(avg_areas)]
-
-            results[component][trajectory_filename] = nm_contrib
-
-    return results
-
-
-def read_config_file(setup):
-
-    setup_vars = vars(setup)
-
-    with open(setup.config_filename, 'r') as f:
-        calc_config = json.load(f)
-
-    for key, value in calc_config.items():
-
-        if key not in setup_vars:
-
-            setup_vars[key] = value
-
-    return
-
-
-def setup_workspace(setup):
-
-    setup.tmp_dir = Path(tempfile.mkdtemp())
-
-    # mdtraj recognizes filetype from extension
-    # Traditionally BAC used .top instead of prmtop which breaks this
-    setup.system_topology = validate_prmtop_filename(setup.system_topology,
-                                                     setup.tmp_dir)
-
-    if setup.ligand_topology:
-
-        setup.ligand_topology = validate_prmtop_filename(setup.ligand_topology,
-                                                         setup.tmp_dir)
-
-        lig_res = extract_residues.extract_residue(setup.ligand_topology)
-
-        setup.ligand_filter = 'resname {:s}'.format(list(lig_res.keys())[0])
-
-    read_config_file(setup)
-
-    # TODO: Validate contents of setup
-
-    return
-
-
-def teardown_workspace(setup):
-
-    shutil.rmtree(setup.tmp_dir)
-
-    return
-
-
-def get_wsas_component_output(setup, sasa_nm_params, results, component):
-
-    output_file = setup.output_dir.joinpath('{}-wsas-atom-breakdown.dat'.format(component))
-    results.to_csv(output_file, sep='\t', index=False)
-
-    id_cols = ['residue_name', 'resid', 'atom_name', 'atom_type']
-    #wsas_component = sasa_analysis.nm_component_calc(results.select_dtypes(exclude=['object']),
-    wsas_component = sasa_analysis.nm_component_calc(results.drop(id_cols, axis=1),
-                                                     setup.temperature,
-                                                     sasa_nm_params['intercept'])
-
-    output_file = setup.output_dir.joinpath('{}-wsas-summary.dat'.format(component))
-    wsas_component.to_csv(output_file, sep='\t')
-
-    return wsas_component
-
+        output_file = os.path.join(output_dir, 'nm-approx-avg.dat')
+        print('{:.3f}\t{:.3f}'.format(nm_approx.mean(), nm_approx.std()), file=open(output_file, 'w'))
 
 if __name__ == "__main__":
     # execute only if run as a script
 
-    setup = commandline_parser()
+    args = commandline_parser()
 
-    setup_workspace(setup)
+    top = args.system_topology
+    lig_top = args.ligand_topology
+    lig_filter = args.ligand_filter
+    trajectories = args.trajectories
+    output_dir = args.output_dir
+    temperature = args.temp
+    component = args.component
+    parameter_file = args.wsas_params
+    config_file = args.freesasa_config
+    non_standard_residues = args.non_standard_residues
 
-    nm_param_filename = setup.freesasa_params
+    top = validate_prmtop_filename(top, output_dir, force_new=True)
+    lig_top = validate_prmtop_filename(lig_top, output_dir, force_new=True)
 
-    with open(nm_param_filename, 'r') as f:
-        sasa_nm_params = json.load(f)
+    if component in ['complex', 'ligand']:
 
-    results = wsas_calc(setup, sasa_nm_params)
+        if not lig_filter and not lig_top:
 
-    if 'complex' in results:
+            print('For complex/ligand calculations a ligand filter or '
+                  'topology must be supplied')
+            sys.exit(1)
 
-        for component in ['complex', 'receptor', 'ligand']:
+    wsas_calculator = Wsas(topology=top,
+                           component=component,
+                           ligand_topology=lig_top,
+                           trajectories=trajectories,
+                           first_frame=0,
+                           last_frame=-1,
+                           stride=10,
+                           ligand_filter=lig_filter,
+                           non_standard_residues=non_standard_residues,
+                           temperature=temperature,
+                           parameter_file=parameter_file,
+                           config_file=config_file,
+                           )
 
-            wsas_component = get_wsas_component_output(setup, sasa_nm_params, results[component], component)
+    wsas_calculator.calc_surface_areas()
+    wsas_calculator.compute_nm_energy()
 
-            if component == 'complex':
+    save_outputs(wsas_calculator, output_dir)
 
-                wsas = wsas_component
+    shutil.rmtree(wsas_calculator.tmp_dir)
 
-            else:
-
-                wsas += -wsas_component
-
-            output_file = setup.output_dir.joinpath('{}-wsas-result.dat'.format(component))
-
-            with open(output_file, 'w') as outfile:
-
-                print('{:.3f}\t{:.3f}'.format(wsas.mean(), wsas.std()), file=outfile)
-
-    else:
-
-        component = list(results.keys())[0]
-        wsas_component = get_wsas_component_output(setup, sasa_nm_params, results[component], component)
-
-    output_file = setup.output_dir.joinpath('{}-wsas-summary.dat'.format(component))
-    wsas_component.to_csv(output_file, sep='\t')
-
-    teardown_workspace(setup)
