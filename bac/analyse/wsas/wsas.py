@@ -368,10 +368,11 @@ if __name__ == "__main__":
 
                 wsas += -wsas_component
 
-        output_file = setup.output_dir.joinpath('{}-wsas-result.dat'.format(component))
+            output_file = setup.output_dir.joinpath('{}-wsas-result.dat'.format(component))
 
-        with open(output_file, 'w') as outfile:
-            print('{:.3f}\t{:.3f}'.format(wsas.mean(), wsas.std()), file=outfile)
+            with open(output_file, 'w') as outfile:
+
+                print('{:.3f}\t{:.3f}'.format(wsas.mean(), wsas.std()), file=outfile)
 
     else:
 
