@@ -1,6 +1,5 @@
 import os
 import argparse
-from pathlib import Path
 import parmed as pmd
 
 def extant_file(x):
@@ -14,7 +13,7 @@ def extant_file(x):
 
     Returns
     -------
-    Path
+    str
         Validated path
 
     """
@@ -27,7 +26,7 @@ def extant_file(x):
         else:
             raise argparse.ArgumentTypeError("{0} does not exist".format(x))
 
-    return Path(x)
+    return str(x)
 
 
 def str2bool(x):
@@ -66,7 +65,7 @@ def check_prmtop(top_filename):
 
     Returns
     -------
-    Path
+    str
         Validated path
 
     """
