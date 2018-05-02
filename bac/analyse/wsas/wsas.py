@@ -189,7 +189,15 @@ def update_sasa_config(setup):
 
         sasa_config = setup.tmp_dir.joinpath('system_sasa.config')
 
-        freesasa_utils.add_residues_freesasa_config_file(residues_to_add, sasa_config)
+        defaults_dirname = os.path.dirname(os.path.realpath(__file__))
+        default_atom_params_filename = os.path.join(defaults_dirname, 'wsas-params-wang2012.json')
+
+        with open(default_atom_params_filename, 'r') as f:
+            params = json.load(f)
+
+        freesasa_utils.add_residues_freesasa_config_file(residues_to_add,
+                                                         sasa_config,
+                                                         params['params'])
 
     else:
 
@@ -320,7 +328,9 @@ def get_wsas_component_output(setup, sasa_nm_params, results, component):
     output_file = setup.output_dir.joinpath('{}-wsas-atom-breakdown.dat'.format(component))
     results.to_csv(output_file, sep='\t', index=False)
 
-    wsas_component = sasa_analysis.nm_component_calc(results.select_dtypes(exclude=['object']),
+    id_cols = ['residue_name', 'resid', 'atom_name', 'atom_type']
+    #wsas_component = sasa_analysis.nm_component_calc(results.select_dtypes(exclude=['object']),
+    wsas_component = sasa_analysis.nm_component_calc(results.drop(id_cols, axis=1),
                                                      setup.temperature,
                                                      sasa_nm_params['intercept'])
 

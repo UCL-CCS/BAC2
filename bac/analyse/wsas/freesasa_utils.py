@@ -171,7 +171,7 @@ def _create_freesasa_section_text(new_residues, sasa_atom_params):
 
 def add_residues_freesasa_config_file(new_residues,
                                       new_filename,
-                                      param_filename = default_atom_params_filename,
+                                      atom_params,
                                       orig_filename=default_config_filename):
     """
     Create a new freesasa config file that adds specified residue to the
@@ -186,22 +186,18 @@ def add_residues_freesasa_config_file(new_residues,
         Filename to be used for the updated freesasa config file.
     res_atom_to_type : dict
         Provides mapping from atom name to atom type.
-    param_filename: str
-        File containing atom type to properties (radius and polarity) mapping
-        needed by freesasa.
+    atom_params: dict
+        Radius and polarity information for each atom type.
     orig_filename: str
         Filename for the original freesasa config file.
 
     """
 
-    with open(param_filename, 'r') as f:
-        params = json.load(f)
-
     # Get text to add atom type and residue sections for the
     # residues being added to the config file
     (new_atom_types,
      new_residues) = _create_freesasa_section_text(new_residues,
-                                                  params['params'])
+                                                  atom_params)
 
     out_file = open(new_filename, 'w')
 
