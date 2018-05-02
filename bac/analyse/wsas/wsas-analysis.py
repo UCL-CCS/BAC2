@@ -1,8 +1,6 @@
 import os, sys
-import json
 import shutil
 import argparse
-import tempfile
 from pathlib import Path
 
 from bac.analyse.wsas.input_checks import extant_file, check_prmtop
