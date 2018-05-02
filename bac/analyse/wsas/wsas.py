@@ -57,7 +57,7 @@ class Wsas:
 
         self.freesasa_config_file = kwargs.get('config_file', default_config_filename)
 
-        if self.ligand_topology:
+        if not self.ligand_filter and self.ligand_topology:
 
             lig_res = extract_residue(self.ligand_topology)
 
