@@ -68,7 +68,7 @@ def save_outputs(wsas, output_dir):
 
     for component, energy_data in wsas.energies.items():
         output_file = os.path.join(output_dir, '{}-wsas-summary.dat'.format(component))
-        energy_data.to_csv(output_file, sep='\t', index=False)
+        energy_data.to_csv(output_file, sep='\t')
 
     if 'complex' in wsas.energies:
 
@@ -84,7 +84,7 @@ def save_outputs(wsas, output_dir):
                 nm_approx -= energies
 
         output_file = os.path.join(output_dir, 'nm-approx-summary.dat')
-        nm_approx.to_csv(output_file, sep='\t', index=False)
+        nm_approx.to_csv(output_file, sep='\t')
 
         output_file = os.path.join(output_dir, 'nm-approx-avg.dat')
         print('{:.3f}\t{:.3f}'.format(nm_approx.mean(), nm_approx.std()), file=open(output_file, 'w'))
