@@ -92,8 +92,6 @@ class Wsas:
 
         """
 
-        self.output.mkdir(exist_ok=True, parents=True)
-
         topology_filename = self.topology
         top = pmd.load_file(topology_filename)
 
