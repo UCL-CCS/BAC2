@@ -67,10 +67,30 @@ class Wsas:
     @advanced_property(type=Component, default=Component.complex)
     def component(self): pass
 
-    @pathlike(default='.')
-    def output(self): pass
 
-    def calc_surface_areas(self, energy=True):
+    def calc_surface_areas(self, wsas=True):
+        """
+        Calculate solvent accessible surface area (SASA), and optionally derived
+        weighted surface areas, for trajectories in self.trajectories.
+
+        Notes
+        -----
+        Outputs are placed in a dict of pd.DataFrames where the key is the
+        component ('complex'/'receptor'/'ligand'). SASA results are stored in
+        self.areas, weighted in self.wsas.
+
+        Parameters
+        ----------
+        wsas : bool
+            Should energy estimates be computed?
+
+        Returns
+        -------
+        dict
+            Final results - either self.areas or self.wsas depending on
+            whether the later are calculated
+
+        """
 
         self.output.mkdir(exist_ok=True, parents=True)
 
@@ -117,7 +137,7 @@ class Wsas:
 
         self.areas = results
 
-        if energy:
+        if wsas:
 
             self.calc_atom_wsas()
             return self.wsas
@@ -181,7 +201,23 @@ class Wsas:
         return atom_series
 
     def calc_atom_wsas(self):
+        """
+        Calculate weighted SASA (wsas) values from surface area for each
+        component with SASA values in self.areas using
+        self.calc_wsas_atom_contribution (see docstring there for details of
+        calculation).
 
+        Parameters
+        ----------
+
+        Notes
+        -----
+        Updates self.wsas
+
+        Returns
+        -------
+
+        """
 
         #TODO: Check that areas exists
         areas = self.areas
@@ -262,6 +298,22 @@ class Wsas:
         return selections
 
     def update_sasa_config(self):
+        """
+        Add non-standard residues (including the ligand if a topology is
+        provided for it) to the freesasa config file.
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+        Edited config files is saved in self.tmp_dir and
+        self.freesasa_config_file is updated to reflect this.
+
+        Returns
+        -------
+
+        """
 
         parameters = self.parameters['params']
         freesasa_config_file = self.freesasa_config_file
@@ -294,6 +346,29 @@ class Wsas:
             self.freesasa_config_file = sasa_config
 
     def compute_nm_energy(self):
+        """
+        Compute estimates of the energy associated with normal mode
+        configurational entropy from atomic wsas values for each component.
+        For 'complex' compute difference; complex - receptor -ligand
+        Calculation is:
+
+        energy = T * S_nm = T * (sum(wsas) + intercept)
+
+        Intercept is read in from the input wsas parameters (via
+        self.parameters)
+
+        Parameters
+        ----------
+
+        Notes
+        -----
+        Updates self.energies with pd.Dataframes for each component (plus
+        difference for complex component)
+
+        Returns
+        -------
+
+        """
 
         #TODO: Check have wsas
 
@@ -303,7 +378,7 @@ class Wsas:
 
         for component, data in self.wsas.items():
 
-            values = data.drop(['residue_name', 'resid', 'atom_name', 'atom_type'], axis =1)
+            values = data.drop(['residue_name', 'resid', 'atom_name', 'atom_type'], axis=1)
 
             # Factor of 1000 converts cal/mol to kcal/mol
             energies[component] = temperature / 1000 * (values.sum() + intercept)
