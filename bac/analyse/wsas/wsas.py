@@ -1,58 +1,89 @@
 import os
 import json
-from pathlib import Path
-from typing import List
-from enum import Enum
 import tempfile
-import numpy as np
+from enum import Enum
+from pkg_resources import resource_filename
 
-import parmed as pmd
+import numpy as np
 import mdtraj as md
 import pandas as pd
+import parmed as pmd
 
-from bac.utils.decorators import advanced_property, pathlike
+from bac.utils.decorators import advanced_property
 from .extract_residues import extract_residue
-from .freesasa_utils import FreesasaRunner, add_residues_freesasa_config_file, default_config_filename
+from .freesasa_utils import FreesasaRunner
 
-defaults_dirname = os.path.dirname(os.path.realpath(__file__))
-default_params_filename = os.path.join(defaults_dirname, 'wsas-params-wang2012.json')
 
 class Component(Enum):
     complex = 'complex'
     ligand = 'ligand'
     receptor = 'receptor'
 
+# Defaults
+
+
+DEFAULT_PARAMETER_FILENAME = resource_filename(__name__, 'bac/analyse/wsas/data/wsas-params-wang2012.json')
+DEFAULT_CONFIG_FILENAME = resource_filename(__name__, 'bac/analyse/wsas/data/amber_config.txt')
+
 
 class Wsas:
 
-    def __init__(self, **kwargs):
+    def __init__(self, component, trajectories, topology, ligand_topology=None, ligand_filter=None, temperature=300,
+                 first_frame=0, last_frame=-1, stride=1, nonstandard_residue_files=None, solvent_residues=None,
+                 parameter_file=None, config_file=None):
+        """Wsas class used to analyse simulations.
 
-        self.temperature = kwargs.get('temperature', 300)
-        self.slice = slice(kwargs.get('first_frame', 0), kwargs.get('last_frame', -1), kwargs.get('stride', 1))
-        self.ligand_filter = kwargs.get('ligand_filter', None)
-        self.nonstandard_residue_files = kwargs.get('nonstandard_residue_files', [])
+        Parameters
+        ----------
+        topology: str
+            File path to the complex topology file.
+        trajectories: list of str
+            List of paths to trajectory files.
+        component: Component
+            Which component to analyse. One of complex, ligand or receptor.
+        temperature: float
+            Temperature of the system in kelvin. Default is 300K.
+        first_frame: int
+            Index of the first frame of every trajectory to analyse. Default is the 0, i.e. first frame.
+        last_frame: int
+            Index of the last frame of every trajectory to analyse. Default is -1, i.e. the last frame.
+        stride: int
+            Stride of frame reading. Use this if you want to skip every `stride` frames.
+        ligand_filter
+        nonstandard_residue_files
+        solvent_residues
+        ligand_topology
+        parameter_file
+        config_file
+        """
 
-        default_solvent = [ "WAT", "HOH", "'Cl.*'", "CIO", "'Cs+'", "IB", "'K.*'",
-                            "'Li+'", "'MG.*'", "'Na+'", "'Rb+'", "CS", "RB", "NA",
-                            "F",  "ZN"]
-        self.solvent_residues = kwargs.get('solvent_residues', default_solvent)
+        self.temperature = temperature
+        self.slice = slice(first_frame, last_frame, stride)
+        self.ligand_filter = ligand_filter
+        self.nonstandard_residue_files = nonstandard_residue_files
 
-        self.topology = kwargs.get('topology')
-        self.ligand_topology = kwargs.get('ligand_topology', None)
-        self.trajectories: List[Path] = kwargs.get('trajectories', [])
-        self.component = kwargs.get('component')
+        default_solvent = ["WAT", "HOH", "'Cl.*'", "CIO", "'Cs+'", "IB", "'K.*'",
+                           "'Li+'", "'MG.*'", "'Na+'", "'Rb+'", "CS", "RB", "NA",
+                           "F",  "ZN"]
+        self.solvent_residues = solvent_residues or default_solvent
+
+        self.topology = topology
+        self.ligand_topology = ligand_topology
+        self.trajectories = trajectories
+        self.component = component
+
         self.tmp_dir = tempfile.mkdtemp()
 
         self.areas = {}
         self.wsas = {}
         self.energies = {}
 
-        parameter_file = kwargs.get('parameter_file', default_params_filename)
+        self.parameters = json.load(parameter_file or DEFAULT_PARAMETER_FILENAME)
 
-        with open(parameter_file, 'r') as f:
-            self.parameters = json.load(f)
+        self.freesasa_config_file = config_file or DEFAULT_CONFIG_FILENAME
 
-        self.freesasa_config_file = kwargs.get('config_file', default_config_filename)
+        # self.ligand_filter = self.ligand_filter or 'resname {:s}'.format(
+        # list(extract_residue(self.ligand_topology).keys())[0]) if self.ligand_topology else None
 
         if not self.ligand_filter and self.ligand_topology:
 
@@ -60,13 +91,11 @@ class Wsas:
 
             self.ligand_filter = 'resname {:s}'.format(list(lig_res.keys())[0])
 
-
     @advanced_property(type=str)
     def topology(self): pass
 
     @advanced_property(type=Component, default=Component.complex)
     def component(self): pass
-
 
     def calc_surface_areas(self, wsas=True):
         """
@@ -95,19 +124,19 @@ class Wsas:
         topology_filename = self.topology
         top = pmd.load_file(topology_filename)
 
-        self.update_sasa_config()
+        sasa_calculator = FreesasaRunner(config=self.freesasa_config_file, ligand_topology=self.ligand_topology,
+                                         wsas_params=self.parameters['params'], tmp_dir=self.tmp_dir,
+                                         nonstandard_residue_files=self.nonstandard_residue_files)
 
-        sasa_config = self.freesasa_config_file
-        sasa_calculator = FreesasaRunner(config=sasa_config)
         atom_selections = None
 
         results = {}
 
         for trajectory in self.trajectories:
 
-            traj =  md.load(trajectory, top=topology_filename)
+            traj = md.load(trajectory, top=topology_filename)
 
-            # If this is the first trajectory setup dataframes to store data
+            # If this is the first trajectory setup data frames to store data
             if atom_selections is None:
 
                 atom_selections = self.create_component_selections(traj)
@@ -217,7 +246,7 @@ class Wsas:
 
         """
 
-        #TODO: Check that areas exists
+        # TODO: Check that areas exists
         areas = self.areas
         parameters = self.parameters
 
@@ -295,54 +324,6 @@ class Wsas:
 
         return selections
 
-    def update_sasa_config(self):
-        """
-        Add non-standard residues (including the ligand if a topology is
-        provided for it) to the freesasa config file.
-
-        Parameters
-        ----------
-
-        Notes
-        -----
-        Edited config files is saved in self.tmp_dir and
-        self.freesasa_config_file is updated to reflect this.
-
-        Returns
-        -------
-
-        """
-
-        parameters = self.parameters['params']
-        freesasa_config_file = self.freesasa_config_file
-        tmp_dir = self.tmp_dir
-        nonstandard_residue_files = self.nonstandard_residue_files
-        ligand_topology = self.ligand_topology
-
-        if ligand_topology:
-
-            files_to_add = [ligand_topology] + nonstandard_residue_files
-
-        else:
-
-            files_to_add = nonstandard_residue_files
-
-        residues_to_add = {}
-
-        for filename in files_to_add:
-            residues_to_add.update(extract_residue(filename))
-
-        if residues_to_add:
-
-            sasa_config = os.path.join(tmp_dir, 'system_sasa.config')
-
-            add_residues_freesasa_config_file(residues_to_add,
-                                              sasa_config,
-                                              parameters,
-                                              orig_filename=freesasa_config_file)
-
-            self.freesasa_config_file = sasa_config
-
     def compute_nm_energy(self):
         """
         Compute estimates of the energy associated with normal mode
@@ -368,7 +349,7 @@ class Wsas:
 
         """
 
-        #TODO: Check have wsas
+        # TODO: Check have wsas
 
         energies = self.energies
         temperature = self.temperature
@@ -385,7 +366,7 @@ class Wsas:
             energies['difference'] = energies['complex'] - energies['receptor'] - energies['ligand']
 
 
-def validate_prmtop_filename(original_prmtop, target_dir='', force_new=False):
+def validate_prmtop(prmtop, target_dir=None, override=False):
     """
     Check that file exists and create a symlink if it doesn't have a
     prmtop extension (often *.top is used but mdtraj cant't detect type
@@ -393,38 +374,35 @@ def validate_prmtop_filename(original_prmtop, target_dir='', force_new=False):
 
     Parameters
     ----------
-    original_filename : str
+    prmtop : str
         Path to supposed prmtop file
     target_dir : str
-        Directory in which to create symlink if required
+        Directory in which to create symlink if required. If None the symlink will
+        be created in the same directory.
+    override: bool
+        Override possible already existing file with .prmtop extension. Default is false
 
     Returns
     -------
     Path
         Location of verified prmtop (with potentially edited filename)
-
     """
 
-    original_filename = Path(original_prmtop)
-
-    if not os.path.isfile(original_filename):
+    if not os.path.isfile(prmtop):
         raise IOError()
 
-    basename, ext = os.path.splitext(os.path.basename(original_filename))
+    _, ext = os.path.splitext(prmtop)
 
-    if ext != 'prmtop':
+    if ext is 'prmtop':
+        return prmtop
 
-        top_filename = Path(os.path.join(target_dir, basename + '.prmtop'))
+    target_dir = target_dir or os.path.dirname(os.path.abspath(prmtop))
 
-        if os.path.islink(top_filename) and force_new:
-            os.unlink(top_filename)
+    new_prmtop = os.path.join(target_dir, os.path.basename(prmtop) + '.prmtop')
 
-        os.symlink(original_filename.absolute(), top_filename.absolute())
+    if os.path.islink(new_prmtop) and override:
+        os.unlink(new_prmtop)
 
-    else:
+    os.symlink(os.path.abspath(prmtop), os.path.abspath(new_prmtop))
 
-        top_filename = original_prmtop
-
-    return str(top_filename)
-
-
+    return new_prmtop

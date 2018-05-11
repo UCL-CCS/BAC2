@@ -2,6 +2,7 @@ import os
 import argparse
 import parmed as pmd
 
+
 def extant_file(x):
     """
     'Type' for argparse - checks that file exists but does not open.

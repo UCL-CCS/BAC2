@@ -4,14 +4,13 @@ import argparse
 from pathlib import Path
 
 from bac.analyse.wsas.input_checks import extant_file, check_prmtop
-from bac.analyse.wsas.freesasa_utils import default_config_filename
-from bac.analyse.wsas.wsas import Wsas, validate_prmtop_filename, default_params_filename
+from bac.analyse.wsas.wsas import Wsas, validate_prmtop, DEFAULT_CONFIG_FILENAME, DEFAULT_PARAMETER_FILENAME
 
 
 def commandline_parser():
 
-    #TODO: Allow user to set solvent filter
-    #TODO: Create option to use a parameters yaml file rather than commandline
+    # TODO: Allow user to set solvent filter
+    # TODO: Create option to use a parameters YAML file rather than commandline
 
     parser = argparse.ArgumentParser(description='WSAS Calculator: Computes surface area '
                                                  'related free energy components')
@@ -40,11 +39,11 @@ def commandline_parser():
                         help='Topology file for non-standard residues',
                         metavar='FILE', type=extant_file)
 
-    parser.add_argument('-w', dest='wsas_params', default=default_params_filename,
+    parser.add_argument('-w', dest='wsas_params', default=DEFAULT_PARAMETER_FILENAME,
                         help='JSON file containing atom/residue parameters for WSAS analysis.',
                         metavar='FILE', type=extant_file)
 
-    parser.add_argument('-f', dest='freesasa_config', default=default_config_filename,
+    parser.add_argument('-f', dest='freesasa_config', default=DEFAULT_CONFIG_FILENAME,
                         help='Freesasa atom and residue parameters file.',
                         metavar='FILE', type=extant_file)
 
@@ -58,6 +57,7 @@ def commandline_parser():
     args = parser.parse_args()
 
     return args
+
 
 def save_outputs(wsas, output_dir):
 
@@ -89,6 +89,7 @@ def save_outputs(wsas, output_dir):
         output_file = os.path.join(output_dir, 'nm-approx-avg.dat')
         print('{:.3f}\t{:.3f}'.format(nm_approx.mean(), nm_approx.std()), file=open(output_file, 'w'))
 
+
 if __name__ == "__main__":
     # execute only if run as a script
 
@@ -105,8 +106,8 @@ if __name__ == "__main__":
     config_file = args.freesasa_config
     non_standard_residues = args.non_standard_residues
 
-    top = validate_prmtop_filename(top, output_dir, force_new=True)
-    lig_top = validate_prmtop_filename(lig_top, output_dir, force_new=True)
+    top = validate_prmtop(top, output_dir, override=True)
+    lig_top = validate_prmtop(lig_top, output_dir, override=True)
 
     if component in ['complex', 'ligand']:
 
@@ -124,7 +125,7 @@ if __name__ == "__main__":
                            last_frame=-1,
                            stride=10,
                            ligand_filter=lig_filter,
-                           non_standard_residues=non_standard_residues,
+                           nonstandard_residue_files=non_standard_residues,
                            temperature=temperature,
                            parameter_file=parameter_file,
                            config_file=config_file,

@@ -1,13 +1,26 @@
 import os
-import sys
-import json
-
-from pathlib import Path
 
 import freesasa
 
-defaults_dirname = os.path.dirname(os.path.realpath(__file__))
-default_config_filename = os.path.join(defaults_dirname, 'amber_config.txt')
+from .extract_residues import extract_residue
+
+# Defaults
+
+_DEFAULT_OPTIONS = {
+    'hetatm': True,
+    'hydrogen': True,
+    # 'separate-chains' : False,
+    'separate-models': True
+}
+
+_DEFAULT_PARAMETERS = {
+    'algorithm': freesasa.LeeRichards,
+    'probe-radius': freesasa.defaultParameters['probe-radius'],
+    'n-points': freesasa.defaultParameters['n-points'],
+    'n-slices': freesasa.defaultParameters['n-slices'],
+    'n-threads': freesasa.defaultParameters['n-threads']
+}
+
 
 class FreesasaRunner:
     """Wrapper to help run freesasa on a single PDB file
@@ -36,10 +49,10 @@ class FreesasaRunner:
 
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, config, wsas_params, tmp_dir, nonstandard_residue_files, ligand_topology, options=None, parameters=None):
         """Wrapper for freesasa
 
-        config: str, optional
+        config: str
             Path to configuration file containing residue composition
             and atomic parameters - freesasa format.
         options: dict, optional
@@ -49,36 +62,17 @@ class FreesasaRunner:
 
         """
 
-        default_options = {
-            'hetatm': True,
-            'hydrogen': True,
-            # 'separate-chains' : False,
-            'separate-models': True
-        }
-
-        default_parameters = {
-            'algorithm': freesasa.LeeRichards,
-            'probe-radius': freesasa.defaultParameters['probe-radius'],
-            'n-points': freesasa.defaultParameters['n-points'],
-            'n-slices': freesasa.defaultParameters['n-slices'],
-            'n-threads': freesasa.defaultParameters['n-threads']
-        }
-
-        config_filename = kwargs.get('config', default_config_filename)
-        config_filename = bytes(str(config_filename), 'utf-8')
-
-        logfilename = kwargs.get('logfile', '/dev/null')
-
         # Hide warnings (as the load of multiple structures is two step and
         # extended config is not read in first step).
         freesasa.setVerbosity(1)
 
-        self.classifier = freesasa.Classifier(config_filename)
+        config = self._update_sasa_config(config, wsas_params, tmp_dir, nonstandard_residue_files, ligand_topology)
 
-        self.options = kwargs.get('options', default_options)
+        self.classifier = freesasa.Classifier(bytes(str(config), 'utf-8'))
 
-        self.parameters = kwargs.get('parameters', default_parameters)
+        self.options = options or _DEFAULT_OPTIONS
 
+        self.parameters = parameters or _DEFAULT_PARAMETERS
 
     def run(self, pdb):
         """Run freesasa on provided PDB file
@@ -96,9 +90,7 @@ class FreesasaRunner:
 
         """
 
-        structure_array = freesasa.structureArray(bytes(pdb, 'utf-8'),
-                                                  options=self.options,
-                                                  classifier=self.classifier)
+        structure_array = freesasa.structureArray(bytes(pdb, 'utf-8'), options=self.options, classifier=self.classifier)
 
         results = []
 
@@ -111,109 +103,121 @@ class FreesasaRunner:
 
         return results
 
+    def _update_sasa_config(self, config, parameters, tmp_dir, nonstandard_residue_files, ligand_topology):
+        """
+        Add non-standard residues (including the ligand if a topology is
+        provided for it) to the freesasa config file.
 
-def _create_freesasa_section_text(new_residues, sasa_atom_params):
-    """
-    Create text to add to freesasa configuration file to incorporate new residue.
+        Parameters
+        ----------
 
-    Parameters
-    ----------
-    new_residues : dict
-        Non-standard residues to add to the freesasa config file.
-        keys = residue names, values = atom name to type mapping (dict).
-    sasa_atom_params: dict
-        Maps atom type to properties needed by freesasa (radius and polarity).
+        Notes
+        -----
+        Edited config files is saved in self.tmp_dir and
+        self.freesasa_config_file is updated to reflect this.
 
-    Returns
-    -------
-    atom_type_section : str
-        Text to be added to freesasa config file atom type section.
-    residue_section : str
-        Text to be added to freesasa config file residue section.
+        Returns
+        -------
 
-    """
+        """
+        files_to_add = nonstandard_residue_files
 
-    atom_types = []
+        if ligand_topology:
+            files_to_add.append(ligand_topology)
 
-    # Create lines for residue section of format:
-    # residue_name atom_name atom_type
-    residue_section = ''
+        residues_to_add = {}
 
-    for res_name, atom_to_type in new_residues.items():
+        for filename in files_to_add:
+            residues_to_add.update(extract_residue(filename))
 
-        residue_section += '\n'
+        if residues_to_add:
 
-        for atom_name, atom_type in atom_to_type.items():
-            residue_line = '{:s} {:s} {:s}\n'.format(res_name,
-                                                     atom_name,
-                                                     atom_type)
+            sasa_config = os.path.join(tmp_dir, 'system_sasa.config')
 
-            atom_types.append(atom_type)
+            self._add_residues_freesasa_config_file(residues_to_add, sasa_config, parameters, orig_filename=config)
 
-            residue_section += residue_line
+            return sasa_config
 
-    # Create lines for atom type section of format:
-    # atom_type residue polarity
-    atom_type_section = ''
+        return config
 
-    for atom_type in set(atom_types):
+    @staticmethod
+    def _create_freesasa_section_text(new_residues, sasa_atom_params):
+        """
+        Create text to add to freesasa configuration file to incorporate new residue.
 
-        atom_line = '{:s} {:.2f} {:s}\n'.format(atom_type,
-                                                sasa_atom_params[atom_type]['radius'],
-                                                sasa_atom_params[atom_type]['polarity'])
+        Parameters
+        ----------
+        new_residues : dict
+            Non-standard residues to add to the freesasa config file.
+            keys = residue names, values = atom name to type mapping (dict).
+        sasa_atom_params: dict
+            Maps atom type to properties needed by freesasa (radius and polarity).
 
-        atom_type_section += atom_line
+        Returns
+        -------
+        atom_type_section : str
+            Text to be added to freesasa config file atom type section.
+        residue_section : str
+            Text to be added to freesasa config file residue section.
 
-    return atom_type_section, residue_section
+        """
 
+        atom_types = []
 
-def add_residues_freesasa_config_file(new_residues,
-                                      new_filename,
-                                      atom_params,
-                                      orig_filename=default_config_filename):
-    """
-    Create a new freesasa config file that adds specified residue to the
-    content of an existing copy.
+        # Create lines for residue section of format:
+        # residue_name atom_name atom_type
+        residue_section = ''
 
-    Parameters
-    ----------
-    new_residues : dict
-        Non-standard residues to add to the freesasa config file.
-        keys = residue names, values = atom name to type mapping (dict).
-    new_filename: str
-        Filename to be used for the updated freesasa config file.
-    res_atom_to_type : dict
-        Provides mapping from atom name to atom type.
-    atom_params: dict
-        Radius and polarity information for each atom type.
-    orig_filename: str
-        Filename for the original freesasa config file.
+        for res_name, atom_to_type in new_residues.items():
 
-    """
+            residue_section += '\n'
 
-    # Get text to add atom type and residue sections for the
-    # residues being added to the config file
-    (new_atom_types,
-     new_residues) = _create_freesasa_section_text(new_residues,
-                                                  atom_params)
+            for atom_name, atom_type in atom_to_type.items():
+                residue_line = '{:s} {:s} {:s}\n'.format(res_name,
+                                                         atom_name,
+                                                         atom_type)
 
-    out_file = open(new_filename, 'w')
+                atom_types.append(atom_type)
 
-    with open(orig_filename) as input_config:
+                residue_section += residue_line
 
-        for next_text in input_config:
+        # Create lines for atom type section of format:
+        # atom_type residue polarity
+        atom_type_section = ''
 
-            # Check for the start of non standard atom types
-            # add new tyoes here
-            if next_text.startswith('# extra'):
-                next_text += new_atom_types
+        for atom_type in set(atom_types):
 
-            out_file.write(next_text)
+            atom_line = '{:s} {:.2f} {:s}\n'.format(atom_type,
+                                                    sasa_atom_params[atom_type]['radius'],
+                                                    sasa_atom_params[atom_type]['polarity'])
 
-    # Insert new residue atom list
-    out_file.write(new_residues)
+            atom_type_section += atom_line
 
-    out_file.close()
+        return atom_type_section, residue_section
 
-    return
+    def _add_residues_freesasa_config_file(self, new_residues, new_filename, atom_params, orig_filename):
+        """
+        Create a new freesasa config file that adds specified residue to the
+        content of an existing copy.
 
+        Parameters
+        ----------
+        new_residues : dict
+            Non-standard residues to add to the freesasa config file.
+            keys = residue names, values = atom name to type mapping (dict).
+        new_filename: str
+            Filename to be used for the updated freesasa config file.
+        atom_params: dict
+            Radius and polarity information for each atom type.
+        orig_filename: str
+            Filename for the original freesasa config file.
+
+        """
+
+        # Get text to add atom type and residue sections for the
+        # residues being added to the config file
+        (new_atom_types, new_residues) = self._create_freesasa_section_text(new_residues, atom_params)
+
+        with open(new_filename, 'w') as out_file, open(orig_filename) as input_config:
+            [out_file.write(l+new_atom_types if l.startswith('# extra') else l) for l in input_config]
+            out_file.write(new_residues)
