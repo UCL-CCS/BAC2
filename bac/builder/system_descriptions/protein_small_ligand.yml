@@ -1,0 +1,16 @@
+receptor:
+  type: protein
+  chains: n
+  file_types:
+    -  [pdb]
+ligand:
+  type: other
+  chains: 1
+  file_types:
+    -  [mol2, frcmod]
+    -  [pdb, lib, frcmod]
+solvent:
+  type: solvent
+  chains: n
+  file_types:
+    -  [pdb]
