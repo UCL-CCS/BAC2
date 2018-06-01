@@ -1,5 +1,5 @@
 src_files: [leaprc.water.tip3p]
-types: [water, ions, solvent]
+type: solvent
 reside_names:
   -  AG
   -  AL

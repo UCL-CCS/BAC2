@@ -1,5 +1,5 @@
 src_files: [leaprc.protein.ff14SB]
-types: [protein]
+type: protein
 reside_names:
   -  ACE
   -  ALA
