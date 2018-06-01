@@ -1,7 +1,6 @@
 # Attributes of main `Simulation()`
 
 timestep:
-firsttimestep: first_timestep
 minimization:
   - minimization
   - on_off

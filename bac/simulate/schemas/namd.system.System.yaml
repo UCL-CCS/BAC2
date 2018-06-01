@@ -1,0 +1,63 @@
+cutoff:
+switching:
+  - switching
+  - on_off
+switchdist: switching_distance
+vdwForceSwitching:
+  - vdw_force_switching
+  - on_off
+exclude:
+  - excluded_interactions
+  - enum
+1-4scaling: one_four_scaling
+dielectric: dielectric_constant
+nonbondedScaling: non_bonded_scaling
+vdwGeometricSigma: vdw_geometric_sigma
+limitdist: limit_distance
+LJcorrection: LJ_correction
+
+pairlistdist: pairlist_distance
+stepspercycle: steps_per_cycle
+splitPatch:
+  - split_patch
+  - enum
+hgroupCutoff: hgroup_cutoff
+margin:
+pairlistMinProcs: pairlist_min_processors
+pairlistsPerCycle: pairlists_per_cycle
+outputPairlists: output_pairlists
+pairlistShrink: pairlist_shrink
+pairlistGrow: pairlist_grow
+pairlistTrigger: pairlist_trigger
+
+pme:
+molly:
+
+cellBasisVector1:
+  - cell_basis_vector_1
+  - iter
+cellBasisVector2:
+  - cell_basis_vector_2
+  - iter
+cellBasisVector3:
+  - cell_basis_vector_3
+  - iter
+cellOrigin:
+  - cell_origin
+  - iter
+extendedSystem: extended_system
+XSTfile: xst_file
+XSTfreq: xst_frequency
+wrapWater:
+  - wrap_water
+  - on_off
+wrapAll:
+  - wrap_all
+  - on_off
+wrapNearest:
+  - wrap_nearest
+  - on_off
+
+waterModel:
+  - water_model
+  - enum

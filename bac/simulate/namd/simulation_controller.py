@@ -5,7 +5,7 @@ import numpy as np
 
 from bac.simulate.namd.temperature_controller import TemperatureController
 from bac.simulate.namd.pressure_controller import PressureController
-from bac.simulate.namd.non_bonded_controller import NonBondedController
+from bac.simulate.namd.system import System
 from bac.simulate.namd.constraint_controller import ConstraintController
 from bac.simulate.namd.free_energy_controller import FreeEnergyController
 
@@ -15,6 +15,7 @@ from bac.utils.decorators import (advanced_property, positive_decimal,
 
 from bac.simulate.basesimulation import BaseSimulation, Engine
 from bac.simulate.coding import Encodable
+from bac.simulate.namd.integrator import Integrator, VerletIntegrator
 
 
 class Simulation(BaseSimulation, Encodable):
@@ -27,9 +28,8 @@ class Simulation(BaseSimulation, Encodable):
 
         # DYNAMICS
 
+        self.integrator: Integrator = kwargs.get('integrator')
         self.number_of_steps = kwargs.get('number_of_steps')
-        self.timestep = kwargs.get('timestep')
-        self.first_timestep = kwargs.get('first_timestep')
 
         self.minimization = kwargs.get('minimization')
 
@@ -42,7 +42,7 @@ class Simulation(BaseSimulation, Encodable):
         self.coordinates = kwargs.get('coordinates')
         self.binary_coordinates = kwargs.get('binary_coordinates')
 
-        self.parameters = kwargs.get('parameters')
+        # self.parameters = kwargs.get('parameters')
 
         # OUTPUT
 
@@ -87,16 +87,18 @@ class Simulation(BaseSimulation, Encodable):
 
         self.gromacs = kwargs.get('gromacs')
 
+    # Default naming convention. While changeble, not recommended.
+
+    _COORD_NAME = 'complex.pdb'
+    _CONFIG_NAME = 'simulation.conf'
+
     # Dynamics
+
+    @advanced_property(type=Integrator, default=VerletIntegrator())
+    def integrator(self): pass
 
     @positive_integer
     def number_of_steps(self): pass
-
-    @positive_decimal(default=1.0)
-    def timestep(self): pass
-
-    @positive_integer(default=0)
-    def first_timestep(self): pass
 
     @boolean(default=False)
     def minimization(self): pass
@@ -105,6 +107,9 @@ class Simulation(BaseSimulation, Encodable):
 
     @positive_decimal
     def temperature(self): pass
+
+    def set_velocities_to_temperature(self, temperature):
+        self.temperature = temperature
 
     @pathlike
     def velocities(self): pass
@@ -117,14 +122,12 @@ class Simulation(BaseSimulation, Encodable):
     @pathlike
     def binary_velocities(self): pass
 
-    @pathlike
+    @pathlike(default=_COORD_NAME)
     def coordinates(self): pass
 
     @pathlike
     def binary_coordinates(self): pass
 
-    @pathlike
-    def parameters(self): pass
 
     # Output
 
@@ -260,7 +263,6 @@ class Simulation(BaseSimulation, Encodable):
 
         if self.free_energy_controller and self.free_energy_controller.file:
             self.free_energy_controller.file = prefix/self.free_energy_controller.file
-
 
     def __next__(self):
         next_run = deepcopy(self)
