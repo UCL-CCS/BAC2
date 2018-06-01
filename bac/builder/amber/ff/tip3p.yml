@@ -1,4 +1,5 @@
-src_file: leaprc.protein.ff14SB
+src_file: leaprc.water.tip3p
+types: [water, ions, solvent]
 reside_names:
   -  AG
   -  AL
