@@ -1,4 +1,5 @@
 import os
+import glob
 import yaml
 from enum import Enum
 import warnings
@@ -19,10 +20,35 @@ class SystemBuilder():
 
         self.ff_type = ff_type
         self.system_type = system_type
-        self.ff_elements = ff
 
         self.system_path = kwargs.get('system_path', DEFAULT_INFO_PATH)
+
+        ff_dir = os.path.join(self.system_path, self.ff_type.value, 'ff')
+        ff_search_txt = os.path.join(ff_dir, '*.yml')
+        ff_files = glob.glob(ff_search_txt)
+
+        valid_ff = []
+        for ff_file in ff_files:
+            ff_name = os.path.splitext(os.path.basename(ff_file))[0]
+            valid_ff.append(ff_name)
+
+        self.valid_ff = valid_ff
+
+        ff_contents = []
+
+        for ff_element in ff:
+            if ff_element in valid_ff:
+                ff_location = os.path.join(ff_dir, ff_element +'.yml')
+                stream = open(ff_location)
+                ff_desc = yaml.load(stream)
+                ff_contents += ff_desc['reside_names']
+                self.ff_elements.append(ff_element)
+            else:
+                warnings.warn("{ff_element} not a valid forcefield suggestion")
+
         self.ff_add = kwargs.get('ff_add', [])
+
+
 
         self.ingredients = kwargs.get('ingredients', {})
 
@@ -45,13 +71,15 @@ class SystemBuilder():
                 self.ingredients[ingredient_type] = []
 
 
+
+
     @advanced_property(type=FFType, default=FFType.amber)
     def ff_type(self): pass
 
     @property
     def system_type(self): pass
 
-    @advanced_property(type=list, default=['ff14sb', 'tip3p'])
+    @advanced_property(type=list, default=[])
     def ff_elements(self): pass
 
     @advanced_property(type=dict, default={})
