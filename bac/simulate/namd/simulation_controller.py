@@ -15,6 +15,7 @@ from bac.utils.decorators import (advanced_property, positive_decimal,
 
 from bac.simulate.basesimulation import BaseSimulation, Engine
 from bac.simulate.coding import Encodable
+from bac.simulate.namd.integrator import Integrator, VerletIntegrator
 
 
 class Simulation(BaseSimulation, Encodable):
@@ -27,9 +28,8 @@ class Simulation(BaseSimulation, Encodable):
 
         # DYNAMICS
 
+        self.integrator: Integrator = kwargs.get('integrator')
         self.number_of_steps = kwargs.get('number_of_steps')
-        self.timestep = kwargs.get('timestep')
-        self.first_timestep = kwargs.get('first_timestep')
 
         self.minimization = kwargs.get('minimization')
 
@@ -89,14 +89,11 @@ class Simulation(BaseSimulation, Encodable):
 
     # Dynamics
 
+    @advanced_property(type=Integrator, default=VerletIntegrator())
+    def integrator(self): pass
+
     @positive_integer
     def number_of_steps(self): pass
-
-    @positive_decimal(default=1.0)
-    def timestep(self): pass
-
-    @positive_integer(default=0)
-    def first_timestep(self): pass
 
     @boolean(default=False)
     def minimization(self): pass
@@ -112,6 +109,7 @@ class Simulation(BaseSimulation, Encodable):
     @velocities.post_set_processing
     def velocities(self, value):
         if value is not None:
+            # Either velocity or temperature can be set.
             self.temperature = None
 
     @pathlike

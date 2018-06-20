@@ -1,0 +1,25 @@
+{
+  "temperature": 300,
+  "first_frame": 0,
+  "last_frame": -1,
+  "stride": 2,
+  "ligand_filter": "",
+  "nonstandard_residue_files": [],
+  "solvent_residues": [
+    "WAT",
+    "HOH",
+    "'Cl.*'",
+    "CIO",
+    "'Cs+'",
+    "IB",
+    "'K.*'",
+    "'Li+'",
+    "'MG.*'",
+    "'Na+'",
+    "'Rb+'",
+    "CS",
+    "RB",
+    "NA",
+    "F",
+    "ZN"]
+}

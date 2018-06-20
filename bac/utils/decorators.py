@@ -2,6 +2,7 @@ from pathlib import Path
 import copy
 import warnings
 from typing import Callable, Union
+from functools import partial
 
 import numpy as np
 
@@ -94,7 +95,7 @@ class advanced_property(property, Versioned):
         if value is None:
             obj.__setattr__(self.private_name, None)
         else:
-            value = self.type(value)
+            value = value if isinstance(self.type, type) and isinstance(value, self.type) else self.type(value)
             try:
                 self.validate(obj, value)
             except AttributeError as e:
@@ -118,7 +119,12 @@ class advanced_property(property, Versioned):
 
         default_to_return = self._default(obj) if callable(self._default) else self._default
 
-        return self.type(default_to_return) if default_to_return is not None else None
+        if default_to_return is None:
+            return None
+        elif isinstance(self.type, type) and isinstance(default_to_return, self.type):
+            return default_to_return
+        else:
+            return self.type(default_to_return)
 
     def validate(self, obj, value):
         if self.validator is not None and self.validator(obj, value) is False:
@@ -154,7 +160,10 @@ class pathlike(advanced_property):
 
 class pdbcolumn(advanced_property):
     def __init__(self, *args, **kwargs):
-        super(pdbcolumn, self).__init__(type=PDBColumn, default=PDBColumn.O, *args, **kwargs)
+        kwargs['type'] = PDBColumn
+        if kwargs.get('default') is None:
+            kwargs['default'] = 'O'
+        super(pdbcolumn, self).__init__(*args, **kwargs)
 
 
 class decimal(advanced_property):
@@ -191,6 +200,11 @@ class non_negative_integer(integer):
 class boolean(advanced_property):
     def __init__(self, *args, **kwargs):
         super(boolean, self).__init__(type=bool, *args, **kwargs)
+
+
+class float_vector(advanced_property):
+    def __init__(self, *args, **kwargs):
+        super(float_vector, self).__init__(type=partial(np.array, dtype=np.float, ndmin=1), *args, **kwargs)
 
 
 class back_referenced(property):

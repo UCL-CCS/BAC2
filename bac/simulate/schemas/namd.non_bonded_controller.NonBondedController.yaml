@@ -16,15 +16,6 @@ vdwGeometricSigma: vdw_geometric_sigma
 limitdist: limit_distance
 LJcorrection: LJ_correction
 
-nonbondedFreq: non_bonded_frequency
-fullElectFrequency: full_elect_frequency
-MTSAlgorithm:
-  - mts_algorithm
-  - enum
-longSplitting:
-  - long_splitting
-  - enum
-
 pairlistdist: pairlist_distance
 stepspercycle: steps_per_cycle
 splitPatch:

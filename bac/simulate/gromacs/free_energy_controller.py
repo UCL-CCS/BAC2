@@ -1,10 +1,9 @@
 from enum import Enum
-from functools import partial
 
-import numpy as np
 
-from bac.utils.decorators import decimal, advanced_property, boolean, integer
+from bac.utils.decorators import decimal, advanced_property, boolean, integer, float_vector
 from bac.simulate.coding import Encodable
+from .group import Group
 
 
 class CouplingType(Enum):
@@ -101,31 +100,25 @@ class FreeEnergyController(Encodable):
     def supports_lambda_state(self):
         return True
 
-    @advanced_property(type=partial(np.array, dtype=np.float), default=[])
+    @float_vector(default=[])
     def fep_lambdas(self): pass
 
-    @advanced_property(type=partial(np.array, dtype=np.float), default=lambda self: self.fep_lambdas,
-                       validator=lambda self, x: self.fep_lambdas.size == x.size)
+    @float_vector(default=lambda self: self.fep_lambdas, validator=lambda self, x: self.fep_lambdas.size == x.size)
     def coulomb_lambdas(self): pass
 
-    @advanced_property(type=partial(np.array, dtype=np.float), default=lambda self: self.fep_lambdas,
-                       validator=lambda self, x: self.fep_lambdas.size == x.size)
+    @float_vector(default=lambda self: self.fep_lambdas, validator=lambda self, x: self.fep_lambdas.size == x.size)
     def van_der_waals_lambdas(self): pass
 
-    @advanced_property(type=partial(np.array, dtype=np.float), default=lambda self: self.fep_lambdas,
-                       validator=lambda self, x: self.fep_lambdas.size == x.size)
+    @float_vector(default=lambda self: self.fep_lambdas, validator=lambda self, x: self.fep_lambdas.size == x.size)
     def bonded_lambdas(self): pass
 
-    @advanced_property(type=partial(np.array, dtype=np.float), default=lambda self: self.fep_lambdas,
-                       validator=lambda self, x: self.fep_lambdas.size == x.size)
+    @float_vector(default=lambda self: self.fep_lambdas, validator=lambda self, x: self.fep_lambdas.size == x.size)
     def restraint_lambdas(self): pass
 
-    @advanced_property(type=partial(np.array, dtype=np.float), default=lambda self: self.fep_lambdas,
-                       validator=lambda self, x: self.fep_lambdas.size == x.size)
+    @float_vector(default=lambda self: self.fep_lambdas, validator=lambda self, x: self.fep_lambdas.size == x.size)
     def mass_lambdas(self): pass
 
-    @advanced_property(type=partial(np.array, dtype=np.float), default=lambda self: self.fep_lambdas,
-                       validator=lambda self, x: self.fep_lambdas.size == x.size)
+    @float_vector(default=lambda self: self.fep_lambdas, validator=lambda self, x: self.fep_lambdas.size == x.size)
     def temperature_lambdas(self): pass
 
     @integer(default=1)
@@ -146,7 +139,7 @@ class FreeEnergyController(Encodable):
     @decimal(default=0.3)
     def soft_core_sigma(self): pass
 
-    @advanced_property(type=list, default=[])
+    @advanced_property(type=list, default=[Group.system])
     def couple_molecule_groups(self): pass
 
     @advanced_property(type=CouplingType, default=CouplingType.vdw_and_coulomb)
