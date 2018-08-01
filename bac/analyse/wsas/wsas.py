@@ -22,14 +22,14 @@ class Component(Enum):
 # Defaults
 
 
-DEFAULT_PARAMETER_FILENAME = resource_filename(__name__, 'bac/analyse/wsas/data/wsas-params-wang2012.json')
-DEFAULT_CONFIG_FILENAME = resource_filename(__name__, 'bac/analyse/wsas/data/amber_config.txt')
+DEFAULT_PARAMETER_FILENAME = resource_filename(__name__, 'data/wsas-params-wang2012.json')
+DEFAULT_CONFIG_FILENAME = resource_filename(__name__, 'data/amber_config.txt')
 
 
 class Wsas:
 
     def __init__(self, component, trajectories, topology, ligand_topology=None, ligand_filter=None, temperature=300,
-                 first_frame=0, last_frame=-1, stride=1, nonstandard_residue_files=None, solvent_residues=None,
+                 first_frame=0, last_frame=-1, stride=1, nonstandard_residue_files=[], solvent_residues=None,
                  parameter_file=None, config_file=None):
         """Wsas class used to analyse simulations.
 
@@ -78,7 +78,8 @@ class Wsas:
         self.wsas = {}
         self.energies = {}
 
-        self.parameters = json.load(parameter_file or DEFAULT_PARAMETER_FILENAME)
+        with open(parameter_file or DEFAULT_PARAMETER_FILENAME) as f:
+            self.parameters = json.load(f)
 
         self.freesasa_config_file = config_file or DEFAULT_CONFIG_FILENAME
 
