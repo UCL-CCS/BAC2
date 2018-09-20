@@ -1,10 +1,5 @@
 integrator:
-  - integrator
-  - enum
-tinit: initial_time
-dt: delta_time
 nsteps: number_of_steps
-init-step: initial_step
 comm-mode:
   - center_of_mass_motion
   - enum

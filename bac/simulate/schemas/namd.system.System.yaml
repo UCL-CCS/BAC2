@@ -57,3 +57,7 @@ wrapAll:
 wrapNearest:
   - wrap_nearest
   - on_off
+
+waterModel:
+  - water_model
+  - enum

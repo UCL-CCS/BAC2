@@ -1,6 +1,7 @@
 
-from bac.utils.decorators import (boolean, positive_decimal, float_vector,
-                                  positive_integer, decimal, pathlike, pdbcolumn)
+from supproperty import (boolean, positive_decimal, float_vector,
+                         positive_integer, decimal, pathlike)
+from bac.utils.decorators import pdbcolumn
 from bac.simulate.coding import Encodable
 
 
