@@ -2,7 +2,7 @@ from enum import Enum
 
 import parmed as pmd
 
-from bac.utils.decorators import *
+from supproperty import *
 from bac.simulate.coding import Encodable
 
 
@@ -77,14 +77,14 @@ class System(Encodable):
 
     _PRMTOP_NAME = 'complex.prmtop'
 
-    @advanced_property(type=pmd.Structure)
+    @supproperty(type=pmd.Structure)
     def topology(self): pass
 
-    @topology.post_set_processing
-    def topology(self):
-        if self.topology.box_vectors is not None:
+    @topology.did_set
+    def topology(self, top):
+        if top and top.box_vectors is not None:
             print('Setting cell vectors.')
-            bv = self.topology.box_vectors.value_in_unit(pmd.unit.angstrom)
+            bv = top.box_vectors.value_in_unit(pmd.unit.angstrom)
             self.cell_basis_vector_1 = bv[0]
             self.cell_basis_vector_2 = bv[1]
             self.cell_basis_vector_3 = bv[2]
@@ -112,7 +112,7 @@ class System(Encodable):
     @boolean(default=False)
     def vdw_force_switching(self): pass
 
-    @advanced_property(type=Interaction)
+    @supproperty(type=Interaction)
     def excluded_interactions(self): pass
 
     @positive_decimal(default=1, validator=lambda _, x: x <= 1)
@@ -136,7 +136,7 @@ class System(Encodable):
     @positive_integer(default=20)
     def steps_per_cycle(self): pass
 
-    @advanced_property(type=SplitPatchType, default=SplitPatchType.hydrogen)
+    @supproperty(type=SplitPatchType, default=SplitPatchType.hydrogen)
     def split_patch(self): pass
 
     # Boundary Condition
@@ -156,9 +156,9 @@ class System(Encodable):
     @pathlike
     def extended_system(self): pass
 
-    @extended_system.post_set_processing
-    def extended_system(self):
-        if self.extended_system is not None:
+    @extended_system.did_set
+    def extended_system(self, ext_system):
+        if ext_system is not None:
             print('Deleting cell vectors.')
             self.cell_basis_vector_1 = None
             self.cell_basis_vector_2 = None
@@ -180,7 +180,7 @@ class System(Encodable):
     @boolean(default=False)
     def wrap_nearest(self): pass
 
-    @advanced_property(type=WaterModel, default=WaterModel.tip3p)
+    @supproperty(type=WaterModel, default=WaterModel.tip3p)
     def water_model(self): pass
 
     def encode(self, path=None, suffix=None):

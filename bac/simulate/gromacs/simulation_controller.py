@@ -2,7 +2,7 @@ from copy import deepcopy
 from enum import Enum
 from pathlib import Path
 
-from bac.utils.decorators import positive_decimal, integer, advanced_property, boolean, pathlike, positive_integer, decimal
+from supproperty import positive_decimal, integer, supproperty, boolean, pathlike, positive_integer, decimal
 from bac.simulate.gromacs.temperature_controller import TemperatureController
 from bac.simulate.gromacs.pressure_controller import PressureController
 from bac.simulate.gromacs.non_bonded_controller import NonBondedController
@@ -80,19 +80,19 @@ class Simulation(BaseSimulation, Encodable):
         self.compression_precision = kwargs.get('compression_precision')
         self.compressed_groups = kwargs.get('compressed_groups')
 
-    @advanced_property(type=Integrator, default=VerletIntegrator(), available='5.0')
+    @supproperty(type=Integrator, default=VerletIntegrator(), available='5.0')
     def integrator(self): pass
 
     @integer(default=0)
     def number_of_steps(self): pass
 
-    @advanced_property(type=CenterOfMassMotion, default=CenterOfMassMotion.linear)
+    @supproperty(type=CenterOfMassMotion, default=CenterOfMassMotion.linear)
     def center_of_mass_motion(self): pass
 
     @integer(default=100)
     def com_motion_removal_frequency(self): pass
 
-    @advanced_property(type=list, default=[Group.system])
+    @supproperty(type=list, default=[Group.system])
     def comm_groups(self): pass
 
     @boolean(default=False)
@@ -168,7 +168,7 @@ class Simulation(BaseSimulation, Encodable):
 
     @property
     def executable(self):
-        return f"aprun -n {1 if self.integrator is Integrator.steep else 32} gmx_mpi mdrun -deffnm {self.output_name} " \
+        return f"aprun -n 32 gmx_mpi mdrun -deffnm {self.output_name} " \
                f"&> {self.output_name.with_suffix('.out')}"
 
     def restructure_paths_with_prefix(self, prefix):
@@ -203,7 +203,7 @@ class Simulation(BaseSimulation, Encodable):
     @decimal(default=1000)
     def compression_precision(self): pass
 
-    @advanced_property(type=list, default=[Group.system])
+    @supproperty(type=list, default=[Group.system])
     def compressed_groups(self): pass
 
     @property
