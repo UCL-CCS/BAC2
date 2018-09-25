@@ -13,7 +13,7 @@ setup(
 
     author='CCS',
 
-    requires=['yaml', 'parmed', 'numpy', 'supproperty'],
+    install_requires=['PyYAML', 'parmed', 'numpy', 'supproperty'],
 
     packages=find_packages(),
 
