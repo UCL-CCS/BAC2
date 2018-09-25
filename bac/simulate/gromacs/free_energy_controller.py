@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-from bac.utils.decorators import decimal, advanced_property, boolean, integer, float_vector
+from supproperty import decimal, supproperty, boolean, integer, float_vector
 from bac.simulate.coding import Encodable
 from .group import Group
 
@@ -139,13 +139,13 @@ class FreeEnergyController(Encodable):
     @decimal(default=0.3)
     def soft_core_sigma(self): pass
 
-    @advanced_property(type=list, default=[Group.system])
+    @supproperty(type=list, default=[Group.system])
     def couple_molecule_groups(self): pass
 
-    @advanced_property(type=CouplingType, default=CouplingType.vdw_and_coulomb)
+    @supproperty(type=CouplingType, default=CouplingType.vdw_and_coulomb)
     def couple_type_initial_lambda(self): pass
 
-    @advanced_property(type=CouplingType, default=CouplingType.vdw_and_coulomb)
+    @supproperty(type=CouplingType, default=CouplingType.vdw_and_coulomb)
     def couple_type_final_lambda(self): pass
 
     @boolean(default=False)
@@ -157,7 +157,7 @@ class FreeEnergyController(Encodable):
     @boolean(default=True)
     def output_derivatives(self): pass
 
-    @advanced_property(type=OutputEnergyType, default=OutputEnergyType.no)
+    @supproperty(type=OutputEnergyType, default=OutputEnergyType.no)
     def output_energy(self): pass
 
     @boolean(default=True)

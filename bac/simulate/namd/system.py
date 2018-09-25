@@ -1,9 +1,8 @@
 from enum import Enum
 
-import numpy as np
+import parmed as pmd
 
-from bac.utils.decorators import *
-
+from supproperty import *
 from bac.simulate.coding import Encodable
 
 
@@ -20,8 +19,18 @@ class SplitPatchType(Enum):
     position = 'position'
 
 
-class NonBondedController(Encodable):
+class WaterModel(Enum):
+    tip3p = 'tip3'
+    tip4p = 'tip4'
+    swm4_ndp = 'swm4'
+
+
+class System(Encodable):
     def __init__(self, **kwargs):
+
+        # Main system descriptors like topology, coordinates etc.
+
+        self.topology = kwargs.get('topology')
 
         self.cutoff = kwargs.get('cutoff')
         self.switching = kwargs.get('switching')
@@ -47,15 +56,16 @@ class NonBondedController(Encodable):
         self.pairlist_grow = kwargs.get('pairlist_grow', 0.01)
         self.pairlist_trigger = kwargs.get('pairlist_trigger', 0.3)
 
-        self.pme = None
+        self.pme = kwargs.get('pme')
         self.molly = None
 
-        self.cell_basis_vector_1 = kwargs.get('cell_basis_vector_1')
-        self.cell_basis_vector_2 = kwargs.get('cell_basis_vector_2')
-        self.cell_basis_vector_3 = kwargs.get('cell_basis_vector_3')
-        self.cell_origin = kwargs.get('cell_origin')
+        # self.cell_basis_vector_1 = kwargs.get('cell_basis_vector_1')
+        # self.cell_basis_vector_2 = kwargs.get('cell_basis_vector_2')
+        # self.cell_basis_vector_3 = kwargs.get('cell_basis_vector_3')
+        # self.cell_origin = kwargs.get('cell_origin')
 
         self.extended_system: Path = kwargs.get('extended_system')
+
         self.xst_file = kwargs.get('xst_file')
         self.xst_frequency = kwargs.get('xst_frequency')
 
@@ -63,11 +73,36 @@ class NonBondedController(Encodable):
         self.wrap_all = kwargs.get('wrap_all')
         self.wrap_nearest = kwargs.get('wrap_nearest')
 
+        # self.water_model = kwargs.get('water_model')
+
+    _PRMTOP_NAME = 'complex.prmtop'
+
+    @supproperty(type=pmd.Structure)
+    def topology(self): pass
+
+    @topology.did_set
+    def topology(self, top):
+        if top and top.box_vectors is not None:
+            bv = top.box_vectors.value_in_unit(pmd.unit.angstrom)
+            self.cell_basis_vector_1 = bv[0]
+            self.cell_basis_vector_2 = bv[1]
+            self.cell_basis_vector_3 = bv[2]
+
+            water = next(res for res in self.topology.residues if res.name == 'WAT')
+            if len(water) == 3:
+                self.water_model = WaterModel.tip3p
+            elif len(water) == 4:
+                self.water_model = WaterModel.tip4p
+
+            print('Setting', self.water_model)
+
+    @pathlike(default=_PRMTOP_NAME)
+    def parameters(self): pass
 
     @positive_decimal
     def cutoff(self): pass
 
-    @boolean(default=True)
+    @boolean(default=lambda self: bool(self.switching_distance))
     def switching(self): pass
 
     @positive_decimal(validator=lambda self, x: x <= self.cutoff)
@@ -76,7 +111,7 @@ class NonBondedController(Encodable):
     @boolean(default=False)
     def vdw_force_switching(self): pass
 
-    @advanced_property(type=Interaction)
+    @supproperty(type=Interaction)
     def excluded_interactions(self): pass
 
     @positive_decimal(default=1, validator=lambda _, x: x <= 1)
@@ -100,7 +135,7 @@ class NonBondedController(Encodable):
     @positive_integer(default=20)
     def steps_per_cycle(self): pass
 
-    @advanced_property(type=SplitPatchType, default=SplitPatchType.hydrogen)
+    @supproperty(type=SplitPatchType, default=SplitPatchType.hydrogen)
     def split_patch(self): pass
 
     # Boundary Condition
@@ -120,9 +155,9 @@ class NonBondedController(Encodable):
     @pathlike
     def extended_system(self): pass
 
-    @extended_system.post_set_processing
-    def extended_system(self, value):
-        if value is not None:
+    @extended_system.did_set
+    def extended_system(self, ext_system):
+        if ext_system is not None:
             self.cell_basis_vector_1 = None
             self.cell_basis_vector_2 = None
             self.cell_basis_vector_3 = None
@@ -135,13 +170,23 @@ class NonBondedController(Encodable):
     def xst_frequency(self): pass
 
     @boolean(default=False)
-    def wrap_water(self):pass
+    def wrap_water(self): pass
 
     @boolean(default=False)
     def wrap_all(self): pass
 
     @boolean(default=False)
     def wrap_nearest(self): pass
+
+    @supproperty(type=WaterModel, default=WaterModel.tip3p)
+    def water_model(self): pass
+
+    def encode(self, path=None, suffix=None):
+
+        if path is not None:
+            self.topology.save(self._PRMTOP_NAME)
+
+        return super().encode(path=path, suffix=suffix)
 
 
 class PME(Encodable):

@@ -1,6 +1,6 @@
 from enum import Enum
 
-from bac.utils.decorators import advanced_property, integer, decimal, float_vector
+from supproperty import supproperty, integer, decimal, float_vector
 from bac.simulate.gromacs.integrator import Integrator
 from bac.simulate.coding import Encodable
 
@@ -84,10 +84,10 @@ class PressureController(Encodable):
                                                           self.pressure,
                                                           self.compressibility)
 
-    @advanced_property(type=PressureCouplingType, default=PressureCouplingType.no)
+    @supproperty(type=PressureCouplingType, default=PressureCouplingType.no)
     def type(self): pass
 
-    @advanced_property(type=IsotropyType, default=IsotropyType.isotropic)
+    @supproperty(type=IsotropyType, default=IsotropyType.isotropic)
     def isotropy(self): pass
 
     def _frequency_default(self):
@@ -118,5 +118,5 @@ class PressureController(Encodable):
     @float_vector(default=[], validator=_group_count_validator)
     def pressure(self): pass
 
-    @advanced_property(type=ReferenceCoordinateScalingType, default=ReferenceCoordinateScalingType.no)
+    @supproperty(type=ReferenceCoordinateScalingType, default=ReferenceCoordinateScalingType.no)
     def reference_coordinate_scaling(self): pass

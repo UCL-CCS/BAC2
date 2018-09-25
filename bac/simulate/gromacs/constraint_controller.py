@@ -1,6 +1,6 @@
 from enum import Enum
 
-from bac.utils.decorators import advanced_property, decimal, boolean, positive_integer
+from supproperty import supproperty, decimal, boolean, positive_integer
 from bac.simulate.coding import Encodable
 
 
@@ -39,10 +39,10 @@ class ConstraintController(Encodable):
 
         self.morse = kwargs.get('morse')
 
-    @advanced_property(type=ConstraintType, default=ConstraintType.none)
+    @supproperty(type=ConstraintType, default=ConstraintType.none)
     def type(self): pass
 
-    @advanced_property(type=ConstraintAlgorithmType, default=ConstraintAlgorithmType.lincs)
+    @supproperty(type=ConstraintAlgorithmType, default=ConstraintAlgorithmType.lincs)
     def algorithm(self): pass
 
     @boolean(default=False)

@@ -1,6 +1,6 @@
 from enum import Enum
 
-from bac.utils.decorators import advanced_property, integer, float_vector
+from supproperty import supproperty, integer, float_vector
 from bac.simulate.gromacs.integrator import Integrator
 from bac.simulate.coding import Encodable
 
@@ -43,7 +43,7 @@ class TemperatureController(Encodable):
 
         return False
 
-    @advanced_property(type=TemperatureCouplingType, default=TemperatureCouplingType.no)
+    @supproperty(type=TemperatureCouplingType, default=TemperatureCouplingType.no)
     def type(self): pass
 
     def _frequency_default(self):
@@ -59,7 +59,7 @@ class TemperatureController(Encodable):
     @integer(default=10, validator=lambda self, v: (v == 1) if (self.simulation.integrator is Integrator.md) else True)
     def nose_hoover_chain_length(self): pass
 
-    @advanced_property(type=list, default=[Group.system])
+    @supproperty(type=list, default=[Group.system])
     def groups(self): pass
 
     @float_vector(default=[], validator=lambda self, x: len(self.groups) == x.size)

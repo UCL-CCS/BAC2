@@ -1,21 +1,42 @@
 # BAC2
 
-**BAC2.0** is a ground up rewrite of the BAC tool intended to unify and 
+Binding Affinity Calculator 2, a ground up rewrite of the BAC tool intended to unify and 
 simplify the maintenance and use of the tool, and provide a platform on 
 which new functionality can be built.
 
-**Key points:**
+## Getting Started
 
-- Developed in Python
-- Python API encapsulates core functionality
-- Python API codes wrap around other libraries and services, e.g. 
-  Radical CyberTools
-- Command line user interface wraps around API
-- Commands take the form `>>> bac build [options]` or `>>> bac execute [options]`
+These instructions will get you a copy of the project up and running on your local machine 
+for development and testing purposes.
 
---------------
+### Prerequisites
 
-**Structure of this project:**
+You will need Python 3.6 or higher. Using a conda environment is the easiest way to go.
+
+
+### Installing
+
+You need to clone this repository and run 
+
+```
+pip install BAC2/
+```
+
+## Authors
+
+* **Kristof Farkas-Pall**
+* **Dave W. Wright**
+* **Stefan Zasada**
+* **Fouad Husseini**
+
+See also the list of [contributors](https://github.com/UCL-CCS/BAC2/contributors) who participated in this project.
+
+## License
+
+This project is licensed under the Apache License - see the [LICENSE.md](LICENSE.md) file for details
+
+
+## Structure of this project
 
 - bac - code
     - build - build layer API top level directory
@@ -24,5 +45,3 @@ which new functionality can be built.
     - remote - execution of simulation on remote servers
 - client - client code
 - docs - documentation
-- glue - remote workflow code
-    - AWS - Amazon EC2 glue scripts

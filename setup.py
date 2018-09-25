@@ -13,7 +13,7 @@ setup(
 
     author='CCS',
 
-    requires=['yaml', 'parmed', 'numpy', 'mdtraj', 'pandas'],
+    install_requires=['PyYAML', 'parmed', 'numpy', 'supproperty'],
 
     packages=find_packages(),
 
