@@ -83,7 +83,6 @@ class System(Encodable):
     @topology.did_set
     def topology(self, top):
         if top and top.box_vectors is not None:
-            print('Setting cell vectors.')
             bv = top.box_vectors.value_in_unit(pmd.unit.angstrom)
             self.cell_basis_vector_1 = bv[0]
             self.cell_basis_vector_2 = bv[1]
@@ -159,7 +158,6 @@ class System(Encodable):
     @extended_system.did_set
     def extended_system(self, ext_system):
         if ext_system is not None:
-            print('Deleting cell vectors.')
             self.cell_basis_vector_1 = None
             self.cell_basis_vector_2 = None
             self.cell_basis_vector_3 = None
