@@ -1,6 +1,6 @@
 from enum import Enum
 
-from bac.utils.decorators import advanced_property, decimal, positive_integer, positive_decimal, boolean
+from supproperty import supproperty, decimal, positive_integer, positive_decimal, boolean
 from bac.simulate.coding import Encodable
 
 
@@ -157,7 +157,7 @@ class NonBondedController(Encodable):
     @positive_decimal(default=1.0)
     def cutoff(self): pass
 
-    @advanced_property(type=CutoffSchemeType, default=CutoffSchemeType.verlet,
+    @supproperty(type=CutoffSchemeType, default=CutoffSchemeType.verlet,
                        validator=lambda _, x: x is CutoffSchemeType.verlet, warn=True,
                        warning_message='`CutoffSchemeType.group` was the only cut-off treatment scheme '
                                        'before version 4.6, and is deprecated in 5.0.')
@@ -170,10 +170,10 @@ class NonBondedController(Encodable):
     @positive_integer(default=10)
     def neighbor_list_update_frequency(self): pass
 
-    @advanced_property(type=NeighborListType, default=NeighborListType.grid)
+    @supproperty(type=NeighborListType, default=NeighborListType.grid)
     def neighbor_list_type(self): pass
 
-    @advanced_property(type=PeriodicBoundaryConditionType, default=PeriodicBoundaryConditionType.xyz)
+    @supproperty(type=PeriodicBoundaryConditionType, default=PeriodicBoundaryConditionType.xyz)
     def periodic_boundary_condition(self): pass
 
     @boolean(default=False)
@@ -182,10 +182,10 @@ class NonBondedController(Encodable):
     @positive_decimal(default=0.005)
     def verlet_buffer_tolerance(self): pass
 
-    @advanced_property(type=CoulombType, default=CoulombType.cutoff)
+    @supproperty(type=CoulombType, default=CoulombType.cutoff)
     def coulomb_type(self): pass
 
-    @advanced_property(type=CoulombModifierType, default=CoulombModifierType.potential_shift_verlet)
+    @supproperty(type=CoulombModifierType, default=CoulombModifierType.potential_shift_verlet)
     def coulomb_modifier(self) -> CoulombModifierType:
         pass
 
@@ -208,10 +208,10 @@ class NonBondedController(Encodable):
     @decimal(default=0)
     def relative_dielectric(self): pass
 
-    @advanced_property(type=VanDerWaalsType, default=VanDerWaalsType.cutoff)
+    @supproperty(type=VanDerWaalsType, default=VanDerWaalsType.cutoff)
     def van_der_waals_type(self): pass
 
-    @advanced_property(type=VanDerWaalsModifierType, default=VanDerWaalsModifierType.potential_shift_verlet)
+    @supproperty(type=VanDerWaalsModifierType, default=VanDerWaalsModifierType.potential_shift_verlet)
     def van_der_waals_modifier(self): pass
 
     @decimal(default=0)
@@ -220,7 +220,7 @@ class NonBondedController(Encodable):
     @decimal(default=1)
     def van_der_waals_cutoff(self): pass
 
-    @advanced_property(type=LongRangeDispersionCorrectionType, default=LongRangeDispersionCorrectionType.no)
+    @supproperty(type=LongRangeDispersionCorrectionType, default=LongRangeDispersionCorrectionType.no)
     def correct_long_range_dispersion(self): pass
 
     @decimal(default=0.12)
@@ -244,10 +244,10 @@ class NonBondedController(Encodable):
     @positive_decimal(default=1e-3)
     def ewald_tolerance_vdw(self): pass
 
-    @advanced_property(type=EwaldCombinationType, default=EwaldCombinationType.geometric)
+    @supproperty(type=EwaldCombinationType, default=EwaldCombinationType.geometric)
     def ewald_combination_rule(self): pass
 
-    @advanced_property(type=EwaldGeometryType, default=EwaldGeometryType.three_dimensions)
+    @supproperty(type=EwaldGeometryType, default=EwaldGeometryType.three_dimensions)
     def ewald_geometry(self): pass
 
     @decimal(default=0)

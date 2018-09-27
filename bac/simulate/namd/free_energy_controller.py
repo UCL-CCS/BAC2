@@ -2,7 +2,8 @@ import numpy as np
 
 from enum import Enum
 
-from bac.utils.decorators import advanced_property,  positive_integer, pathlike, pdbcolumn, positive_decimal, boolean
+from supproperty import supproperty,  positive_integer, pathlike, positive_decimal, boolean
+from bac.utils.decorators import pdbcolumn
 
 from bac.simulate.coding import Encodable
 
@@ -30,13 +31,13 @@ class FreeEnergyController(Encodable):
         self.bond_decoupling = kwargs.get('bond_decoupling')
         self.decouple = kwargs.get('decouple')
 
-    @advanced_property(type=FreeEnergyCalculationType, default=FreeEnergyCalculationType.ti)
+    @supproperty(type=FreeEnergyCalculationType, default=FreeEnergyCalculationType.ti)
     def type(self): pass
 
-    @advanced_property(type=np.float, validator=lambda _, x: 0 <= x <= 1)
+    @supproperty(type=np.float, validator=lambda _, x: 0 <= x <= 1)
     def start_lambda(self): pass
 
-    @advanced_property(type=np.float, validator=lambda _, x: 0 <= x <= 1)
+    @supproperty(type=np.float, validator=lambda _, x: 0 <= x <= 1)
     def end_lambda(self): pass
 
     @property

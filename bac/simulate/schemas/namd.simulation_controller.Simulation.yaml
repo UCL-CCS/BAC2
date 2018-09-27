@@ -1,6 +1,6 @@
 # Attributes of main `Simulation()`
 
-timestep:
+integrator:
 minimization:
   - minimization
   - on_off
@@ -50,8 +50,8 @@ gromacs:
   - gromacs
   - on_off
 
-## NonBondedController
-non_bonded_controller:
+## System
+system:
 
 
 ## ConstraintController

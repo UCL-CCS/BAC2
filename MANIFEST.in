@@ -1,1 +1,2 @@
 include bac/simulate/schemas/*
+include bac/analyse/wsas/data/*
