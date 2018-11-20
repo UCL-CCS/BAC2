@@ -2,6 +2,7 @@ import yaml
 from functools import reduce
 from pathlib import Path
 
+
 _encoders = {'yes_no': lambda x: ('no', 'yes')[x],
              'on_off': lambda x: ('off', 'on')[x],
              'enum': lambda x: x.value,

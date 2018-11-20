@@ -1,4 +1,4 @@
-from bac.utils.decorators import positive_integer, positive_decimal
+from supproperty import positive_integer, positive_decimal
 from bac.simulate.coding import Encodable
 
 

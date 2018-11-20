@@ -1,6 +1,7 @@
 from enum import Enum
 
-from bac.utils.decorators import pathlike, advanced_property, positive_integer, positive_decimal, boolean, pdbcolumn
+from supproperty import pathlike, supproperty, positive_integer, positive_decimal, boolean
+from bac.utils.decorators import pdbcolumn
 
 from bac.simulate.coding import Encodable
 
@@ -30,7 +31,7 @@ class BondConstraint(Encodable):
         self.die_on_error = die_on_error
         self.use_settle = use_settle
 
-    @advanced_property(type=BondType, default=BondType.none)
+    @supproperty(type=BondType, default=BondType.none)
     def bonds(self): pass
 
     @positive_decimal(default=1.0e-8)

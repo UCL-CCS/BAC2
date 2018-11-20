@@ -9,9 +9,9 @@ from bac.simulate.namd.system import System
 from bac.simulate.namd.constraint_controller import ConstraintController
 from bac.simulate.namd.free_energy_controller import FreeEnergyController
 
-from bac.utils.decorators import (advanced_property, positive_decimal,
-                                  positive_integer, pathlike, boolean,
-                                  non_negative_integer)
+from supproperty import (supproperty, positive_decimal,
+                         positive_integer, pathlike, boolean,
+                         non_negative_integer)
 
 from bac.simulate.basesimulation import BaseSimulation, Engine
 from bac.simulate.coding import Encodable
@@ -23,7 +23,7 @@ class Simulation(BaseSimulation, Encodable):
     def __init__(self, **kwargs):
         self.temperature_controller = None
         self.pressure_controller = None
-        self.non_bonded_controller = None
+        self.system = None
         self.constraints = ConstraintController()
 
         # DYNAMICS
@@ -42,7 +42,7 @@ class Simulation(BaseSimulation, Encodable):
         self.coordinates = kwargs.get('coordinates')
         self.binary_coordinates = kwargs.get('binary_coordinates')
 
-        # self.parameters = kwargs.get('parameters')
+        self.parameters = kwargs.get('parameters')
 
         # OUTPUT
 
@@ -94,7 +94,7 @@ class Simulation(BaseSimulation, Encodable):
 
     # Dynamics
 
-    @advanced_property(type=Integrator, default=VerletIntegrator())
+    @supproperty(type=Integrator, default=VerletIntegrator())
     def integrator(self): pass
 
     @positive_integer
@@ -114,9 +114,10 @@ class Simulation(BaseSimulation, Encodable):
     @pathlike
     def velocities(self): pass
 
-    @velocities.post_set_processing
+    @velocities.did_set
     def velocities(self, value):
         if value is not None:
+            # Either velocity or temperature can be set.
             self.temperature = None
 
     @pathlike
@@ -126,8 +127,10 @@ class Simulation(BaseSimulation, Encodable):
     def coordinates(self): pass
 
     @pathlike
-    def binary_coordinates(self): pass
+    def parameters(self): pass
 
+    @pathlike
+    def binary_coordinates(self): pass
 
     # Output
 
@@ -188,7 +191,7 @@ class Simulation(BaseSimulation, Encodable):
     @boolean(default=True)
     def read_exclusions(self): pass
 
-    @advanced_property(type=np.float, validator=lambda _, x: x >= 1, default=2.0)
+    @supproperty(type=np.float, validator=lambda _, x: x >= 1, default=2.0)
     def scnb(self): pass
 
     # Charmm
@@ -227,7 +230,7 @@ class Simulation(BaseSimulation, Encodable):
     def add_input_dependency(self, other_simulation):
         super(Simulation, self).add_input_dependency(other_simulation)
 
-        self.non_bonded_controller.extended_system = other_simulation.output_name.with_suffix('.xsc')
+        self.system.extended_system = other_simulation.output_name.with_suffix('.xsc')
         self.coordinates = other_simulation.output_name.with_suffix('.coor')
 
         if self.constraints.harmonic_constraint is not None:
@@ -249,11 +252,11 @@ class Simulation(BaseSimulation, Encodable):
         if self.parameters and self.parameters.exists():
             self.parameters = prefix/self.parameters
 
-        if self.non_bonded_controller.extended_system and self.non_bonded_controller.extended_system.exists():
-            self.non_bonded_controller.extended_system = prefix/self.non_bonded_controller.extended_system
+        if self.system.extended_system and self.system.extended_system.exists():
+            self.system.extended_system = prefix/self.system.extended_system
 
-        if self.non_bonded_controller.xst_file and self.non_bonded_controller.xst_file.exists():
-            self.non_bonded_controller.xst_file = prefix/self.non_bonded_controller.xst_file
+        if self.system.xst_file and self.system.xst_file.exists():
+            self.system.xst_file = prefix/self.system.xst_file
 
         if self.constraints.harmonic_constraint and self.constraints.harmonic_constraint.reference_position_file and self.constraints.harmonic_constraint.reference_position_file.exists():
             self.constraints.harmonic_constraint.reference_position_file = prefix/self.constraints.harmonic_constraint.reference_position_file

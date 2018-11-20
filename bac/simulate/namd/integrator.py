@@ -1,6 +1,7 @@
 from enum import Enum
 
-from bac.utils.decorators import advanced_property, positive_integer, positive_decimal, boolean, pathlike, pdbcolumn
+from supproperty import supproperty, positive_integer, positive_decimal, boolean, pathlike
+from bac.utils.decorators import pdbcolumn
 from bac.simulate.coding import Encodable
 
 
@@ -48,10 +49,10 @@ class MTSIntegrator(Integrator, Encodable):
     @positive_integer(default=1, validator=lambda self, x: x % self.electrostatic_frequency == 0)
     def non_bonded_frequency(self): pass
 
-    @advanced_property(type=LongSplitting, default=LongSplitting.c1)
+    @supproperty(type=LongSplitting, default=LongSplitting.c1)
     def long_splitting(self): pass
 
-    @advanced_property(type=MTSAlgorithm, default=MTSAlgorithm.impulse)
+    @supproperty(type=MTSAlgorithm, default=MTSAlgorithm.impulse)
     def algorithm(self): pass
 
 

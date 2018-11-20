@@ -1,6 +1,7 @@
-from bac.utils.decorators import (boolean, positive_decimal, pathlike, pdbcolumn,
-                                  positive_integer, decimal, advanced_property)
+from supproperty import (boolean, positive_decimal, pathlike,
+                         positive_integer, decimal, supproperty)
 
+from bac.utils.decorators import pdbcolumn
 from bac.simulate.coding import Encodable
 from bac.utils.pdb import PDBColumn
 import bac.simulate.base_thermostat as base
@@ -30,7 +31,7 @@ class LangevinDynamics(TemperatureController, Encodable):
     @pathlike(default=lambda self: self.simulation.coordinates if self.damping is None else None)
     def file(self): pass
 
-    @advanced_property(type=PDBColumn, default=lambda self: PDBColumn.O if self.damping is None else None)
+    @supproperty(type=PDBColumn, default=lambda self: PDBColumn.O if self.damping is None else None)
     def column(self): pass
 
 
