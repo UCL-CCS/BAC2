@@ -14,7 +14,7 @@ setup(
     author='CCS',
 
     install_requires=['PyYAML', 'parmed', 'numpy', 'supproperty',
-                      'pandas', 'mdtraj'],
+                      'pandas', 'mdtraj', 'freesasa'],
 
     packages=find_packages(),
 
