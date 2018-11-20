@@ -38,22 +38,24 @@ RESIDUE_DICTIONARY = {
     'DT': 'T'
 }
 
+REVERSE_REV_DICTIONARY = {v: k for k, v in RESIDUE_DICTIONARY.items()}
+
 
 def convert_aa3to1(aa3):
-    try:
+
+    if aa3 in RESIDUE_DICTIONARY:
         aa1 = RESIDUE_DICTIONARY[aa3]
-    except:
+    else:
         aa1 = 'X'
 
     return aa1
 
 
 def convert_aa1to3(aa1):
-    map = {v: k for k, v in RESIDUE_DICTIONARY.items()}
 
-    try:
-        aa3 = map[aa1]
-    except:
+    if aa1 in REVERSE_REV_DICTIONARY:
+        aa3 = REVERSE_REV_DICTIONARY[aa1]
+    else:
         aa3 = 'UNK'
 
     return aa3
