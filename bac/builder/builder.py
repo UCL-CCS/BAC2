@@ -6,7 +6,7 @@ import warnings
 
 import parmed as pmd
 
-from bac.utils.decorators import pathlike, advanced_property
+from supproperty import supproperty
 
 #Defaults
 DEFAULT_INFO_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -70,22 +70,19 @@ class SystemBuilder():
             for ingredient_type in self.description.keys():
                 self.ingredients[ingredient_type] = []
 
-
-
-
-    @advanced_property(type=FFType, default=FFType.amber)
+    @supproperty(type=FFType, default=FFType.amber)
     def ff_type(self): pass
 
     @property
     def system_type(self): pass
 
-    @advanced_property(type=list, default=[])
+    @supproperty(type=list, default=[])
     def ff_elements(self): pass
 
-    @advanced_property(type=dict, default={})
+    @supproperty(type=dict, default={})
     def ingredients(self): pass
 
-    @advanced_property(type=dict, default={})
+    @supproperty(type=dict, default={})
     def description(self): pass
 
     def needed_ingredients(self):
@@ -99,8 +96,6 @@ class SystemBuilder():
         return needed
 
     def needed_ff_moltypes(self):
-
-        for
 
         pass
 
