@@ -9,7 +9,7 @@ import mdtraj as md
 import pandas as pd
 import parmed as pmd
 
-from bac.utils.decorators import advanced_property
+from supproperty import supproperty
 from .extract_residues import extract_residue
 from .freesasa_utils import FreesasaRunner
 
@@ -91,10 +91,10 @@ class Wsas:
 
             self.ligand_filter = 'resname {:s}'.format(list(lig_res.keys())[0])
 
-    @advanced_property(type=str)
+    @supproperty(type=str)
     def topology(self): pass
 
-    @advanced_property(type=Component, default=Component.complex)
+    @supproperty(type=Component, default=Component.complex)
     def component(self): pass
 
     def calc_surface_areas(self, wsas=True):
