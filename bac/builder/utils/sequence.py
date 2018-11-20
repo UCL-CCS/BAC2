@@ -1,4 +1,4 @@
-RESIDUE_DICTIONARY = {
+AMINO_RESIDUES = {
     'ALA': 'A',
     'ARG': 'R',
     'ASP': 'D',
@@ -22,6 +22,16 @@ RESIDUE_DICTIONARY = {
     'TRP': 'W',
     'TYR': 'Y',
     'VAL': 'V',
+}
+
+DNA_RESIDUES = {
+    'DA': 'A',
+    'DC': 'C',
+    'DG': 'G',
+    'DT': 'T'
+}
+
+RNA_RESIDUES = {
     'GUA': 'G',
     'CYT': 'C',
     'ADE': 'A',
@@ -32,11 +42,11 @@ RESIDUE_DICTIONARY = {
     'G': 'G',
     'T': 'T',
     'U': 'U',
-    'DA': 'A',
-    'DC': 'C',
-    'DG': 'G',
-    'DT': 'T'
 }
+
+NUCLEIC_RESIDUES = {**RNA_RESIDUES, **DNA_RESIDUES}
+
+RESIDUE_DICTIONARY = {AMINO_RESIDUES, NUCLEIC_RESIDUES}
 
 REVERSE_REV_DICTIONARY = {v: k for k, v in RESIDUE_DICTIONARY.items()}
 
