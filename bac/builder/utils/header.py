@@ -1,7 +1,7 @@
 from collections import OrderedDict
 import numpy as np
 from .assembly import Symmetry, BioTransform, BioUnit
-from .sequence import convert_aa3to1
+from .sequence import convert_resname3to1
 
 
 class HeaderInfo(object):
@@ -50,7 +50,7 @@ class HeaderInfo(object):
 
         sequence = sequences[chain_id]
 
-        seq_aa1 = [convert_aa3to1(x) for x in sequence]
+        seq_aa1 = [convert_resname3to1(x) for x in sequence]
 
         if seq_format == 'aa1':
 

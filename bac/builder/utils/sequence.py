@@ -61,7 +61,7 @@ ION_RESIDUES = ANION_RESIDUES + CATION_RESIDUES
 WAT_RESIDUES = residue.WATER_NAMES
 
 
-def convert_aa3to1(aa3):
+def convert_resname3to1(aa3):
 
     if aa3 in RESIDUE_DICTIONARY:
         aa1 = RESIDUE_DICTIONARY[aa3]
@@ -71,7 +71,7 @@ def convert_aa3to1(aa3):
     return aa1
 
 
-def convert_aa1to3(aa1):
+def convert_resname1to3(aa1):
 
     if aa1 in REVERSE_REV_DICTIONARY:
         aa3 = REVERSE_REV_DICTIONARY[aa1]
