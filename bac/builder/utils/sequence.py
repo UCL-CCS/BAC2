@@ -82,6 +82,7 @@ def convert_resname1to3(aa1):
 
 
 def convert_resname_list(sequence, seq_format='letter'):
+    
     if format not in ['fasta', 'letter']:
         raise RuntimeWarning('Resname list conversion to unknown format '
                              'requested - using "letter" as default')
