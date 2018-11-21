@@ -50,14 +50,14 @@ class HeaderInfo(object):
 
         sequence = sequences[chain_id]
 
-        seq_aa1 = [convert_resname3to1(x) for x in sequence]
+        seq_res_letter = [convert_resname3to1(x) for x in sequence]
 
         if seq_format == 'aa1':
 
-            return seq_aa1
+            return seq_res_letter
 
         else:
-            return ''.join(seq_aa1)
+            return ''.join(seq_res_letter)
 
     def add_seq_res_line(self, line):
         """
