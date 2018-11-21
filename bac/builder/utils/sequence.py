@@ -81,6 +81,22 @@ def convert_resname1to3(aa1):
     return aa3
 
 
+def convert_resname_list(sequence, seq_format='letter'):
+    if format not in ['fasta', 'letter']:
+        raise RuntimeWarning('Resname list conversion to unknown format '
+                             'requested - using "letter" as default')
+
+    seq_res_letter = [convert_resname3to1(x) for x in sequence]
+
+    if seq_format == 'letter':
+
+        return seq_res_letter
+
+    else:
+
+        return ''.join(seq_res_letter)
+
+
 def uniquify_list(lst):
     # Preserves order
 

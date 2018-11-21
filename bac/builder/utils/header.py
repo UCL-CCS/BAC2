@@ -1,7 +1,7 @@
 from collections import OrderedDict
 import numpy as np
 from .assembly import Symmetry, BioTransform, BioUnit
-from .sequence import convert_resname3to1
+from .sequence import convert_resname_list
 
 
 class HeaderInfo(object):
@@ -26,7 +26,7 @@ class HeaderInfo(object):
         self.symmetry = {}
         self.disulphides = {}
 
-    def chain_sequence(self, chain_id, seq_format='fasta'):
+    def chain_sequence(self, chain_id, seq_format='letter'):
         """
 
         Parameters
@@ -34,8 +34,8 @@ class HeaderInfo(object):
         chain_id: str
             Chain identifier for which the sequence is required
         seq_format: str
-            Choice of format to return - 'aa1' = list of single letter residue
-            codes, 'fasta' = fasta style string on single letter codes
+            Choice of format to return - 'letter' = list of single letter residue
+            codes, 'fasta' = fasta style string of single letter codes
 
         Returns
         -------
@@ -46,18 +46,14 @@ class HeaderInfo(object):
         sequences = self.sequences
 
         if chain_id not in sequences:
-            return ''
+            if seq_format == 'letter'
+                return []
+            else:
+                return ''
 
         sequence = sequences[chain_id]
 
-        seq_res_letter = [convert_resname3to1(x) for x in sequence]
-
-        if seq_format == 'aa1':
-
-            return seq_res_letter
-
-        else:
-            return ''.join(seq_res_letter)
+        return convert_resname_list(sequence, seq_format=seq_format)
 
     def add_seq_res_line(self, line):
         """
