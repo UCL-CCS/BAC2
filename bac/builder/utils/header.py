@@ -46,7 +46,7 @@ class HeaderInfo(object):
         sequences = self.sequences
 
         if chain_id not in sequences:
-            if seq_format == 'letter'
+            if seq_format == 'letter':
                 return []
             else:
                 return ''
