@@ -4,7 +4,7 @@ from bac.builder.utils.sequence import convert_resname_list
 
 def chain_sequence(struct, chain_id, seq_format='letter'):
 
-    chain = struct[chain_id,:,:]
+    chain = struct.view[chain_id,:,:]
 
     sequence = [x.name for x in chain.residues]
 
