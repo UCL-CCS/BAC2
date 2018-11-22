@@ -14,12 +14,22 @@ class SourceStructure(object):
         self.structure = pmd.load_file(structure_filename)
         self.header = HeaderInfo(structure_filename)
         self.chains = set([x.chain for x in self.structure.residues])
+
         self.chain_types = {}
+        self.chain_nonstandard = {}
 
         chain_types = self.chain_types
 
         for chain in self.chains:
             chain_types[chain] = scan_chain_type(self, chain)
+
+            # Record what is nonstandard before we update types to consider
+            # bonding pattern for residues linked to polymers (protein, RNA, DNA).
+            condition = (chain_types[chain][:, 1] == 'unknown')
+            self.chain_nonstandard[chain] = chain_types[chain][condition][:, 0]
+
+            # Update types to classify nonstandard residues bonding in
+            # polymers as part of neighbouring chain type.
             update_chain_type_assignment(self, chain_types[chain])
 
 
