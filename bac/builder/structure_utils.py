@@ -80,7 +80,7 @@ def scan_chain_type(struct, chain_id):
 
 
 def check_residue_for_polymer_bond(struct, residue_idx,
-                           bond_type='protein', check_direction=1):
+                                   bond_type='protein', check_direction=1):
     """
     Determine if the selected residue in `struct` has a recognised polymer bond
     to the neighbouring residue.
