@@ -13,7 +13,7 @@ def chain_sequence(struct, chain_id, seq_format='letter'):
     Parameters
     ----------
     struct : :class:`Structure <parmed.Structure>`
-        Structure file from which to get chain sequence
+        Structure from which to get chain sequence
     chain_id : str
         Selected chain
     seq_format: str
@@ -39,7 +39,25 @@ def chain_sequence(struct, chain_id, seq_format='letter'):
         return convert_resname_list(sequence, seq_format=seq_format)
 
 
-def scan_chain(struct, chain_id):
+def scan_chain_type(struct, chain_id):
+    """
+    Lookup residue types (protein, water, etc.) for all residues in selected
+    chain.
+
+    Parameters
+    ----------
+    struct : :class:`Structure <parmed.Structure>`
+        Structure to check residue types
+    chain_id : str
+        Selected chain
+
+    Returns
+    -------
+    np.array
+        Contains [residue index (in `struct`), residue type] pairs for each
+        residue in selected chain.
+
+    """
     residue_type = []
     chain = struct.view[chain_id, :, :]
 
@@ -61,8 +79,30 @@ def scan_chain(struct, chain_id):
     return np.array(residue_type, dtype=object)
 
 
-def check_residue_for_bond(struct, residue_idx,
+def check_residue_for_polymer_bond(struct, residue_idx,
                            bond_type='protein', check_direction=1):
+    """
+    Determine if the selected residue in `struct` has a recognised polymer bond
+    to the neighbouring residue.
+
+    Parameters
+    ----------
+    struct : :class:`Structure <parmed.Structure>`
+        Structure to check residue types
+    residue_idx : int
+        Index of the residue for which to check for a polymer bond
+    bond_type : str
+        Type of polymer bond to look for ('protein', 'dna', 'rna')
+    check_direction : int
+        Direction of bond to check along the polymer: either -1 toward lower
+        residue numbers or 1 towards higher residue numbers.
+
+    Returns
+    -------
+    bool
+        True = residue is polymer bonded to neighbouring residue, False = no
+        polymer bond to neighbouring residue
+    """
 
     if bond_type not in POLYMER_BONDS:
         raise RuntimeError(f"Invalid polymer bond type, "
@@ -97,7 +137,26 @@ def check_residue_for_bond(struct, residue_idx,
     return False
 
 
-def check_chain_type_assignment(struct, residue_type_assignment):
+def update_chain_type_assignment(struct, residue_type_assignment):
+    """
+    In the case where a chain contains multiple types we may have modified or
+    artificial polymer residues incorrectly assigned. Here we check to see if
+    at any change in assigned residue types the residue at the switch
+    participate in polymer bonds and reassign type in
+    `residue_type_assignment` accordingly.
+
+    Parameters
+    ----------
+    struct : :class:`Structure <parmed.Structure>`
+        Structure to check residue types
+    residue_type_assignment : np.array
+        Should contain [residue index (in `struct`), residue type] pairs for
+        each residue in selected chain.
+
+    Returns
+    -------
+
+    """
 
     # Search `residue_type_assignment` to find residues where type changes
     changes = np.where(residue_type_assignment[:-1, 1] != residue_type_assignment[1:, 1])[0]+1
@@ -119,10 +178,10 @@ def check_chain_type_assignment(struct, residue_type_assignment):
 
             residue_idx = residue_type_assignment[idx,0]
 
-            polymer_bonded = check_residue_for_bond(struct,
-                                                    residue_idx,
-                                                    bond_type=last_type,
-                                                    check_direction=check_direction)
+            polymer_bonded = check_residue_for_polymer_bond(struct,
+                                                            residue_idx,
+                                                            bond_type=last_type,
+                                                            check_direction=check_direction)
 
             if polymer_bonded:
 
