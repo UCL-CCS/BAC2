@@ -203,9 +203,24 @@ def update_chain_type_assignment(struct, residue_type_assignment):
                 break
 
 
-def get_chain_gaps(struct, chain_id):
+def get_chain_gaps(struct, chain_id, return_idx=False):
 
-    pass
+    # TODO: Check this works
+
+    chain = struct.view[chain_id, :, :]
+
+    residue_numbers = np.array([[residue.number, residue.idx] for residue in chain])
+    start_residue_idx = residue_numbers[np.where(np.diff(residue_numbers[:, 0]) != 1)][:, 1]
+
+    if return_idx:
+
+        return [(idx, idx + 1) for idx in start_residue_idx]
+
+    else:
+
+        residues = struct.residues
+
+        return [(residues[idx].number, residues[idx + 1].number) for idx in start_residue_idx]
 
 
 def clean_residue_altlocs(structure, residue_idx, altloc='A', blank_remaining=True):
