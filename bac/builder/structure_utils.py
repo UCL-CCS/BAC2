@@ -100,7 +100,7 @@ def check_residue_for_bond(struct, residue_idx,
 def check_chain_type_assignment(struct, residue_type_assignment):
 
     # Search `residue_type_assignment` to find residues where type changes
-    changes = np.where(residue_type_assignment[:-1,1] != residue_type_assignment[1:,1])[0]+1
+    changes = np.where(residue_type_assignment[:-1, 1] != residue_type_assignment[1:, 1])[0]+1
     search_ends = [0] + changes + residue_type_assignment[-1, 0]
 
     polymer_types = POLYMER_BONDS.keys()
@@ -126,7 +126,7 @@ def check_chain_type_assignment(struct, residue_type_assignment):
 
             if polymer_bonded:
 
-                residue_type_assignment[idx,1] = last_type
+                residue_type_assignment[idx, 1] = last_type
 
                 idx -= check_direction
 
