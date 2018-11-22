@@ -1,5 +1,5 @@
-import parmed as pmd
 import numpy as np
+import parmed as pmd
 from bac.builder.utils.sequence import convert_resname_list
 from bac.builder.utils.sequence import AMINO_RESIDUES, DNA_RESIDUES
 from bac.builder.utils.sequence import RNA_RESIDUES, WATER_RESIDUES
@@ -206,6 +206,49 @@ def update_chain_type_assignment(struct, residue_type_assignment):
 def get_chain_gaps(struct, chain_id):
 
     pass
+
+
+def clean_residue_altlocs(structure, residue_idx, altloc='A', blank_remaining=True):
+    keep = ['', altloc]
+
+    mask = [1 if atom.altloc not in keep and atom.residue.idx == residue_idx else 0 for atom in structure]
+
+    structure.strip(mask)
+
+    if blank_remaining:
+        for atom in structure.residues[residue_idx].atoms:
+            atom.altloc = ''
+
+
+def has_altloc(residue):
+    for atom in residue:
+        if atom.altloc:
+            return True
+    return False
+
+
+def get_altloc_residues(structure, idx_only=False):
+    have_altlocs = []
+
+    for residue in structure.residues:
+        if has_altloc(residue):
+            if idx_only:
+                have_altlocs.append(residue.idx)
+            else:
+                have_altlocs.append(residue)
+
+    return have_altlocs
+
+
+def print_altloc_info(structure):
+
+    print(f"idx\tname\tnumber\taltlocs")
+
+    for residue in get_altloc_residues(structure):
+
+        altlocs = [loc for loc in list(set([atom.altloc for atom in residue])) if loc]
+
+        print(f"{residue.idx}\t{residue.name}\t{residue.number}\t{altlocs}")
 
 
 def reassign_chains():
