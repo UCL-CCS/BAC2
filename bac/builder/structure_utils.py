@@ -27,7 +27,7 @@ def chain_sequence(struct, chain_id, seq_format='letter'):
         Output of all residue codes in the format selected in seq_format.
     """
 
-    chain = struct.view[chain_id,:,:]
+    chain = struct.view[chain_id, :, :]
 
     sequence = [x.name for x in chain.residues]
 
