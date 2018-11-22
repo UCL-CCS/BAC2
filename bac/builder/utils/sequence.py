@@ -58,7 +58,13 @@ CATION_RESIDUES = list(residue.CATION_NAMES)
 
 ION_RESIDUES = ANION_RESIDUES + CATION_RESIDUES
 
-WAT_RESIDUES = residue.WATER_NAMES
+WATER_RESIDUES = residue.WATER_NAMES
+
+POLYMER_BONDS = {
+                 'protein': {'start': "C", 'end': "N"},
+                 'rna': {'start': "O3'", 'end': "P"},
+                 'dna': {'start': "O3'", 'end': "P"}
+                }
 
 
 def convert_resname3to1(aa3):
