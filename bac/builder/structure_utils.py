@@ -232,7 +232,7 @@ def get_chain_number_gaps(struct, chain_id, return_idx=False):
                                 for residue in chain.residues])
 
     start_residue_idx = residue_numbers[
-                            np.where(np.diff(residue_numbers[:, 0]) != 1)][:, 1]
+                            np.where(np.diff(residue_numbers[:, 0]) > 1)][:, 1]
 
     if return_idx:
 
@@ -251,7 +251,7 @@ def is_polymer_chain_gap(idx1, idx2, residue_types):
     matches1 = np.where(residue_types[:, 0] == idx1)
     matches2 = np.where(residue_types[:, 0] == idx2)
 
-    if matches1 and matches2:
+    if matches1[0].size > 0 and matches2[0].size > 0:
 
         match_idx1 = matches1[0][0]
         match_idx2 = matches2[0][0]
