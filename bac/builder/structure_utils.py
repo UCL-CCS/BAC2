@@ -168,10 +168,12 @@ def update_chain_type_assignment(struct, residue_type_assignment):
 
     for idx in changes:
 
-        if residue_type_assignment[idx, 1] != 'unknown':
-            continue
+        last_type = residue_type_assignment[idx-1, 1]
 
-        last_type = residue_type_assignment[idx + check_direction, 1]
+        if (residue_type_assignment[idx, 1] != 'unknown' and
+                last_type != 'unknown'):
+
+            continue
 
         # If we are changing to a polymer type we should check backwards for
         # for residues that might change type, otherwise forwards.
