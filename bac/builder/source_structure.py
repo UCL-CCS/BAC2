@@ -4,6 +4,7 @@ from bac.builder.utils.header import HeaderInfo
 from bac.builder.structure_utils import (scan_chain_type, update_chain_type_assignment,
                                          get_chain_number_gaps)
 
+
 class SourceStructure(object):
 
     def __init__(self, structure_filename):
