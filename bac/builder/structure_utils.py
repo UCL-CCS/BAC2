@@ -80,7 +80,8 @@ def scan_chain_type(struct, chain_id):
 
 
 def check_residue_for_polymer_bond(struct, residue_idx,
-                                   bond_type='protein', check_direction=1):
+                                   bond_type='protein', check_direction=1,
+                                   specific_idx=None):
     """
     Determine if the selected residue in `struct` has a recognised polymer bond
     to the neighbouring residue.
@@ -96,6 +97,8 @@ def check_residue_for_polymer_bond(struct, residue_idx,
     check_direction : int
         Direction of bond to check along the polymer: either -1 toward lower
         residue numbers or 1 towards higher residue numbers.
+    specific_idx : int
+        Test that polymer bond exists to a particular residue index.
 
     Returns
     -------
@@ -128,10 +131,16 @@ def check_residue_for_polymer_bond(struct, residue_idx,
 
         bond_atom = struct.atoms[bond_atom_idx]
 
-        bonded_atom = [x.idx for x in bond_atom.bond_partners
+        bonded_atom = [x for x in bond_atom.bond_partners
                        if x.name == partner_atom_name]
 
         if bonded_atom:
+
+            if specific_idx is not None:
+
+                if bonded_atom[0].residue.idx != specific_idx:
+                    return False
+
             return True
 
     return False
@@ -246,10 +255,30 @@ def get_chain_number_gaps(struct, chain_id, return_idx=False):
                 for idx in start_residue_idx]
 
 
-def is_polymer_chain_gap(idx1, idx2, residue_types):
+def is_start_polymer_gap(struct, idx, residue_types):
+    """
+    Check if idx`th residue in `struct` the start of a gap in a polymer
+    chain.
 
-    matches1 = np.where(residue_types[:, 0] == idx1)
-    matches2 = np.where(residue_types[:, 0] == idx2)
+    Parameters
+    ----------
+    struct : :class:`Structure <parmed.Structure>`
+        Structure to check residue types.
+    idx : int
+        Index of residue we are checking.
+    residue_types : np.array
+        Array containing [residue index in structure, residue type] pairs.
+
+    Returns
+    -------
+    bool
+        Is the `idx`th residue in `struct` the start of a gap in a polymer
+        chain.
+    """
+
+    next_idx = idx + 1
+    matches1 = np.where(residue_types[:, 0] == idx)
+    matches2 = np.where(residue_types[:, 0] == next_idx)
 
     if matches1[0].size > 0 and matches2[0].size > 0:
 
@@ -261,17 +290,41 @@ def is_polymer_chain_gap(idx1, idx2, residue_types):
 
         if (residue_type1 == residue_type2 and
                 residue_type1 in POLYMER_BONDS.keys()):
+
+            if not check_residue_for_polymer_bond(struct, idx,
+                                                  bond_type=residue_type1,
+                                                  specific_idx=next_idx):
+                return False
+
             return True
 
     return False
 
 
 def get_polymer_gaps(struct, chain_id, residue_types):
+    """
+    Get a list of all gaps in all polymers in `chain_id` in `struct`.
+
+    Parameters
+    ----------
+    struct : :class:`Structure <parmed.Structure>`
+        Structure to check residue types.
+    chain_id : str
+        Chain identifier for chain of interest.
+    residue_types : np.array
+        Array containing [residue index in structure, residue type] pairs.
+
+    Returns
+    -------
+    list
+        Pairs of indices representing the start and end of gaps in polymer
+        chains within the selected chain.
+    """
 
     gaps = get_chain_number_gaps(struct, chain_id, return_idx=True)
 
     return [(x, y) for x, y in gaps
-            if is_polymer_chain_gap(x, y, residue_types)]
+            if is_start_polymer_gap(struct, x, residue_types)]
 
 
 def clean_residue_altlocs(struct, residue_idx,

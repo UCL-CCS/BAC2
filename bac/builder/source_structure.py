@@ -34,7 +34,7 @@ class SourceStructure(object):
             # polymers as part of neighbouring chain type.
             update_chain_type_assignment(self, chain_types[chain])
 
+            # Gaps defined by pair of polymer residues where residue number
+            # different by > 1 and no polymer bond between them.
             self.chain_gaps[chain] = get_polymer_gaps(self, chain,
                                                       chain_types[chain])
-
-            # Check chain gaps for bonding (i.e. numeric but not polymer gaps)
