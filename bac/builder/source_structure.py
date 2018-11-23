@@ -12,6 +12,7 @@ class SourceStructure(object):
         if os.path.splitext(structure_filename)[1] != '.pdb':
             raise NotImplementedError("We can only process PDB files for now.")
 
+        self.source_file = os.path.realpath(os.path.expanduser(structure_filename))
         self.structure = pmd.load_file(structure_filename)
         self.header = HeaderInfo(structure_filename)
         self.chains = set([x.chain for x in self.structure.residues])
@@ -38,3 +39,32 @@ class SourceStructure(object):
             # different by > 1 and no polymer bond between them.
             self.chain_gaps[chain] = get_polymer_gaps(self, chain,
                                                       chain_types[chain])
+
+        self.decomposition_mapping = {}
+        self.model_selection = {}
+
+    def generate_decomposition(self):
+        """
+        Decompose initial chains into modelling/simulation friendly units.
+
+        Returns
+        -------
+
+        """
+
+        pass
+
+    def write_decomposition(self, filename):
+        """
+        Write decomposition information to YAML file
+
+        Returns
+        -------
+
+        """
+
+        pass
+
+    def create_scaffold(self, decomposition, selection, naming_scheme):
+
+        pass
