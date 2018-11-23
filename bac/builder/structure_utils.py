@@ -226,12 +226,10 @@ def get_chain_number_gaps(struct, chain_id, return_idx=False):
 
     """
 
-    # TODO: Check this works
-
     chain = struct.view[chain_id, :, :]
 
     residue_numbers = np.array([[residue.number, residue.idx]
-                                for residue in chain])
+                                for residue in chain.residues])
 
     start_residue_idx = residue_numbers[
                             np.where(np.diff(residue_numbers[:, 0]) != 1)][:, 1]
@@ -246,6 +244,34 @@ def get_chain_number_gaps(struct, chain_id, return_idx=False):
 
         return [(residues[idx].number, residues[idx + 1].number)
                 for idx in start_residue_idx]
+
+
+def is_polymer_chain_gap(idx1, idx2, residue_types):
+
+    matches1 = np.where(residue_types[:, 0] == idx1)
+    matches2 = np.where(residue_types[:, 0] == idx2)
+
+    if matches1 and matches2:
+
+        match_idx1 = matches1[0][0]
+        match_idx2 = matches2[0][0]
+
+        residue_type1 = residue_types[match_idx1, 1]
+        residue_type2 = residue_types[match_idx2, 1]
+
+        if (residue_type1 == residue_type2 and
+                residue_type1 in POLYMER_BONDS.keys()):
+            return True
+
+    return False
+
+
+def get_polymer_gaps(struct, chain_id, residue_types):
+
+    gaps = get_chain_number_gaps(struct, chain_id, return_idx=True)
+
+    return [(x, y) for x, y in gaps
+            if is_polymer_chain_gap(x, y, residue_types)]
 
 
 def clean_residue_altlocs(struct, residue_idx,
