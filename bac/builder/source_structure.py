@@ -2,7 +2,7 @@ import os
 import parmed as pmd
 from bac.builder.utils.header import HeaderInfo
 from bac.builder.structure_utils import (scan_chain_type, update_chain_type_assignment,
-                                        get_chain_gaps)
+                                         get_chain_number_gaps)
 
 class SourceStructure(object):
 
@@ -33,4 +33,4 @@ class SourceStructure(object):
             # polymers as part of neighbouring chain type.
             update_chain_type_assignment(self, chain_types[chain])
 
-            self.chain_gaps[chain] = get_chain_gaps(self, chain)
+            self.chain_gaps[chain] = get_chain_number_gaps(self, chain)

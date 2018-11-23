@@ -13,9 +13,9 @@ def chain_sequence(struct, chain_id, seq_format='letter'):
     Parameters
     ----------
     struct : :class:`Structure <parmed.Structure>`
-        Structure from which to get chain sequence
+        Structure from which to get chain sequence.
     chain_id : str
-        Selected chain
+        Selected chain identifier.
     seq_format: str
         Format for output - 'resname' (list of three letter reside codes),
         'letter' (list fo single letter residue codes), 'fasta' (sting of
@@ -47,9 +47,9 @@ def scan_chain_type(struct, chain_id):
     Parameters
     ----------
     struct : :class:`Structure <parmed.Structure>`
-        Structure to check residue types
+        Structure in which to check residue types.
     chain_id : str
-        Selected chain
+        Selected chain identifier.
 
     Returns
     -------
@@ -88,11 +88,11 @@ def check_residue_for_polymer_bond(struct, residue_idx,
     Parameters
     ----------
     struct : :class:`Structure <parmed.Structure>`
-        Structure to check residue types
+        Structure to check residue types.
     residue_idx : int
-        Index of the residue for which to check for a polymer bond
+        Index of the residue for which to check for a polymer bond.
     bond_type : str
-        Type of polymer bond to look for ('protein', 'dna', 'rna')
+        Type of polymer bond to look for ('protein', 'dna', 'rna').
     check_direction : int
         Direction of bond to check along the polymer: either -1 toward lower
         residue numbers or 1 towards higher residue numbers.
@@ -101,7 +101,7 @@ def check_residue_for_polymer_bond(struct, residue_idx,
     -------
     bool
         True = residue is polymer bonded to neighbouring residue, False = no
-        polymer bond to neighbouring residue
+        polymer bond to neighbouring residue.
     """
 
     if bond_type not in POLYMER_BONDS:
@@ -148,7 +148,7 @@ def update_chain_type_assignment(struct, residue_type_assignment):
     Parameters
     ----------
     struct : :class:`Structure <parmed.Structure>`
-        Structure to check residue types
+        Structure to check residue types.
     residue_type_assignment : np.array
         Should contain [residue index (in `struct`), residue type] pairs for
         each residue in selected chain.
@@ -203,14 +203,36 @@ def update_chain_type_assignment(struct, residue_type_assignment):
                 break
 
 
-def get_chain_gaps(struct, chain_id, return_idx=False):
+def get_chain_number_gaps(struct, chain_id, return_idx=False):
+    """
+    Find numbering gaps between adjacent residues in selected chain.
+
+    Parameters
+    ----------
+    struct : :class:`Structure <parmed.Structure>`
+        Structure to check chain numbering in.
+    chain_id : str
+        Selected chain identifier.
+    return_idx : bool
+        Return values either residue numbers (False = default) or
+        indices (True).
+
+    Returns
+    -------
+    list
+        Pairs of start and end residue numbers or idnetifiers.
+
+    """
 
     # TODO: Check this works
 
     chain = struct.view[chain_id, :, :]
 
-    residue_numbers = np.array([[residue.number, residue.idx] for residue in chain])
-    start_residue_idx = residue_numbers[np.where(np.diff(residue_numbers[:, 0]) != 1)][:, 1]
+    residue_numbers = np.array([[residue.number, residue.idx]
+                                for residue in chain])
+
+    start_residue_idx = residue_numbers[
+                            np.where(np.diff(residue_numbers[:, 0]) != 1)][:, 1]
 
     if return_idx:
 
@@ -220,48 +242,106 @@ def get_chain_gaps(struct, chain_id, return_idx=False):
 
         residues = struct.residues
 
-        return [(residues[idx].number, residues[idx + 1].number) for idx in start_residue_idx]
+        return [(residues[idx].number, residues[idx + 1].number)
+                for idx in start_residue_idx]
 
 
-def clean_residue_altlocs(structure, residue_idx, altloc='A', blank_remaining=True):
+def clean_residue_altlocs(struct, residue_idx,
+                          altloc='A', blank_remaining=True):
+    """
+    Clean selected residue to leave only a single set of coordinates by
+    removing all but the selected `altloc` and any common atoms.
+
+    Parameters
+    ----------
+    struct : :class:`Structure <parmed.Structure>`
+        Structure to check chain numbering in.
+    residue_idx : int
+        Index of the residue to clean.
+    altloc : str
+        Letter code of the altloc to retain.
+    blank_remaining : bool
+        Should we blank the altloc field on retained atoms.
+
+    """
+
     keep = ['', altloc]
 
-    mask = [1 if atom.altloc not in keep and atom.residue.idx == residue_idx else 0 for atom in structure]
+    mask = [1 if atom.altloc not in keep and atom.residue.idx == residue_idx
+            else 0 for atom in struct]
 
-    structure.strip(mask)
+    struct.strip(mask)
 
     if blank_remaining:
-        for atom in structure.residues[residue_idx].atoms:
+        for atom in struct.residues[residue_idx].atoms:
             atom.altloc = ''
 
 
 def has_altloc(residue):
+    """
+    Check if residue contains altloc atoms.
+
+    Parameters
+    ----------
+    residue : `Residue <parmed.topologyobjects.Residue>`
+        Residue object containing to atoms to be checked.
+
+    Returns
+    -------
+    bool
+        Does the residue contain altlocs?
+
+    """
     for atom in residue:
         if atom.altloc:
             return True
     return False
 
 
-def get_altloc_residues(structure, idx_only=False):
-    have_altlocs = []
+def get_altloc_residues(struct, idx_only=False):
+    """
+    Obtain list of all residues in `struct` containing altlocs.
 
-    for residue in structure.residues:
-        if has_altloc(residue):
-            if idx_only:
-                have_altlocs.append(residue.idx)
-            else:
-                have_altlocs.append(residue)
+    Parameters
+    ----------
+    struct : :class:`Structure <parmed.Structure>`
+        Structure to check for altlocs.
+    idx_only : bool
+        Return index only (True) or residue objects (False = default).
 
-    return have_altlocs
+    Returns
+    -------
+    list
+        List containing either `parmed.topologyobjects.Residue` objects for all
+        residues containing altlocs or their indices in the input structure.
+
+    """
+
+    have_altlocs = [residue for residue in struct.residues
+                    if has_altloc(residue)]
+
+    if not idx_only:
+        return have_altlocs
+    else:
+        return [residue.idx for residue in have_altlocs]
 
 
-def print_altloc_info(structure):
+def print_altloc_info(struct):
+    """
+    Print information on altlocs in `struct`
+
+    Parameters
+    ----------
+    struct : :class:`Structure <parmed.Structure>`
+        Structure about which to report altlocs.
+    """
 
     print(f"idx\tname\tnumber\taltlocs")
 
-    for residue in get_altloc_residues(structure):
+    for residue in get_altloc_residues(struct):
 
-        altlocs = [loc for loc in list(set([atom.altloc for atom in residue])) if loc]
+        altlocs = [loc for loc in list(set([atom.altloc for atom in residue]))
+                   if loc]
 
         print(f"{residue.idx}\t{residue.name}\t{residue.number}\t{altlocs}")
 
