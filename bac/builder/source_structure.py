@@ -68,3 +68,8 @@ class SourceStructure(object):
     def create_scaffold(self, decomposition, selection, naming_scheme):
 
         pass
+
+    def reconcile_header_sequence(self):
+
+        pass
+
