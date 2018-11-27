@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import parmed as pmd
 from bac.builder.utils.header import HeaderInfo
 from bac.builder.structure_utils import (scan_chain_type, update_chain_type_assignment,
@@ -52,7 +53,17 @@ class SourceStructure(object):
 
         """
 
-        pass
+        chain_types = self.chain_types
+        chain_gaps = self.chain_gaps
+
+        decomposition_mapping = {}
+
+        for chain_id, residue_types  in chain_types.items():
+
+
+
+            pass
+
 
     def write_decomposition(self, filename):
         """
@@ -73,3 +84,12 @@ class SourceStructure(object):
 
         pass
 
+    def check_residue_no_increases(self, idxs):
+
+        residues = self.residues
+
+        residues_numbers = [(residue.idx, residue.number) for residue
+                            in residues if residue.idx in idxs]
+
+        dx = np.diff(residues_numbers)
+        return np.all(dx > 0)
