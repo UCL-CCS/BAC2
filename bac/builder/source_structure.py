@@ -60,7 +60,11 @@ class SourceStructure(object):
 
         for chain_id, residue_types  in chain_types.items():
 
+            chain_idxs = residue_types[:, 0]
 
+            if self.check_residue_no_increases(chain_idxs):
+
+                residue_number_runs = self.residue_no_blocks(chain_idxs)
 
             pass
 
