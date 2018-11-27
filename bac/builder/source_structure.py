@@ -64,7 +64,6 @@ class SourceStructure(object):
 
             pass
 
-
     def write_decomposition(self, filename):
         """
         Write decomposition information to YAML file
@@ -85,6 +84,20 @@ class SourceStructure(object):
         pass
 
     def check_residue_no_increases(self, idxs):
+        """
+        Check that residue with given indicies have monotonically increasing
+        residue numbering.
+
+        Parameters
+        ----------
+        idxs : list or np.array
+            Indices of the residues to check
+
+        Returns
+        -------
+        bool
+            Do the relevant residue numbers increase monotonically?
+        """
 
         residues = self.residues
 
@@ -95,15 +108,28 @@ class SourceStructure(object):
         return np.all(dx > 0)
 
     def residue_no_blocks(self, idxs):
+        """
+        Get list of blocks of residue indexes where the residue numbers
+        increase.
+
+        Parameters
+        ----------
+        idxs : list or np.array
+            Indices of the residues to group
+
+        Returns
+        -------
+        list
+            List of `np.arrays` containing indices of residues which increase in
+            residue numbering.
+        """
 
         residues = self.residues
 
         residue_numbers = [(residue.idx, residue.number) for residue
-                            in residues if residue.idx in idxs]
+                           in residues if residue.idx in idxs]
 
-        out = [tuple(arr) for arr in
-               np.split(residue_numbers,
-                        np.where(np.diff(residue_numbers[:, 1]) < 0)[0] + 1)
-               if arr.size > 1]
-
-        pass
+        return [arr[:, 0] for arr in
+                np.split(residue_numbers,
+                         np.where(np.diff(residue_numbers[:, 1]) < 0)[0] + 1)
+                if arr.size > 1]
