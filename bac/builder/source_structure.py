@@ -88,8 +88,17 @@ class SourceStructure(object):
 
         residues = self.residues
 
-        residues_numbers = [(residue.idx, residue.number) for residue
+        residues_numbers = [residue.number for residue
                             in residues if residue.idx in idxs]
 
         dx = np.diff(residues_numbers)
         return np.all(dx > 0)
+
+    def locate_residue_no_blocks(self, idxs):
+
+        residues = self.residues
+
+        residues_numbers = [(residue.idx, residue.number) for residue
+                            in residues if residue.idx in idxs]
+
+        pass
