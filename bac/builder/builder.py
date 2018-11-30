@@ -8,15 +8,19 @@ import parmed as pmd
 
 from supproperty import supproperty
 
-#Defaults
+# Defaults
 DEFAULT_INFO_PATH = os.path.dirname(os.path.realpath(__file__))
+
 
 class FFType(Enum):
     amber = 'amber'
 
-class SystemBuilder():
 
-    def __init__(self, ff_type=FFType('amber'), system_type='protein_small_ligand', ff=['ff14sb', 'tip3p'], sanitize=False, **kwargs):
+class SystemBuilder(object):
+
+    def __init__(self, ff_type=FFType('amber'),
+                 system_type='protein_small_ligand', ff=['ff14sb', 'tip3p'],
+                 sanitize=False, **kwargs):
 
         self.ff_type = ff_type
         self.system_type = system_type
@@ -48,14 +52,15 @@ class SystemBuilder():
 
         self.ff_add = kwargs.get('ff_add', [])
 
-
-
         self.ingredients = kwargs.get('ingredients', {})
 
-        description_path = os.path.join(self.system_path, 'system_descriptions', system_type + '.yml')
+        description_path = os.path.join(self.system_path,
+                                        'system_descriptions',
+                                        system_type + '.yml')
 
         if not os.path.isfile(description_path):
-            raise IOError(f"System description file does not exist: {description_path}")
+            raise IOError(f"System description file does not "
+                          f"exist: {description_path}")
 
         stream = open(description_path, 'r')
         self.description = yaml.load(stream)
@@ -65,7 +70,8 @@ class SystemBuilder():
         if self.ingredients:
             actual_ingredients = self.ingredients.keys()
             if actual_ingredients != expected_ingredients:
-                warnings.warn(f"Expected ingredients {expected_ingredients} but provided {actual_ingredients}")
+                warnings.warn(f"Expected ingredients {expected_ingredients} "
+                              f"but provided {actual_ingredients}")
         else:
             for ingredient_type in self.description.keys():
                 self.ingredients[ingredient_type] = []
