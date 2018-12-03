@@ -5,7 +5,7 @@ from bac.builder.utils.header import HeaderInfo
 from bac.builder.structure_utils import (scan_chain_type, update_chain_type_assignment,
                                          get_polymer_gaps)
 from bac.builder.utils.sequence import convert_resname_list
-
+import re
 
 class SourceStructure(object):
 
@@ -250,3 +250,18 @@ class SourceStructure(object):
                     sequence += gap_fill[last_residue]
 
         return sequence
+
+    def reconcile_structure_sequence(self, chain_id, sequence):
+
+        alignment = ()
+
+        seq_regex = self.chain_sequence(chain_id,
+                                        seq_format='fasta', gap_char='.')
+
+        matches = re.search(seq_regex, sequence)
+
+        if matches:
+            pre_seq, post_seq = re.split(seq_regex, sequence)
+            alignment = (matches[0], pre_seq, post_seq)
+
+        return alignment
