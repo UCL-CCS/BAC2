@@ -60,7 +60,7 @@ class SourceStructure(object):
 
         decomposition_mapping = {}
 
-        for chain_id, residue_types  in chain_types.items():
+        for chain_id, residue_types in chain_types.items():
 
             chain_idxs = residue_types[:, 0]
 
