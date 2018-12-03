@@ -18,7 +18,7 @@ def chain_sequence(struct, chain_id, seq_format='letter'):
         Selected chain identifier.
     seq_format: str
         Format for output - 'resname' (list of three letter reside codes),
-        'letter' (list fo single letter residue codes), 'fasta' (sting of
+        'letter' (list of single letter residue codes), 'fasta' (sting of
         single letter codes).
 
     Returns
