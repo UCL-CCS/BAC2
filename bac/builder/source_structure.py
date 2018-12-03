@@ -23,9 +23,10 @@ class SourceStructure(object):
         self.chain_gaps = {}
 
         chain_types = self.chain_types
+        structure = self.structure
 
         for chain in self.chains:
-            chain_types[chain] = scan_chain_type(self, chain)
+            chain_types[chain] = scan_chain_type(structure, chain)
 
             # Record what is nonstandard before we update types to consider
             # bonding for residues linked to polymers (protein, RNA, DNA).
@@ -34,11 +35,11 @@ class SourceStructure(object):
 
             # Update types to classify nonstandard residues bonding in
             # polymers as part of neighbouring chain type.
-            update_chain_type_assignment(self, chain_types[chain])
+            update_chain_type_assignment(structure, chain_types[chain])
 
             # Gaps defined by pair of polymer residues where residue number
             # different by > 1 and no polymer bond between them.
-            self.chain_gaps[chain] = get_polymer_gaps(self, chain,
+            self.chain_gaps[chain] = get_polymer_gaps(structure, chain,
                                                       chain_types[chain])
 
         self.decomposition_mapping = {}
@@ -103,7 +104,7 @@ class SourceStructure(object):
             Do the relevant residue numbers increase monotonically?
         """
 
-        residues = self.residues
+        residues = self.structure.residues
 
         residue_numbers = [residue.number for residue
                            in residues if residue.idx in idxs]
@@ -128,7 +129,7 @@ class SourceStructure(object):
             residue numbering.
         """
 
-        residues = self.residues
+        residues = self.structure.residues
 
         residue_numbers = [(residue.idx, residue.number) for residue
                            in residues if residue.idx in idxs]
