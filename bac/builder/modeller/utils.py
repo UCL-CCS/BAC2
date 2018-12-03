@@ -29,10 +29,13 @@ def write_ali_file(filename, target_seq, structure_seq,
     with open(filename, 'w') as output_file:
 
         output_file.write(f'>P1;{structure_id}\n')
-        output_file.write(f'structureX:{structure_id}:{start_resid}:{chain}:{end_resid}:{chain}::::\n')
-        for line in textwrap.wrap(structure_seq + '*', width=75, break_on_hyphens=False):
+        output_file.write(f'structure:{structure_id}:{start_resid}:'
+                          f'{chain}:{end_resid}:{chain}::::\n')
+        for line in textwrap.wrap(structure_seq + '*', width=75,
+                                  break_on_hyphens=False):
             output_file.write(line + '\n')
         output_file.write(f'>P1;{structure_id}_fill\n')
         output_file.write('sequence:::::::::\n')
-        for line in textwrap.wrap(target_seq + '*', width=75, break_on_hyphens=False):
+        for line in textwrap.wrap(target_seq + '*', width=75,
+                                  break_on_hyphens=False):
             output_file.write(line + '\n')
