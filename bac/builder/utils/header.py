@@ -32,6 +32,7 @@ class HeaderInfo(object):
         self.unit_transforms = {}
         self.symmetry = {}
         self.disulphides = {}
+        self.missing_residues = {}
 
         if pdb_filename is not None:
             self.read_pdb_header(pdb_filename)
@@ -107,6 +108,7 @@ class HeaderInfo(object):
 
         biomt_lines = []
         symmetry_lines = []
+        missing_residue_lines = []
 
         with open(pdb_filename, 'r') as pdb:
 
@@ -124,8 +126,55 @@ class HeaderInfo(object):
                 elif line.startswith('SEQRES'):
                     self._add_seq_res_line(line)
 
+                elif line.startswith('REMARK 465'):
+                    missing_residue_lines.append(line)
+
         self.unit_transforms = self._parse_biomt(biomt_lines)
         self.symmetry = self._parse_symmetry(symmetry_lines)
+        self.missing_residues = self._parse_missing_residues(missing_residue_lines)
+
+    @staticmethod
+    def _parse_missing_residues(lines):
+
+        content_lines = False
+        first_model = None
+
+        missing_residues = {}
+
+        for line in lines:
+
+            if content_lines:
+
+                model = line[11:15].strip()
+
+                if first_model is None:
+                    first_model = model
+                elif model != first_model:
+                    print("WARNING: only recording missing residues for"
+                          "the first model in the PDB")
+                    break
+
+                residue_name = line[15:18]
+                chain = line[19]
+                residue_number = int(line[20:27])
+
+                if chain not in missing_residues:
+                    missing_residues[chain] = []
+
+                missing_residues[chain].append((residue_number,
+                                                residue_name))
+
+                # Note: For now assuming this is not used, recording
+                #       to make adaptation easier is needed
+                if len(line) > 27:
+                    insertion_code = line[27]
+                else:
+                    insertion_code = ''
+
+            elif 'SSSEQI' in line:
+                content_lines = True
+
+        return missing_residues
 
     @staticmethod
     def _parse_biomt(lines):
