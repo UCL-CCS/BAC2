@@ -224,7 +224,7 @@ class SourceStructure(object):
             start = residues[gap[0]].number
             end = residues[gap[1]].number
 
-            gap_fill[start] = [gap_char for _ in range(end-start)]
+            gap_fill[start] = [gap_char for _ in range(end - start - 1)]
 
         if seq_format == 'fasta':
             sequence = ''
