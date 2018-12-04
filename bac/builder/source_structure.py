@@ -296,8 +296,29 @@ class SourceStructure(object):
         return sequence
 
     def reconcile_structure_sequence(self, chain_id, sequence):
+        """
+        Align sequence of residues in the selected chain of the structure with
+        the provided sequence.
 
-        alignment = ()
+        Parameters
+        ----------
+        chain_id : str
+            Chain to select from the structure.
+        sequence : str
+            FASTA-like sequence.
+
+        Returns
+        -------
+        str
+            Section of sequence that matches the structure.
+        str
+            Any residues in the input sequence before the matching section.
+        str
+            Any residues in the input sequence after the matching section.
+
+        """
+
+        alignment = ([], [], [])
 
         seq_regex = self.chain_sequence(chain_id,
                                         seq_format='fasta', gap_char='.')
