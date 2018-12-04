@@ -44,7 +44,9 @@ class SourceStructure(object):
             self.chain_gaps[chain] = get_polymer_gaps(structure, chain,
                                                       chain_types[chain])
 
-        self.decomposition_mapping = {}
+        decomposition, decomp_gaps = self.generate_decomposition()
+        self.decomposition = decomposition
+        self.decomposition_gaps = decomp_gaps
         self.model_selection = {}
 
     def generate_decomposition(self):
@@ -60,10 +62,17 @@ class SourceStructure(object):
         chain_gaps = self.chain_gaps
 
         decomposition = {}
+        decomp_gaps = {}
 
         for chain_id, residue_types in chain_types.items():
 
+            if chain_id in chain_gaps:
+                gaps = chain_gaps
+            else:
+                gaps = []
+
             decomposition[chain_id] = []
+            decomp_gaps[chain_id] = []
 
             type_changes = np.where(residue_types[:-1, 1] !=
                                     residue_types[1:, 1])[0] + 1
@@ -83,7 +92,13 @@ class SourceStructure(object):
 
                     decomposition[chain_id].append(types_data)
 
-        return decomposition
+                    block_gaps = [gap for gap in gaps if
+                                  np.any(np.isin(types_data[:, 0], gap[0])) and
+                                  np.any(np.isin(types_data[:, 0], gap[1]))]
+
+                    decomp_gaps[chain_id].append(block_gaps)
+
+        return decomposition, decomp_gaps
 
     def write_decomposition(self, filename):
         """
