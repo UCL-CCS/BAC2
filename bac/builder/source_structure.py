@@ -154,7 +154,7 @@ class SourceStructure(object):
 
         return [arr[:, 0] for arr in
                 np.split(residue_numbers,
-                         np.where(np.diff(residue_numbers[:, 1]) < 0)[0] + 1)
+                         np.where(np.diff(residue_numbers[:, 1]) < 1)[0] + 1)
                 if arr.size > 1]
 
     def residue_contiguous_no_blocks(self, idxs):
@@ -181,9 +181,12 @@ class SourceStructure(object):
 
         residue_numbers = np.array(residue_numbers)
 
+        diff = np.diff(residue_numbers[:, 1])
+
         return [arr[:, 0] for arr in
                 np.split(residue_numbers,
-                         np.where(np.diff(residue_numbers[:, 1]) != 0)[0] + 1)
+                         np.where(np.logical_or((diff < 0),
+                                                (diff > 1)))[0] + 1)
                 if arr.size > 1]
 
     def chain_sequence(self, chain_id, seq_format='letter', gap_char='-'):
