@@ -7,6 +7,7 @@ from bac.builder.structure_utils import (scan_chain_type, update_chain_type_assi
 from bac.builder.utils.sequence import convert_resname_list
 import re
 
+
 class SourceStructure(object):
 
     def __init__(self, structure_filename):
