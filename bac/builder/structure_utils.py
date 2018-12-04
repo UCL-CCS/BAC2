@@ -1,5 +1,4 @@
 import numpy as np
-import parmed as pmd
 from bac.builder.utils.sequence import convert_resname_list
 from bac.builder.utils.sequence import AMINO_RESIDUES, DNA_RESIDUES
 from bac.builder.utils.sequence import RNA_RESIDUES, WATER_RESIDUES
@@ -426,8 +425,3 @@ def print_altloc_info(struct):
                    if loc]
 
         print(f"{residue.idx}\t{residue.name}\t{residue.number}\t{altlocs}")
-
-
-def reassign_chains():
-
-    pass
