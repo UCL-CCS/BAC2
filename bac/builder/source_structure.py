@@ -59,17 +59,31 @@ class SourceStructure(object):
         chain_types = self.chain_types
         chain_gaps = self.chain_gaps
 
-        decomposition_mapping = {}
+        decomposition = {}
 
         for chain_id, residue_types in chain_types.items():
 
-            chain_idxs = residue_types[:, 0]
+            decomposition[chain_id] = []
 
-            if self.check_residue_no_increases(chain_idxs):
+            type_changes = np.where(residue_types[:-1, 1] !=
+                                    residue_types[1:, 1])[0] + 1
 
-                residue_number_runs = self.residue_no_blocks(chain_idxs)
+            type_blocks = np.split(residue_types, type_changes)
 
-            pass
+            for type_block in type_blocks:
+
+                # Use indices to find blocks of residues with
+                # contiguous numbers (indicative of a real biological chain)
+                number_residue_blocks = self.residue_no_blocks(type_block[:, 0])
+
+                for number_residue_block in number_residue_blocks:
+
+                    types_data = residue_types[np.where(
+                        np.isin(residue_types[:, 0], number_residue_block))]
+
+                    decomposition[chain_id].append(types_data)
+
+        return decomposition
 
     def write_decomposition(self, filename):
         """
@@ -146,7 +160,7 @@ class SourceStructure(object):
     def residue_contiguous_no_blocks(self, idxs):
         """
         Get list of blocks of residue indexes where the residue numbers
-        are contiguous.
+        are contiguous (currently assume same residue numbers are insertions).
 
         Parameters
         ----------
