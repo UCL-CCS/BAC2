@@ -51,10 +51,18 @@ class SourceStructure(object):
 
     def generate_decomposition(self):
         """
-        Decompose initial chains into modelling/simulation friendly units.
+        Decompose initial chains into modelling/simulation friendly units. This
+        means breaking chains up based on residue type (from `self.chain_type`)
+        and having increasing residue numbers.
 
         Returns
         -------
+        dict
+            Keys are chain ids and the values are likes of arrays which contain
+            residue index and type pairs.
+        dict
+            Keys are chain ids and the values tuples containing indexes of
+            residues flanking gaps in protein or nucleic sub-chains.
 
         """
 
@@ -77,6 +85,7 @@ class SourceStructure(object):
             type_changes = np.where(residue_types[:-1, 1] !=
                                     residue_types[1:, 1])[0] + 1
 
+            # Split chain by residue type
             type_blocks = np.split(residue_types, type_changes)
 
             for type_block in type_blocks:
@@ -87,6 +96,8 @@ class SourceStructure(object):
 
                 for number_residue_block in number_residue_blocks:
 
+                    # Get index and type information for all residues in this
+                    # block
                     types_data = residue_types[np.where(
                         np.isin(residue_types[:, 0], number_residue_block))]
 
