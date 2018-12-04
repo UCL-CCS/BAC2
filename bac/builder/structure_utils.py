@@ -168,7 +168,8 @@ def update_chain_type_assignment(struct, residue_type_assignment):
     """
 
     # Find residues where type changes in  `residue_type_assignment`
-    changes = np.where(residue_type_assignment[:-1, 1] != residue_type_assignment[1:, 1])[0]+1
+    changes = np.where(residue_type_assignment[:-1, 1] !=
+                       residue_type_assignment[1:, 1])[0]+1
     # We may check chain in either direction but should stop if find a second
     # type change or the end of the chain.
     search_ends = [0] + changes + residue_type_assignment[-1, 0]
