@@ -47,7 +47,6 @@ class SourceStructure(object):
         decomposition, decomp_gaps = self.generate_decomposition()
         self.decomposition = decomposition
         self.decomposition_gaps = decomp_gaps
-        self.model_selection = {}
 
     def generate_decomposition(self):
         """
@@ -122,11 +121,7 @@ class SourceStructure(object):
 
         pass
 
-    def create_scaffold(self, decomposition, selection, naming_scheme):
-
-        pass
-
-    def reconcile_header_sequence(self):
+    def create_scaffold(self, selection, naming_scheme):
 
         pass
 
