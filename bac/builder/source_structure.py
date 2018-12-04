@@ -175,7 +175,7 @@ class SourceStructure(object):
 
         return [arr[:, 0] for arr in
                 np.split(residue_numbers,
-                         np.where(np.diff(residue_numbers[:, 1]) < 1)[0] + 1)
+                         np.where(np.diff(residue_numbers[:, 1]) < 0)[0] + 1)
                 if arr.size > 1]
 
     def residue_contiguous_no_blocks(self, idxs):
