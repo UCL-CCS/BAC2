@@ -10,14 +10,24 @@ import re
 
 class SourceStructure(object):
 
-    def __init__(self, structure_filename):
+    def __init__(self, structure, header_filename=None):
 
-        if os.path.splitext(structure_filename)[1] != '.pdb':
-            raise NotImplementedError("We can only process PDB files for now.")
+        if isinstance(structure, pmd.Structure):
+            self.structure = structure
+            self.source_file = ''
 
-        self.source_file = os.path.realpath(os.path.expanduser(structure_filename))
-        self.structure = pmd.load_file(structure_filename)
-        self.header = HeaderInfo(structure_filename)
+        else:
+
+            if os.path.splitext(structure)[1] != '.pdb':
+                raise NotImplementedError("We can only process PDB files for now.")
+
+            if header_filename is None:
+                header_filename = structure
+
+            self.source_file = os.path.realpath(os.path.expanduser(structure))
+            self.structure = pmd.load_file(structure)
+
+        self.header = HeaderInfo(header_filename)
         self.chains = set([x.chain for x in self.structure.residues])
 
         self.chain_types = {}
