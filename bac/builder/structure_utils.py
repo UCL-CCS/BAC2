@@ -257,8 +257,11 @@ def residue_list_sequence(residues, seq_format='letter', gap_char='-'):
         number_diff = residue.number - last_number
         if residue.chain == last_chain and number_diff > 1:
 
-            for _ in range(number_diff):
-                sequence.append(gap_code)
+            for _ in range(number_diff - 1):
+                if seq_format == 'fasta':
+                    sequence += gap_code
+                else:
+                    sequence.append(gap_code)
 
         if seq_format in ['fasta', 'letter']:
             residue_letter = convert_resname3to1(residue.name)

@@ -2,9 +2,11 @@ import os
 from collections import defaultdict
 import parmed as pmd
 from bac.builder.utils.header import HeaderInfo
+from bac.builder.utils.sequence import convert_resname_list
 from bac.builder.structure_utils import (get_residue_type,
                                          check_residue_polymer_bonded,
-                                         align_sequence_structure)
+                                         align_sequence_structure,
+                                         residue_list_sequence)
 
 
 class Subdivision(object):
@@ -78,7 +80,7 @@ class SourceStructure(object):
     def default_decomposition(self):
 
         chain_map = self.chain_map
-        decomposition = {}
+        decomposition = defaultdict(None)
 
         for chain, chain_residues in chain_map.items():
 
@@ -135,4 +137,53 @@ class SourceStructure(object):
 
         pass
 
+    def chain_sequence(self, chain_id, seq_format='fasta', src='structure'):
 
+        if src not in ['structure', 'header']:
+            raise RuntimeError("src must be 'structure', 'header'")
+
+        decomposition = self.decomposition
+        header_info = self.header
+
+        if src == 'header':
+
+            three_letter_seq = header_info.sequence
+
+            if seq_format == 'fasta':
+
+                sequence = convert_resname_list(three_letter_seq, seq_format=seq_format)
+
+            elif seq_format == 'letter':
+
+                sequence = convert_resname_list(three_letter_seq)
+
+            else:
+
+                sequence = three_letter_seq
+
+            return sequence
+
+        else:
+
+            if seq_format == 'fasta':
+                sequence = ''
+            else:
+                sequence = []
+
+            if decomposition[chain_id] is None:
+                return sequence
+
+            # TODO: Warning for multi-component systems?
+            if len(decomposition[chain_id]) > 1:
+                end_char = '*'
+            else:
+                end_char = ''
+
+            for subdivision in decomposition[chain_id]:
+
+                sequence += residue_list_sequence(subdivision.residues,
+                                                  seq_format=seq_format)
+                if seq_format == 'fasta':
+                    sequence += end_char
+
+            return sequence
