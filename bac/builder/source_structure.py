@@ -11,7 +11,7 @@ from bac.builder.structure_utils import (get_residue_type,
 
 class Subdivision(object):
 
-    def __init__(self, residue_type=None, chain_id=''):
+    def __init__(self, residue_type=None, chain_id='', structure=None):
 
         self.residues = pmd.TrackedList()
         self.residue_type = residue_type
@@ -20,6 +20,7 @@ class Subdivision(object):
         self.aligned_sequence = ''
         self.pre_sequence = ''
         self.post_sequence = ''
+        self.src_structure = structure
 
     def align_sequence(self, sequence):
         aligned, pre, post = align_sequence_structure(self.residues, sequence)
@@ -31,6 +32,14 @@ class Subdivision(object):
             self.pre_sequence = pre
             self.post_sequence = post
             return True
+
+    def get_loop_residues(self, pre_res=0, post_res=0):
+
+        if id not in ['number', 'modeller']:
+            raise RuntimeError("Residue id must be one of 'number' or "
+                               "'modeller'")
+
+        pass
 
 
 class SourceStructure(object):
@@ -79,6 +88,7 @@ class SourceStructure(object):
 
     def default_decomposition(self):
 
+        structure = self.structure
         chain_map = self.chain_map
         decomposition = defaultdict(None)
 
@@ -94,14 +104,16 @@ class SourceStructure(object):
                 if subdivision is None:
 
                     subdivision = Subdivision(residue_type=residue_type,
-                                                      chain_id=chain)
+                                              chain_id=chain,
+                                              structure=structure)
 
                 elif (residue_type != subdivision.residue_type or
                       residue.number < subdivision.residues[-1].number):
 
                     decomposition[chain].append(subdivision)
                     subdivision = Subdivision(residue_type=residue_type,
-                                                      chain_id=chain)
+                                              chain_id=chain,
+                                              structure=structure)
 
                 subdivision.residues.append(residue)
 
