@@ -1,11 +1,34 @@
 import os
-import numpy as np
+from collections import defaultdict
 import parmed as pmd
 from bac.builder.utils.header import HeaderInfo
-from bac.builder.structure_utils import (scan_chain_type, update_chain_type_assignment,
-                                         get_polymer_gaps)
-from bac.builder.utils.sequence import convert_resname_list
-import re
+from bac.builder.structure_utils import (get_residue_type,
+                                         check_residue_polymer_bonded,
+                                         align_sequence_structure)
+
+
+class Subdivision(object):
+
+    def __init__(self, residue_type=None, chain_id=''):
+
+        self.residues = pmd.TrackedList()
+        self.residue_type = residue_type
+        self.chain_id = chain_id
+        self.gaps = []
+        self.aligned_sequence = ''
+        self.pre_sequence = ''
+        self.post_sequence = ''
+
+    def align_sequence(self, sequence):
+        aligned, pre, post = align_sequence_structure(self.residues, sequence)
+
+        if not aligned:
+            return False
+        else:
+            self.aligned_sequence = aligned
+            self.pre_sequence = pre
+            self.post_sequence = post
+            return True
 
 
 class SourceStructure(object):
@@ -19,7 +42,8 @@ class SourceStructure(object):
         else:
 
             if os.path.splitext(structure)[1] != '.pdb':
-                raise NotImplementedError("We can only process PDB files for now.")
+                raise NotImplementedError("We can only process PDB files "
+                                          "for now.")
 
             if header_filename is None:
                 header_filename = structure
@@ -28,97 +52,73 @@ class SourceStructure(object):
             self.structure = pmd.load_file(structure)
 
         self.header = HeaderInfo(header_filename)
-        self.chains = set([x.chain for x in self.structure.residues])
 
-        self.chain_types = {}
-        self.chain_nonstandard = {}
-        self.chain_gaps = {}
+        struct = self.structure
 
-        chain_types = self.chain_types
-        structure = self.structure
+        self.chain_map = defaultdict(pmd.TrackedList)
+        self.nonstandard = []
 
-        for chain in self.chains:
-            chain_types[chain] = scan_chain_type(structure, chain)
+        for r in struct.residues:
 
-            # Record what is nonstandard before we update types to consider
-            # bonding for residues linked to polymers (protein, RNA, DNA).
-            condition = (chain_types[chain][:, 1] == 'unknown')
-            self.chain_nonstandard[chain] = chain_types[chain][condition][:, 0]
+            residue_type = get_residue_type(r)
 
-            # Update types to classify nonstandard residues bonding in
-            # polymers as part of neighbouring chain type.
-            update_chain_type_assignment(structure, chain_types[chain])
+            if residue_type == 'unknown':
+                self.nonstandard.append(r)
+                polymer_bond = check_residue_polymer_bonded(r)
+                if polymer_bond is not None:
+                    residue_type = polymer_bond
 
-            # Gaps defined by pair of polymer residues where residue number
-            # different by > 1 and no polymer bond between them.
-            self.chain_gaps[chain] = get_polymer_gaps(structure, chain,
-                                                      chain_types[chain])
+            # TODO: Is there a less hacky way to do this?
+            r.residue_type = residue_type
+            self.chain_map[r.chain].append(r)
 
-        decomposition, decomp_gaps = self.generate_decomposition()
-        self.decomposition = decomposition
-        self.decomposition_gaps = decomp_gaps
+        self.chains = self.chain_map.keys()
+        self.decomposition = self.default_decomposition()
 
-    def generate_decomposition(self):
-        """
-        Decompose initial chains into modelling/simulation friendly units. This
-        means breaking chains up based on residue type (from `self.chain_type`)
-        and having increasing residue numbers.
+    def default_decomposition(self):
 
-        Returns
-        -------
-        dict
-            Keys are chain ids and the values are likes of arrays which contain
-            residue index and type pairs.
-        dict
-            Keys are chain ids and the values tuples containing indexes of
-            residues flanking gaps in protein or nucleic sub-chains.
-
-        """
-
-        chain_types = self.chain_types
-        chain_gaps = self.chain_gaps
-
+        chain_map = self.chain_map
         decomposition = {}
-        decomp_gaps = {}
 
-        for chain_id, residue_types in chain_types.items():
+        for chain, chain_residues in chain_map.items():
 
-            if chain_id in chain_gaps:
-                gaps = chain_gaps
-            else:
-                gaps = []
+            decomposition[chain] = []
+            subdivision = None
 
-            decomposition[chain_id] = []
-            decomp_gaps[chain_id] = []
+            for residue in chain_residues:
 
-            type_changes = np.where(residue_types[:-1, 1] !=
-                                    residue_types[1:, 1])[0] + 1
+                residue_type = residue.residue_type
 
-            # Split chain by residue type
-            type_blocks = np.split(residue_types, type_changes)
+                if subdivision is None:
 
-            for type_block in type_blocks:
+                    subdivision = Subdivision(residue_type=residue_type,
+                                                      chain_id=chain)
 
-                # Use indices to find blocks of residues with
-                # contiguous numbers (indicative of a real biological chain)
-                number_residue_blocks = self.residue_no_blocks(type_block[:, 0])
+                elif (residue_type != subdivision.residue_type or
+                      residue.number < subdivision.residues[-1].number):
 
-                for number_residue_block in number_residue_blocks:
+                    decomposition[chain].append(subdivision)
+                    subdivision = Subdivision(residue_type=residue_type,
+                                                      chain_id=chain)
 
-                    # Get index and type information for all residues in this
-                    # block
-                    types_data = residue_types[np.where(
-                        np.isin(residue_types[:, 0], number_residue_block))]
+                subdivision.residues.append(residue)
 
-                    decomposition[chain_id].append(types_data)
+                if len(subdivision.residues) > 1:
+                    last_residue = subdivision.residues[-2]
+                    if residue.number - last_residue.number > 1:
 
-                    block_gaps = [gap for gap in gaps if
-                                  np.any(np.isin(types_data[:, 0], gap[0])) and
-                                  np.any(np.isin(types_data[:, 0], gap[1]))]
+                        bonded = check_residue_polymer_bonded(residue,
+                                                              bond_type=residue_type,
+                                                              directions=[-1],
+                                                              specific_partner=last_residue)
 
-                    decomp_gaps[chain_id].append(block_gaps)
+                        if not bonded:
+                            subdivision.gaps.append((last_residue, residue))
 
-        return decomposition, decomp_gaps
+            if residue == chain_residues[-1]:
+                decomposition[chain].append(subdivision)
+
+        return decomposition
 
     def write_decomposition(self, filename):
         """
@@ -135,203 +135,4 @@ class SourceStructure(object):
 
         pass
 
-    def check_residue_no_increases(self, idxs):
-        """
-        Check that residue with given indicies have monotonically increasing
-        residue numbering.
 
-        Parameters
-        ----------
-        idxs : list or np.array
-            Indices of the residues to check
-
-        Returns
-        -------
-        bool
-            Do the relevant residue numbers increase monotonically?
-        """
-
-        residues = self.structure.residues
-
-        residue_numbers = [residue.number for residue
-                           in residues if residue.idx in idxs]
-
-        dx = np.diff(residue_numbers)
-        return np.all(dx > 0)
-
-    def residue_no_blocks(self, idxs):
-        """
-        Get list of blocks of residue indexes where the residue numbers
-        increase.
-
-        Parameters
-        ----------
-        idxs : list or np.array
-            Indices of the residues to group
-
-        Returns
-        -------
-        list
-            List of `np.arrays` containing indices of residues which increase in
-            residue numbering.
-        """
-
-        residues = self.structure.residues
-
-        residue_numbers = [(residue.idx, residue.number) for residue
-                           in residues if residue.idx in idxs]
-
-        residue_numbers = np.array(residue_numbers)
-
-        return [arr[:, 0] for arr in
-                np.split(residue_numbers,
-                         np.where(np.diff(residue_numbers[:, 1]) < 0)[0] + 1)
-                if arr.size > 1]
-
-    def residue_contiguous_no_blocks(self, idxs):
-        """
-        Get list of blocks of residue indexes where the residue numbers
-        are contiguous (currently assume same residue numbers are insertions).
-
-        Parameters
-        ----------
-        idxs : list or np.array
-            Indices of the residues to group
-
-        Returns
-        -------
-        list
-            List of `np.arrays` containing indices of residues which increase in
-            residue numbering.
-        """
-
-        residues = self.structure.residues
-
-        residue_numbers = [(residue.idx, residue.number) for residue
-                           in residues if residue.idx in idxs]
-
-        residue_numbers = np.array(residue_numbers)
-
-        diff = np.diff(residue_numbers[:, 1])
-
-        return [arr[:, 0] for arr in
-                np.split(residue_numbers,
-                         np.where(np.logical_or((diff < 0),
-                                                (diff > 1)))[0] + 1)
-                if arr.size > 1]
-
-    def chain_sequence(self, chain_id, seq_format='letter', gap_char='-'):
-        """
-        Get sequence information for selected chain in input structure.
-
-        Parameters
-        ----------
-        chain_id : str
-            Selected chain identifier.
-        seq_format : str
-            Format for output - 'resname' (list of three letter reside codes),
-            'letter' (list of single letter residue codes), 'fasta' (sting of
-            single letter codes).
-        gap_char : str
-            Character to use in single letter format for gaps.
-
-        Returns
-        -------
-        list or str
-            Output of all residue codes in the format selected in seq_format.
-        """
-
-        if len(gap_char) > 1:
-            raise RuntimeError("Must use a single character to represent "
-                               "sequence gaps")
-
-        struct = self.structure
-
-        residues = self.structure.residues
-        residue_types = self.chain_types[chain_id]
-
-        if chain_id in self.chain_gaps:
-            gaps = self.chain_gaps[chain_id]
-        else:
-            gaps = []
-
-        if not np.any(np.isin(residue_types[:, 1], ['protein', 'dna', 'rna'])):
-            if seq_format == 'fasta':
-                return ''
-            else:
-                return []
-
-        mask = np.isin(residue_types[:, 1], ['protein', 'dna', 'rna'])
-        seq_idxs = residue_types[:, 0][mask]
-
-        residue_blocks = self.residue_contiguous_no_blocks(seq_idxs)
-
-        gap_fill = {}
-
-        for gap in gaps:
-
-            start = residues[gap[0]].number
-            end = residues[gap[1]].number
-
-            gap_fill[start] = [gap_char for _ in range(end - start - 1)]
-
-        if seq_format == 'fasta':
-            sequence = ''
-        else:
-            sequence = []
-
-        for residue_block in residue_blocks:
-
-            block_sequence = [residues[x].name for x in residue_block]
-
-            if seq_format != 'resname':
-                block_sequence = convert_resname_list(block_sequence,
-                                                      seq_format=seq_format)
-
-            last_residue = residues[residue_block[-1]].number
-
-            sequence += block_sequence
-
-            if last_residue in gap_fill:
-                if seq_format == 'fasta':
-                    sequence += ''.join(gap_fill[last_residue])
-                else:
-                    sequence += gap_fill[last_residue]
-
-        return sequence
-
-    def reconcile_structure_sequence(self, chain_id, sequence):
-        """
-        Align sequence of residues in the selected chain of the structure with
-        the provided sequence.
-
-        Parameters
-        ----------
-        chain_id : str
-            Chain to select from the structure.
-        sequence : str
-            FASTA-like sequence.
-
-        Returns
-        -------
-        str
-            Section of sequence that matches the structure.
-        str
-            Any residues in the input sequence before the matching section.
-        str
-            Any residues in the input sequence after the matching section.
-
-        """
-
-        alignment = ([], [], [])
-
-        seq_regex = self.chain_sequence(chain_id,
-                                        seq_format='fasta', gap_char='.')
-
-        matches = re.search(seq_regex, sequence)
-
-        if matches:
-            pre_seq, post_seq = re.split(seq_regex, sequence)
-            alignment = (matches[0], pre_seq, post_seq)
-
-        return alignment
