@@ -23,7 +23,18 @@ class Subdivision(object):
         self.post_sequence = ''
         self.src_structure = structure
 
+    def is_polymer(self):
+
+        if self.residue_type in ['protein', 'dna', 'rna']:
+            return True
+
+        return False
+
     def align_sequence(self, sequence):
+
+        if not self.is_polymer():
+            return False
+
         aligned, pre, post = align_sequence_structure(self.residues, sequence)
 
         if not aligned:
