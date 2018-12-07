@@ -194,7 +194,7 @@ class SourceStructure(object):
 
                         bonded = check_residue_polymer_bonded(residue,
                                                               bond_type=residue_type,
-                                                              directions=[-1],
+                                                              directions=[1],
                                                               specific_partner=last_residue)
 
                         if not bonded:
