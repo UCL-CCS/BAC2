@@ -1,6 +1,7 @@
 import os
 from collections import defaultdict
 import pprint
+import re
 import parmed as pmd
 from bac.builder.utils.header import HeaderInfo
 from bac.builder.utils.sequence import convert_resname_list
@@ -30,6 +31,11 @@ class Subdivision(object):
 
         return False
 
+    def sequence(self, gap_char='-', seq_format='fasta'):
+
+        return residue_list_sequence(self.residues, seq_format=seq_format,
+                                     gap_char=gap_char)
+
     def align_sequence(self, sequence):
 
         if not self.is_polymer():
@@ -45,13 +51,18 @@ class Subdivision(object):
             self.post_sequence = post
             return True
 
-    def get_loop_residues(self, pre_res=0, post_res=0):
+    def get_added_residue_positions(self, pre_res=0, post_res=0,
+                                    numbering='modeller'):
 
-        if id not in ['number', 'modeller']:
-            raise RuntimeError("Residue id must be one of 'number' or "
-                               "'modeller'")
+        if numbering == 'modeller':
+            offset = 0
+        else:
+            offset = self.residues[0].number - 1
 
-        pass
+        sequence = '-'*pre_res + self.sequence() + '-'*post_res
+
+        return [(m.start(0) + 1 + offset, m.end(0) + offset) for m
+                in re.finditer('-+', sequence)]
 
     def target_sequence(self, pre_res=0, post_res=0):
 
