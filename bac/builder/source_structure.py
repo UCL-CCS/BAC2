@@ -42,6 +42,18 @@ class Subdivision(object):
 
         pass
 
+    def target_sequence(self, pre_res=0, post_res=0):
+
+        aligned_sequence = self.aligned_sequence
+
+        if aligned_sequence:
+
+            return (self.pre_sequence[:pre_res] + aligned_sequence +
+                    self.post_sequence[:post_res])
+
+        else:
+            return ''
+
     def modeller_selection(self):
         pass
 
