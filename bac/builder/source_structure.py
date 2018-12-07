@@ -1,5 +1,6 @@
 import os
 from collections import defaultdict
+import pprint
 import parmed as pmd
 from bac.builder.utils.header import HeaderInfo
 from bac.builder.utils.sequence import convert_resname_list
@@ -41,6 +42,35 @@ class Subdivision(object):
 
         pass
 
+    def modeller_selection(self):
+        pass
+
+    def __repr__(self):
+
+        residues = self.residues
+        residue_type = self.residue_type
+        if self.aligned_sequence:
+            aligned_sequence = self.aligned_sequence
+        else:
+            aligned_sequence = None
+
+        if residues:
+
+            first_idx = residues[0].idx
+            last_idx = residues[-1].idx
+
+        else:
+
+            first_idx = None
+            last_idx = None
+
+        return (f"{self.__class__}( residue_idxs={first_idx}-{last_idx}," 
+                f" residue_type={residue_type}, aligned_sequence={aligned_sequence})")
+
+    def __str__(self):
+
+        return pprint.pformat(self.__dict__, indent=4)
+
 
 class SourceStructure(object):
 
@@ -62,6 +92,7 @@ class SourceStructure(object):
             self.source_file = os.path.realpath(os.path.expanduser(structure))
             self.structure = pmd.load_file(structure)
 
+        self.header_filename = header_filename
         self.header = HeaderInfo(header_filename)
 
         struct = self.structure
@@ -85,6 +116,12 @@ class SourceStructure(object):
 
         self.chains = self.chain_map.keys()
         self.decomposition = self.default_decomposition()
+
+    def __repr__(self):
+
+        return (f"{self.__class__}(structure={self.structure}, "
+                f"source_file={self.source_file}, "
+                f"header_file={self.header_filename})")
 
     def default_decomposition(self):
 
