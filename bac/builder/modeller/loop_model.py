@@ -1,4 +1,7 @@
-basic_modeller_script = """
+import os
+from string import Template
+
+BASIC_MODEL_SCRIPT = Template("""
 from modeller import *
 from modeller.automodel import *    # Load the automodel class
 
@@ -12,17 +15,16 @@ class MyModel(automodel):
         return selection(self.residue_range('133', '135'),
                          self.residue_range('217', '230'))
 
-a = MyModel(env, alnfile = 'alignment.ali',
-            knowns = '1qg8', sequence = '1qg8_fill')
+a = MyModel(env, alnfile = $alignment_file,
+            knowns = $known_structure, sequence = $sequence_id')
 a.starting_model= 1
 a.ending_model  = 1
 
 a.make()
-"""
 
-# loopmodel refines the loops
-# Needed for long loops and terminal extensions
-less_basic_modeller_script = """
+""")
+
+STANDARD_MODEL_SCRIPT = Template("""
 from modeller import *
 from modeller.automodel import *    # Load the automodel class
 
@@ -36,10 +38,40 @@ class MyModel(loopmodel):
         return selection(self.residue_range('133', '135'),
                          self.residue_range('217', '230'))
 
-a = MyModel(env, alnfile = 'alignment.ali',
-            knowns = '1qg8', sequence = '1qg8_fill')
+a = MyModel(env, alnfile = $alignment_file,
+            knowns = $known_structure, sequence = $sequence_id')
 a.starting_model= 1
 a.ending_model  = 1
 
 a.make()
-"""
+
+""")
+
+
+def create_loop_model_script(structure_filename, sequence_id,
+                             alignment_file='alignment.ali',
+                             workdir='.', basic=False):
+
+    if structure_filename[-4:] == '.pdb':
+        structure_name = structure_filename[:-4]
+    else:
+        structure_name = structure_filename
+
+    if basic:
+        template_text = BASIC_MODEL_SCRIPT
+    else:
+        # Uses modeller `loopmodel` which refines the loops
+        # Needed for long loops and terminal extensions
+        template_text = STANDARD_MODEL_SCRIPT
+
+    script_text = template_text.substitute(known_structure=structure_name,
+                                           sequence_id=sequence_id,
+                                           alignment_file=alignment_file)
+
+    script_name = f'{structure_name}-loop-model.py'
+    script_path = os.path.join(workdir, script_name)
+
+    with open(script_path, 'w') as fout:
+        fout.write(script_text)
+
+    return script_path
