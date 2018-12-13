@@ -53,9 +53,9 @@ a.make()
 
 
 def create_loop_model_script(structure_filename, sequence_id,
+                             loop_residue_ranges,
                              alignment_file='alignment.ali',
-                             workdir='.', basic=False,
-                             loop_residue_ranges):
+                             workdir='.', basic=False):
 
     if structure_filename[-4:] == '.pdb':
         structure_name = structure_filename[:-4]
