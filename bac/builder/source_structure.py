@@ -76,7 +76,18 @@ class Subdivision(object):
         else:
             return ''
 
+    def structure(self):
+
+        struct = self.src_structure
+
+        df = struct.to_dataframe()
+        residue_idxs = [res.idx for res in self.residues]
+
+        return struct[df.resid.isin(residue_idxs)]
+
     def modeller_selection(self):
+
+        
         pass
 
     def __repr__(self):
