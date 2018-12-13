@@ -1,7 +1,9 @@
+import itertools
+import re
 from collections import OrderedDict
 import numpy as np
 from .assembly import Symmetry, BioTransform, BioUnit
-from .sequence import convert_resname_list
+from .sequence import convert_resname_list,convert_resname3to1
 
 
 class HeaderInfo(object):
@@ -36,6 +38,12 @@ class HeaderInfo(object):
 
         if pdb_filename is not None:
             self.read_pdb_header(pdb_filename)
+
+    def has_header(self):
+        pass
+
+    def validate_header(self):
+        pass
 
     def chain_sequence(self, chain_id, seq_format='letter'):
         """
@@ -175,6 +183,70 @@ class HeaderInfo(object):
                 content_lines = True
 
         return missing_residues
+
+    def missing_sequence(self, chain_id):
+
+        missing = self.missing_residues
+        seq = []
+
+        if chain_id not in missing:
+            return []
+
+        chain_missing = missing[chain_id]
+
+        for ndx, group in itertools.groupby(
+                enumerate(chain_missing), lambda i_x: i_x[0] - i_x[1][0]):
+            gap_residues = [x[1] for x in group]
+            end_points = [gap_residues[0][0], gap_residues[-1][0]]
+
+            gap_seq = ''.join([convert_resname3to1(x[1]) for x in gap_residues])
+
+            seq.append(end_points + [gap_seq])
+
+        return seq
+
+    def reconcile_sequence_missing(self, chain_id):
+
+        sequences = self.sequences
+        missing_residues = self.missing_residues
+
+        if chain_id in sequences:
+
+            if chain_id in missing_residues:
+                missing_sequences = self.missing_sequence(chain_id)
+            else:
+                return True
+
+            sequence = self.sequences[chain_id]
+
+        else:
+            return True
+
+        first_gap_seq = missing_sequences[0][2]
+
+        if sequence.startswith(first_gap_seq):
+            offsets = [missing_sequences[0][0]]
+        else:
+            offsets = [m.start() for m in
+                       re.finditer('(?=' + first_gap_seq + ')', sequence)]
+
+        match = True
+
+        for offset in offsets:
+
+            for gap_start, gap_end, gap_seq in missing_sequences:
+
+                start = gap_start - offset
+                end = gap_end - offset
+
+                target = sequence[start:end + 1]
+                if gap_seq != target:
+                    match = False
+
+                if match:
+                    return match
+
+        return match
 
     @staticmethod
     def _parse_biomt(lines):
