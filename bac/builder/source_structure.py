@@ -85,10 +85,19 @@ class Subdivision(object):
 
         return struct[df.resid.isin(residue_idxs)]
 
-    def modeller_selection(self):
+    def modeller_selection(self, filename):
 
-        
-        pass
+        if filename[-4:] == '.pdb':
+            pdbname = filename[:-4]
+        else:
+            pdbname = filename
+
+        chain_id = self.chain_id
+        start = self.residues[0].resid
+        end = self.residues[-1].resid
+
+        return (f"structure:{filename}:{start}:{chain_id}:{end}:{chain_id}"
+                f"::::")
 
     def __repr__(self):
 
