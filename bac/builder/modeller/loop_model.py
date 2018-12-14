@@ -71,7 +71,8 @@ def create_loop_model_script(structure_filename, sequence_id,
 
     lines = []
     for res_range in loop_residue_ranges:
-        lines.append(" " * 25 + f"self.residue_range('{res_range[0]}', '{res_range[1]}')")
+        lines.append(" " * 25 + f"self.residue_range('{res_range[0]}', "
+                                f"'{res_range[1]}')")
 
     sel = ',\n'.join(lines)
 
