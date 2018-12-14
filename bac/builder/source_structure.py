@@ -72,6 +72,34 @@ class Subdivision:
 
         return False
 
+    def is_complete(self, strict=False):
+        """
+        Check if this `Subdivision` represents a complete polymer chain - i.e.
+        has no gaps between bonded residues, or if they are present and not
+        `strict` then do we have a sequence aligned to it that can be used to
+        fill in gaps.
+
+        Parameters
+        ----------
+        strict : bool
+            Do we accept an aligned sequence as having no gaps?
+
+        Returns
+        -------
+        bool:
+            Is the sequence of `self.residues` gap free or has a sequence been
+            aligned to allow gaps to be filled.
+
+        """
+
+        if not self.gaps:
+            return True
+
+        if not strict and self.aligned_sequence:
+            return True
+
+        return False
+
     def sequence(self, gap_char='-', seq_format='fasta'):
         """
         Return the sequence of the `self.residues` list of residues, with gaps
