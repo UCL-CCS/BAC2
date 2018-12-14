@@ -1,8 +1,9 @@
 import textwrap
 
 
-def write_ali_file(filename, target_seq, structure_seq,
-                   structure_id='pdb', start_resid=1, end_resid=-1, chain='?'):
+def write_simple_ali_file(filename, target_seq, structure_seq,
+                          structure_id='pdb', start_resid=1, end_resid=-1,
+                          chain='?'):
     """
     Write a single chain Modeller (PIR format) alignment file.
 
