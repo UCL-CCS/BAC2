@@ -1,4 +1,5 @@
 import os
+import textwrap
 from string import Template
 
 SELECTION_INDENT_LENGTH = 25
@@ -18,8 +19,8 @@ class MyModel(automodel):
 $selection
                          )
 
-a = MyModel(env, alnfile = $alignment_file,
-            knowns = $known_structure, sequence = $sequence_id')
+a = MyModel(env, alnfile = '$alignment_file',
+            knowns = '$known_structure', sequence = '$sequence_id')
 a.starting_model= 1
 a.ending_model  = 1
 
@@ -42,8 +43,8 @@ class MyModel(loopmodel):
 $selection
                          )
 
-a = MyModel(env, alnfile = $alignment_file,
-            knowns = $known_structure, sequence = $sequence_id')
+a = MyModel(env, alnfile = '$alignment_file',
+            knowns = '$known_structure', sequence = '$sequence_id')
 a.starting_model= 1
 a.ending_model  = 1
 
@@ -52,7 +53,7 @@ a.make()
 """)
 
 
-def create_loop_model_script(structure_filename, sequence_id,
+def create_loop_model_script(structure_filename,
                              loop_residue_ranges,
                              alignment_file='alignment.ali',
                              workdir='.', basic=False):
@@ -71,13 +72,14 @@ def create_loop_model_script(structure_filename, sequence_id,
 
     lines = []
     for res_range in loop_residue_ranges:
-        lines.append(" " * 25 + f"self.residue_range('{res_range[0]}', "
-                                f"'{res_range[1]}')")
+        lines.append(" " * SELECTION_INDENT_LENGTH +
+                     f"self.residue_range('{res_range[0]}', "
+                     f"'{res_range[1]}')")
 
     sel = ',\n'.join(lines)
 
     script_text = template_text.substitute(known_structure=structure_name,
-                                           sequence_id=sequence_id,
+                                           sequence_id=structure_name + '_fill',
                                            alignment_file=alignment_file,
                                            selection=sel)
 
@@ -87,4 +89,18 @@ def create_loop_model_script(structure_filename, sequence_id,
     with open(script_path, 'w') as fout:
         fout.write(script_text)
 
-    return script_path
+    return script_name
+
+
+def write_ali_file(filename, target_seq, structure_seq,
+                   structure_id='pdb', start_resid=1, end_resid=-1, chain='?'):
+    with open(filename, 'w') as output_file:
+
+        output_file.write(f'>P1;{structure_id}\n')
+        output_file.write(f'structureX:{structure_id}:{start_resid}:{chain}:{end_resid}:{chain}::::\n')
+        for line in textwrap.wrap(structure_seq + '*', width=75, break_on_hyphens=False):
+            output_file.write(line + '\n')
+        output_file.write(f'>P1;{structure_id}_fill\n')
+        output_file.write('sequence:::::::::\n')
+        for line in textwrap.wrap(target_seq + '*', width=75, break_on_hyphens=False):
+            output_file.write(line + '\n')

@@ -369,6 +369,17 @@ class SourceStructure:
         self.chains = self.chain_map.keys()
         self.decomposition = self.default_decomposition()
 
+        for chain, subdivisions in self.decomposition.items():
+            for subdivision in [sub for sub in subdivisions
+                                if sub.residue_type in
+                                ['protein', 'rna', 'dna']]:
+
+                if chain in self.header.sequences:
+
+                    target_sequence = self.header.chain_sequence(chain,
+                                                                 seq_format='fasta')
+                    subdivision.align_sequence(target_sequence)
+
     def __repr__(self):
 
         return (f"{self.__class__}(structure={self.structure}, "
