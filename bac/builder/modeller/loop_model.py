@@ -43,10 +43,21 @@ class MyModel(loopmodel):
 $selection
                          )
 
+    def select_loop_atoms(self):
+        # Note these are numbers of residues that change
+        # Numbering starts at 1 (i.e. can be offset from PDB numbering)
+        return selection(
+$selection
+                         )
+
 a = MyModel(env, alnfile = '$alignment_file',
             knowns = '$known_structure', sequence = '$sequence_id')
 a.starting_model= 1
 a.ending_model  = 1
+
+a.loop.starting_model = 1
+a.loop.ending_model   = $n_model
+a.loop.md_level       = refine.fast
 
 a.make()
 
@@ -56,7 +67,8 @@ a.make()
 def create_loop_model_script(structure_filename,
                              loop_residue_ranges,
                              alignment_file='alignment.ali',
-                             workdir='.', basic=False):
+                             workdir='.', basic=False,
+                             n_model=2):
 
     if structure_filename[-4:] == '.pdb':
         structure_name = structure_filename[:-4]
@@ -81,7 +93,8 @@ def create_loop_model_script(structure_filename,
     script_text = template_text.substitute(known_structure=structure_name,
                                            sequence_id=structure_name + '_fill',
                                            alignment_file=alignment_file,
-                                           selection=sel)
+                                           selection=sel,
+                                           n_model=n_model)
 
     script_name = f'{structure_name}-loop-model.py'
     script_path = os.path.join(workdir, script_name)

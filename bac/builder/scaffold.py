@@ -9,6 +9,7 @@ import parmed as pmd
 from .source_structure import SourceStructure
 from .modeller.loop_model import create_loop_model_script, write_ali_file
 from bac.utils.file_system import cd
+from bac.utils.general import natural_sort
 
 
 class ScaffoldBuilder:
@@ -79,9 +80,10 @@ class ScaffoldBuilder:
                         # Run script
                         with cd(tmp_dir):
 
+                            # TODO: Need to capture logs here
                             subprocess.call(['python', script_name])
-                            completed = glob.glob(f'{structure_id}_fill*.pdb')[0]
-                            struct = pmd.load_file(completed)
+                            completed = glob.glob(f'{structure_id}_fill.BL*.pdb')
+                            struct = pmd.load_file(natural_sort(completed)[-1])
 
                         # Read new model into structure and add to components
                         components.append(struct)
