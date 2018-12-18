@@ -81,7 +81,7 @@ class ScaffoldBuilder:
 
                         # Run script
                         with cd(tmp_dir):
-                            print(tmp_dir)
+
                             subprocess.call(['python', script_name])
                             completed = glob.glob(f'{structure_id}_fill*.pdb')[0]
                             struct = pmd.load_file(completed)
