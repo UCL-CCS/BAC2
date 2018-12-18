@@ -35,9 +35,7 @@ class ScaffoldBuilder:
 
             for subdivision in subdivisions:
 
-                print(subdivision)
-
-                initial_stucture = subdivision.structure()
+                initial_structure = subdivision.structure()
 
                 if (subdivision.is_complete() and
                         subdivision.residue_type in ['protein']):
@@ -47,13 +45,12 @@ class ScaffoldBuilder:
                         tmp_dir = tempfile.mkdtemp(prefix='scaffold_',
                                                    dir=self.work_dir)
 
-                        sequence_id = 'header'
                         structure_id = 'tmp'
                         pdb_filename = f'{structure_id}.pdb'
                         pdb_path = os.path.join(tmp_dir, pdb_filename)
 
                         # TODO: AltLocs?
-                        initial_stucture.write_pdb(pdb_path, renumber=False)
+                        initial_structure.write_pdb(pdb_path, renumber=False)
 
                         added_residues = subdivision.get_added_residue_positions()
 
@@ -66,9 +63,9 @@ class ScaffoldBuilder:
                         # Need to think about pre/post residues here
                         stucture_sequence = subdivision.sequence()
 
-                        start_resid = initial_stucture.residues[0].number
-                        chain_id = initial_stucture.residues[0].chain
-                        end_resid = initial_stucture.residues[-1].number
+                        start_resid = initial_structure.residues[0].number
+                        chain_id = initial_structure.residues[0].chain
+                        end_resid = initial_structure.residues[-1].number
 
                         ali_filename = 'alignment.ali'
                         alignment_path = os.path.join(tmp_dir, ali_filename)
@@ -91,10 +88,10 @@ class ScaffoldBuilder:
 
                     else:
 
-                        components.append(initial_stucture)
+                        components.append(initial_structure)
 
                 elif subdivision.residue_type in ['ions', 'water']:
 
-                    components.append(initial_stucture)
+                    components.append(initial_structure)
 
         return components
