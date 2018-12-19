@@ -313,3 +313,18 @@ def align_sequence_structure(residues, sequence):
         alignment = (matches[0], pre_seq, post_seq)
 
     return alignment
+
+
+def reset_atom_numbers(structure):
+    """In ParmEd some operations result in all atom numbers being set to -1.
+    Use the index to replace this with consecutive numbers (renumber in file
+    output functions also renumbers the residues).
+
+    Parameters
+    ----------
+    structure : :class:`Structure <parmed.Structure>`
+
+    """
+
+    for atom in structure.atoms:
+        atom.number = atom.idx + 1
