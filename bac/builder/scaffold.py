@@ -10,6 +10,7 @@ from .source_structure import SourceStructure
 from .modeller.loop_model import create_loop_model_script, write_ali_file
 from bac.utils.file_system import cd
 from bac.utils.general import natural_sort
+from .structure_utils import reset_atom_numbers
 
 
 class ScaffoldBuilder:
