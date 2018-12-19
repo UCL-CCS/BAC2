@@ -34,6 +34,7 @@ from modeller.automodel import *    # Load the automodel class
 
 log.verbose()
 env = environ()
+env.io.hetatm = True
 
 class MyModel(loopmodel):
     def select_atoms(self):
