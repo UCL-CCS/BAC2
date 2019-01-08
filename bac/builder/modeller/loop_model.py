@@ -58,7 +58,7 @@ a.ending_model  = 1
 
 a.loop.starting_model = 1
 a.loop.ending_model   = $n_model
-a.loop.md_level       = refine.fast
+a.loop.md_level       = refine.slow_large
 
 a.make()
 
