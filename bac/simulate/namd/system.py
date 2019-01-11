@@ -59,11 +59,6 @@ class System(Encodable):
         self.pme = kwargs.get('pme')
         self.molly = None
 
-        # self.cell_basis_vector_1 = kwargs.get('cell_basis_vector_1')
-        # self.cell_basis_vector_2 = kwargs.get('cell_basis_vector_2')
-        # self.cell_basis_vector_3 = kwargs.get('cell_basis_vector_3')
-        # self.cell_origin = kwargs.get('cell_origin')
-
         self.extended_system: Path = kwargs.get('extended_system')
 
         self.xst_file = kwargs.get('xst_file')
@@ -140,16 +135,17 @@ class System(Encodable):
 
     # Boundary Condition
 
-    @float_vector(default=(0, 0, 0), validator=lambda _, x: x.size == 3)
+    # Previous version used default = (0, 0, 0)
+    @float_vector(default=None, validator=lambda _, x: x.size == 3)
     def cell_basis_vector_1(self): pass
 
-    @float_vector(default=(0, 0, 0), validator=lambda _, x: x.size == 3)
+    @float_vector(default=None, validator=lambda _, x: x.size == 3)
     def cell_basis_vector_2(self): pass
 
-    @float_vector(default=(0, 0, 0), validator=lambda _, x: x.size == 3)
+    @float_vector(default=None, validator=lambda _, x: x.size == 3)
     def cell_basis_vector_3(self): pass
 
-    @float_vector(default=(0, 0, 0), validator=lambda _, x: x.size == 3)
+    @float_vector(default=None, validator=lambda _, x: x.size == 3)
     def cell_origin(self): pass
 
     @pathlike
@@ -157,7 +153,7 @@ class System(Encodable):
 
     @extended_system.did_set
     def extended_system(self, ext_system):
-        if ext_system is not None:
+        if self.extended_system is not None:
             self.cell_basis_vector_1 = None
             self.cell_basis_vector_2 = None
             self.cell_basis_vector_3 = None

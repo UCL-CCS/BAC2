@@ -87,12 +87,14 @@ class Workflow:
             for ensemble in ensembles:
                 ensemble.fn(sim)
 
-            prefix = Path(*(ens.path_name for ens in ensembles))
-            self.path.joinpath(prefix).mkdir(parents=True, exist_ok=True)
+            replica_dir = Path(*(ens.path_name for ens in ensembles))
+            replica_path = self.path.joinpath(replica_dir)
+            replica_path.mkdir(parents=True, exist_ok=True)
 
-            sim.restructure_paths_with_prefix(prefix=prefix)
+            sim.restructure_paths_with_prefix(prefix=replica_path)
 
-            sim.encode(path=self.path)
+            #sim.encode(path=self.path)
+            sim.encode(path=Path('.'))
 
         self.write_generic_bash_executable(path=self.path)
 
