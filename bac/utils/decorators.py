@@ -13,7 +13,7 @@ class pdbcolumn(supproperty):
         super(pdbcolumn, self).__init__(*args, **kwargs)
 
 
-class back_referenced(property):
+class advanced_property(property):
     """Decorator for attributes that reference their owner.
 
     The decorated object has a property called `simulation` that references back to the
