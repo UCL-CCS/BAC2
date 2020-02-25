@@ -44,7 +44,7 @@ class advanced_property(property):
     """
     def __init__(self, f):
         self.f = f
-        super(back_referenced, self).__init__(fget=self._fget, fset=self._fset)
+        super(advanced_property, self).__init__(fget=self._fget, fset=self._fset)
 
     def _fget(self, obj):
         try:
