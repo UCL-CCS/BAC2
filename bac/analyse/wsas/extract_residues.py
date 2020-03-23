@@ -34,6 +34,39 @@ def extract_parmtop_residue(filename):
     return {res_name: res_atom_to_type}
 
 
+def extract_parmtop_residues(filename):
+    """
+    Extract residue name and atom name/type mapping from input parmtop.
+    Note: Only one residue must be present in the topology.
+
+    Parameters
+    ----------
+    filename: Path
+        Filename of the input parmtop.
+
+    Returns
+    -------
+    dict
+        key = residue name, value = atom name to type mapping (dict).
+
+    """
+
+    res_top = pmd.load_file(str(filename))
+
+    residues = {}
+    for atom in res_top:
+        # fixme - avoid ions etc
+        if atom.residue.name == 'WAT':
+            continue
+
+        if atom.residue.name not in residues:
+            residues[atom.residue.name] = {}
+
+        residues[atom.residue.name][atom.name] = atom.type
+
+    return residues
+
+
 def extract_prep_residue(filename):
     """
     Extract residue name and atom name/type mapping from input prep file.
@@ -152,7 +185,7 @@ def extract_residue(filename):
 
     elif extension in ['.top', '.prmtop']:
 
-        residue = extract_parmtop_residue(filename)
+        residue = extract_parmtop_residues(filename)
 
     elif extension == '.prep':
 
