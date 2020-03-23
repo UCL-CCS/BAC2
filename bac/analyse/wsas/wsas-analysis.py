@@ -122,8 +122,6 @@ if __name__ == "__main__":
                            component=component,
                            ligand_topology=lig_top,
                            trajectories=trajectories,
-                           first_frame=0,
-                           last_frame=-1,
                            stride=10,
                            ligand_filter=lig_filter,
                            nonstandard_residue_files=non_standard_residues,
