@@ -15,10 +15,10 @@ _DEFAULT_OPTIONS = {
 
 _DEFAULT_PARAMETERS = {
     'algorithm': freesasa.LeeRichards,
-    # 'probe-radius': freesasa.defaultParameters['probe-radius'],
-    # 'n-points': freesasa.defaultParameters['n-points'],
-    # 'n-slices': freesasa.defaultParameters['n-slices'],
-    # 'n-threads': freesasa.defaultParameters['n-threads']
+    'probe-radius': freesasa.defaultParameters['probe-radius'],
+    'n-points': freesasa.defaultParameters['n-points'],
+    'n-slices': freesasa.defaultParameters['n-slices'],
+    'n-threads': freesasa.defaultParameters['n-threads']
 }
 
 
