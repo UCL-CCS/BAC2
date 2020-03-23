@@ -56,7 +56,7 @@ def extract_parmtop_residues(filename):
     residues = {}
     for atom in res_top:
         # fixme - avoid ions etc
-        if atom.residue.name == 'WAT':
+        if atom.residue.name in ['WAT', 'Cl-']:
             continue
 
         if atom.residue.name not in residues:
