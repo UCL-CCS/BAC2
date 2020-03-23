@@ -29,7 +29,7 @@ DEFAULT_CONFIG_FILENAME = resource_filename(__name__, 'data/amber_config.txt')
 class Wsas:
 
     def __init__(self, component, trajectories, topology, ligand_topology=None, ligand_filter=None, temperature=300,
-                 first_frame=0, last_frame=-1, stride=1, nonstandard_residue_files=[], solvent_residues=None,
+                 first_frame=0, last_frame=None, stride=1, nonstandard_residue_files=[], solvent_residues=None,
                  parameter_file=None, config_file=None):
         """Wsas class used to analyse simulations.
 
