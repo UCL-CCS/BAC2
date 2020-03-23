@@ -13,7 +13,7 @@ setup(
 
     author='CCS',
 
-    install_requires=['PyYAML', 'parmed', 'numpy', 'supproperty', 'mdtraj', 'pandas', 'freesasa'],
+    install_requires=['PyYAML', 'parmed', 'numpy', 'supproperty', 'mdtraj', 'pandas', 'freesasa', 'cython', 'setuptools'],
 
     packages=find_packages(),
 
