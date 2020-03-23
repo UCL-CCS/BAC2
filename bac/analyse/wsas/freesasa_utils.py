@@ -128,20 +128,21 @@ class FreesasaRunner:
         residues_to_add = {}
 
         for filename in files_to_add:
-            residues_to_add.update(extract_residue(filename))
+            residues, gentop = extract_residue(filename)
+            residues_to_add.update(residues)
 
         if residues_to_add:
 
             sasa_config = os.path.join(tmp_dir, 'system_sasa.config')
 
-            self._add_residues_freesasa_config_file(residues_to_add, sasa_config, parameters, orig_filename=config)
+            self._add_residues_freesasa_config_file(residues_to_add, sasa_config, parameters, gentop, orig_filename=config)
 
             return sasa_config
 
         return config
 
     @staticmethod
-    def _create_freesasa_section_text(new_residues, sasa_atom_params):
+    def _create_freesasa_section_text(new_residues, sasa_atom_params, gentop):
         """
         Create text to add to freesasa configuration file to incorporate new residue.
 
@@ -187,15 +188,26 @@ class FreesasaRunner:
 
         for atom_type in set(atom_types):
 
-            atom_line = '{:s} {:.2f} {:s}\n'.format(atom_type,
-                                                    sasa_atom_params[atom_type]['radius'],
-                                                    sasa_atom_params[atom_type]['polarity'])
+            # use the predefined values if they are present
+            if atom_type in sasa_atom_params:
+                atom_line = '{:s} {:.2f} {:s}\n'.format(atom_type,
+                                                        sasa_atom_params[atom_type]['radius'],
+                                                        sasa_atom_params[atom_type]['polarity'])
+            else:
+                # fetch the values from the prmtop value,
+                # ie radius = atom.solvent_radius
+                # polarity, depends on the cutoff, if
+                # abs(atom.charge) > 0.3
+                # but we have to look up these again
+                atom = [atom for atom in gentop if atom.type == atom_type][0]
+                polar = 'apolar' if abs(atom.charge) < 0.3 else 'polar'
+                atom_line = '{:s} {:.2f} {:s}\n'.format(atom_type, atom.solvent_radius, polar)
 
             atom_type_section += atom_line
 
         return atom_type_section, residue_section
 
-    def _add_residues_freesasa_config_file(self, new_residues, new_filename, atom_params, orig_filename):
+    def _add_residues_freesasa_config_file(self, new_residues, new_filename, atom_params, gentop, orig_filename):
         """
         Create a new freesasa config file that adds specified residue to the
         content of an existing copy.
@@ -216,7 +228,7 @@ class FreesasaRunner:
 
         # Get text to add atom type and residue sections for the
         # residues being added to the config file
-        (new_atom_types, new_residues) = self._create_freesasa_section_text(new_residues, atom_params)
+        (new_atom_types, new_residues) = self._create_freesasa_section_text(new_residues, atom_params, gentop)
 
         with open(new_filename, 'w') as out_file, open(orig_filename) as input_config:
             [out_file.write(l+new_atom_types if l.startswith('# extra') else l) for l in input_config]

@@ -64,7 +64,7 @@ def extract_parmtop_residues(filename):
 
         residues[atom.residue.name][atom.name] = atom.type
 
-    return residues
+    return residues, res_top
 
 
 def extract_prep_residue(filename):
@@ -185,7 +185,7 @@ def extract_residue(filename):
 
     elif extension in ['.top', '.prmtop']:
 
-        residue = extract_parmtop_residues(filename)
+        return extract_parmtop_residues(filename)
 
     elif extension == '.prep':
 
