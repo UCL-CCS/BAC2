@@ -107,7 +107,8 @@ if __name__ == "__main__":
     non_standard_residues = args.non_standard_residues
 
     top = validate_prmtop(top, output_dir, override=True)
-    lig_top = validate_prmtop(lig_top, output_dir, override=True)
+    if lig_top is not None:
+        lig_top = validate_prmtop(lig_top, output_dir, override=True)
 
     if component in ['complex', 'ligand']:
 
@@ -137,4 +138,3 @@ if __name__ == "__main__":
     save_outputs(wsas_calculator, output_dir)
 
     shutil.rmtree(wsas_calculator.tmp_dir)
-
