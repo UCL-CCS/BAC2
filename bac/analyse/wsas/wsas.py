@@ -94,10 +94,13 @@ class Wsas:
         # self.ligand_filter = self.ligand_filter or 'resname {:s}'.format(
         # list(extract_residue(self.ligand_topology).keys())[0]) if self.ligand_topology else None
 
+        if not self.ligand_filter and self.nonstandard_residue:
+            print("Create a ligand filter based on the ligand resname")
+            self.ligand_filter = "resname " + self.nonstandard_residue
+            print("Ligand filter is:", self.ligand_filter)
+
         if not self.ligand_filter and self.ligand_topology:
-
             lig_res = extract_residue(self.ligand_topology)
-
             self.ligand_filter = 'resname {:s}'.format(list(lig_res.keys())[0])
 
     @advanced_property(type=str)
@@ -383,8 +386,6 @@ class Wsas:
 
         if self.component.value == 'complex':
             energies['difference'] = energies['complex'] - energies['receptor'] - energies['ligand']
-
-    def _extract_ligand_prmtop(self, complex_toplogy, ):
 
 
 def validate_prmtop(prmtop, target_dir=None, override=False):
