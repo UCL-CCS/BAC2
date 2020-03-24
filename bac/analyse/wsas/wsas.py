@@ -150,7 +150,7 @@ class Wsas:
                     missing_params = []
                     for x in atom_list:
                         if top.atoms[x].type not in self.parameters['params']:
-                            missing_params.append(top.atoms[x].type)
+                            missing_params.append(top.atoms[x])
 
                     if missing_params:
                         raise Exception('wsas calculation will not work because there is no such type', ', '.join(missing_params))
