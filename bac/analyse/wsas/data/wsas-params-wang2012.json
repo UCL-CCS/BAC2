@@ -38,7 +38,17 @@
             "radius": 1.74,
             "weight": 0.0352
         },
+        "CX": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0352
+        },
         "CB": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0352
+        },
+        "C8": {
             "polarity": "apolar",
             "radius": 1.74,
             "weight": 0.0352
@@ -219,6 +229,11 @@
             "weight": 0.0308
         },
         "cd": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0308
+        },
+        "CO": {
             "polarity": "apolar",
             "radius": 1.74,
             "weight": 0.0308
