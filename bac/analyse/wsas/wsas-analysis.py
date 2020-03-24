@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     if component in ['complex', 'ligand']:
 
-        if not lig_filter and not lig_top:
+        if not lig_filter and not lig_top and not lig_filter_resname:
 
             print('For complex/ligand calculations a ligand filter or '
                   'topology must be supplied')
