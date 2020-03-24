@@ -94,9 +94,9 @@ class Wsas:
         # self.ligand_filter = self.ligand_filter or 'resname {:s}'.format(
         # list(extract_residue(self.ligand_topology).keys())[0]) if self.ligand_topology else None
 
-        if not self.ligand_filter and self.nonstandard_residue:
+        if not self.ligand_filter and ligand_filter_resname:
             print("Create a ligand filter based on the ligand resname")
-            self.ligand_filter = "resname " + self.nonstandard_residue
+            self.ligand_filter = "resname " + ligand_filter_resname
             print("Ligand filter is:", self.ligand_filter)
 
         if not self.ligand_filter and self.ligand_topology:
