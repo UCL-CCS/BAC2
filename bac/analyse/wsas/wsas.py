@@ -67,8 +67,8 @@ class Wsas:
             extracted_residue, res_top = extract_parmtop_residue_with_name(topology, ligand_filter_resname)
             print("Extracted ", extracted_residue)
             self.nonstandard_residue = extracted_residue
-        else:
-            self.nonstandard_residue_files = nonstandard_residue_files
+
+        self.nonstandard_residue_files = nonstandard_residue_files
 
         default_solvent = ["WAT", "HOH", "'Cl.*'", "CIO", "'Cs+'", "IB", "'K.*'",
                            "'Li+'", "'MG.*'", "'Na+'", "'Rb+'", "CS", "RB", "NA",
