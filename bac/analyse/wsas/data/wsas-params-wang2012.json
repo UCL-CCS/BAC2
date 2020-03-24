@@ -43,6 +43,16 @@
             "radius": 1.74,
             "weight": 0.0352
         },
+        "2C": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0352
+        },
+        "3C": {
+            "polarity": "apolar",
+            "radius": 1.74,
+            "weight": 0.0352
+        },
         "CC": {
             "polarity": "apolar",
             "radius": 1.74,
