@@ -9,7 +9,7 @@ from .extract_residues import extract_residue
 _DEFAULT_OPTIONS = {
     'hetatm': True,
     'hydrogen': True,
-    'halt-at-unknown': True,
+    # 'halt-at-unknown': True,
     # 'separate-chains' : False,
     'separate-models': True
 }
