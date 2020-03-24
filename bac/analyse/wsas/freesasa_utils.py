@@ -96,9 +96,8 @@ class FreesasaRunner:
         results = []
 
         for s in structure_array:
-
+            print('Computing SASA for each model/frame')
             result = freesasa.calc(s)
-
             atom_areas = [result.atomArea(ndx) for ndx in range(s.nAtoms())]
             results.append(atom_areas)
 
