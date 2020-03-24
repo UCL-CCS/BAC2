@@ -50,7 +50,7 @@ class FreesasaRunner:
 
     """
 
-    def __init__(self, config, wsas_params, tmp_dir, nonstandard_residue_files, ligand_topology, options=None, parameters=None):
+    def __init__(self, config, wsas_params, tmp_dir, nonstandard_residue_files, nonstandard_residue, ligand_topology, options=None, parameters=None):
         """Wrapper for freesasa
 
         config: str
@@ -67,7 +67,7 @@ class FreesasaRunner:
         # extended config is not read in first step).
         freesasa.setVerbosity(1)
 
-        config = self._update_sasa_config(config, wsas_params, tmp_dir, nonstandard_residue_files, ligand_topology)
+        config = self._update_sasa_config(config, wsas_params, tmp_dir, nonstandard_residue_files, nonstandard_residue, ligand_topology)
 
         self.classifier = freesasa.Classifier(bytes(str(config), 'utf-8'))
 
@@ -104,7 +104,7 @@ class FreesasaRunner:
 
         return results
 
-    def _update_sasa_config(self, config, parameters, tmp_dir, nonstandard_residue_files, ligand_topology):
+    def _update_sasa_config(self, config, parameters, tmp_dir, nonstandard_residue_files, nonstandard_residue, ligand_topology):
         """
         Add non-standard residues (including the ligand if a topology is
         provided for it) to the freesasa config file.
@@ -132,13 +132,14 @@ class FreesasaRunner:
             residues, gentop = extract_residue(filename)
             residues_to_add.update(residues)
 
+        if nonstandard_residue:
+            residues_to_add.update(nonstandard_residue)
+
         if residues_to_add:
-
             sasa_config = os.path.join(tmp_dir, 'system_sasa.config')
-
             self._add_residues_freesasa_config_file(residues_to_add, sasa_config, parameters, gentop, orig_filename=config)
-
             return sasa_config
+
 
         return config
 

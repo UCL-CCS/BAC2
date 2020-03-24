@@ -10,7 +10,7 @@ import pandas as pd
 import parmed as pmd
 
 from bac.utils.decorators import advanced_property
-from .extract_residues import extract_residue
+from .extract_residues import extract_residue, extract_parmtop_residue_with_name
 from .freesasa_utils import FreesasaRunner
 
 
@@ -28,8 +28,9 @@ DEFAULT_CONFIG_FILENAME = resource_filename(__name__, 'data/amber_config.txt')
 
 class Wsas:
 
-    def __init__(self, component, trajectories, topology, ligand_topology=None, ligand_filter=None, temperature=300,
-                 first_frame=0, last_frame=None, stride=1, nonstandard_residue_files=[], solvent_residues=None,
+    def __init__(self, component, trajectories, topology, ligand_topology=None, ligand_filter_resname=None,
+                 ligand_filter=None, temperature=300, first_frame=0, last_frame=None, stride=1,
+                 nonstandard_residue_files=[], solvent_residues=None,
                  parameter_file=None, config_file=None):
         """Wsas class used to analyse simulations.
 
@@ -60,7 +61,14 @@ class Wsas:
         self.temperature = temperature
         self.slice = slice(first_frame, last_frame, stride)
         self.ligand_filter = ligand_filter
-        self.nonstandard_residue_files = nonstandard_residue_files
+
+        if ligand_filter_resname is not None and not nonstandard_residue_files:
+            print("Extracting non standard residue by resname from the complex topology")
+            extracted_residue, res_top = extract_parmtop_residue_with_name(topology, ligand_filter_resname)
+            print("Extracted ", extracted_residue)
+            self.nonstandard_residue = extracted_residue
+        else:
+            self.nonstandard_residue_files = nonstandard_residue_files
 
         default_solvent = ["WAT", "HOH", "'Cl.*'", "CIO", "'Cs+'", "IB", "'K.*'",
                            "'Li+'", "'MG.*'", "'Na+'", "'Rb+'", "CS", "RB", "NA",
@@ -127,7 +135,8 @@ class Wsas:
 
         sasa_calculator = FreesasaRunner(config=self.freesasa_config_file, ligand_topology=self.ligand_topology,
                                          wsas_params=self.parameters['params'], tmp_dir=self.tmp_dir,
-                                         nonstandard_residue_files=self.nonstandard_residue_files)
+                                         nonstandard_residue_files=self.nonstandard_residue_files,
+                                         nonstandard_residue=self.nonstandard_residue)
 
         atom_selections = None
 
@@ -374,6 +383,8 @@ class Wsas:
 
         if self.component.value == 'complex':
             energies['difference'] = energies['complex'] - energies['receptor'] - energies['ligand']
+
+    def _extract_ligand_prmtop(self, complex_toplogy, ):
 
 
 def validate_prmtop(prmtop, target_dir=None, override=False):

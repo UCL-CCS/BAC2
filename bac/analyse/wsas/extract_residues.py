@@ -34,8 +34,9 @@ def extract_parmtop_residue(filename):
     return {res_name: res_atom_to_type}
 
 
-def extract_parmtop_residues(filename):
+def extract_parmtop_residue_with_name(filename, resname):
     """
+    fixme - update doc
     Extract residue name and atom name/type mapping from input parmtop.
     Note: Only one residue must be present in the topology.
 
@@ -53,18 +54,18 @@ def extract_parmtop_residues(filename):
 
     res_top = pmd.load_file(str(filename))
 
-    residues = {}
+    extracted_residues = {}
     for atom in res_top:
-        # fixme - avoid ions etc
-        if atom.residue.name in ['WAT', 'Cl-']:
+        # extract only the requested residues
+        if atom.residue.name != resname:
             continue
 
-        if atom.residue.name not in residues:
-            residues[atom.residue.name] = {}
+        if atom.residue.name not in extracted_residues:
+            extracted_residues[atom.residue.name] = {}
 
-        residues[atom.residue.name][atom.name] = atom.type
+        extracted_residues[atom.residue.name][atom.name] = atom.type
 
-    return residues, res_top
+    return extracted_residues, res_top
 
 
 def extract_prep_residue(filename):
@@ -185,7 +186,7 @@ def extract_residue(filename):
 
     elif extension in ['.top', '.prmtop']:
 
-        return extract_parmtop_residues(filename)
+        return extract_parmtop_residue_with_name(filename)
 
     elif extension == '.prep':
 
@@ -197,6 +198,36 @@ def extract_residue(filename):
 
     else:
 
+        raise Exception('File {} is not a recognised Amber residue '
+                        'template format'.format(filename))
+
+    return residue
+
+
+def extract_residue_from_complex(filename, resname):
+    """
+    fixme - update doc
+    Extract residue name(s) and atom name/type mapping from an Amber format
+    file containing residue template information. Filetype is guessed from
+    extension.
+
+    Parameters
+    ----------
+    filename: Path
+        Filename of the input residue template file.
+
+    Returns
+    -------
+    dict
+        keys = residue names, values = atom name to type mapping (dict).
+
+    """
+
+    extension = os.path.splitext(filename)[1]
+
+    if extension in ['.top', '.prmtop']:
+        return extract_parmtop_residue_with_name(filename, resname)
+    else:
         raise Exception('File {} is not a recognised Amber residue '
                         'template format'.format(filename))
 

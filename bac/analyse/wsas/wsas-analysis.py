@@ -26,7 +26,9 @@ def commandline_parser():
     parser.add_argument('-lf', dest='ligand_filter', required=False,
                         help='Filter text (mdtraj DSL) to identify ligand',
                         type=str)
-
+    parser.add_argument('-lfr', dest='ligand_filter_resname', required=False,
+                        help='Resname of the ligand (mdtraj DSL) to identify ligand. e.g. "GLY"',
+                        type=str)
     parser.add_argument('-t', dest='trajectories', required=False, nargs='+',
                         help='Trajectories of coordinates to use in analysis.',
                         metavar='FILE', type=extant_file)
@@ -98,6 +100,7 @@ if __name__ == "__main__":
     top = args.system_topology
     lig_top = args.ligand_topology
     lig_filter = args.ligand_filter
+    lig_filter_resname = args.ligand_filter_resname
     trajectories = args.trajectories
     output_dir = args.output_dir
     temperature = args.temp
@@ -121,6 +124,7 @@ if __name__ == "__main__":
     wsas_calculator = Wsas(topology=top,
                            component=component,
                            ligand_topology=lig_top,
+                           ligand_filter_resname=lig_filter_resname,
                            trajectories=trajectories,
                            stride=10,
                            ligand_filter=lig_filter,
