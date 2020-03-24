@@ -150,10 +150,10 @@ class Wsas:
                     missing_params = []
                     for x in atom_list:
                         if top.atoms[x].type not in self.parameters['params']:
-                            missing_params.append((top.atoms[x].type, top.atoms[x]))
+                            missing_params.append(top.atoms[x].type)
 
                     if missing_params:
-                        raise Exception('wsas calculation will not work because there is no such type', missing_params)
+                        raise Exception('wsas calculation will not work because there is no such type', ', '.join(missing_params))
                     results[component]['atom_type'] = [top.atoms[x].type for x in atom_list]
 
             for component, atom_list in atom_selections.items():
